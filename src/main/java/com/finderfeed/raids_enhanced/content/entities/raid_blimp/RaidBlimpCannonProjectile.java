@@ -34,7 +34,7 @@ public class RaidBlimpCannonProjectile extends FDProjectile implements AnimatedO
     public static void summon(RaidBlimp raidBlimp, Vec3 pos, Vec3 direction){
         RaidBlimpCannonProjectile p = new RaidBlimpCannonProjectile(REEntities.RAID_BLIMP_CANNON_PROJECTILE.get(), raidBlimp.level());
         p.blimp = raidBlimp.getUUID();
-        p.setDeltaMovement(direction.normalize().scale(3));
+        p.setDeltaMovement(direction.normalize().scale(2));
         p.setPos(pos);
         raidBlimp.level().addFreshEntity(p);
     }
@@ -51,6 +51,8 @@ public class RaidBlimpCannonProjectile extends FDProjectile implements AnimatedO
             if (tickCount > 2000){
                 this.explode(this.position());
             }
+        }else{
+            level().addParticle(ParticleTypes.SMOKE, this.getX(),this.getY() + this.getBbHeight()/2, this.getZ(), 0,0,0);
         }
 
         this.tickModelSystem();

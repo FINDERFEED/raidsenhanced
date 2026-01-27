@@ -1,11 +1,20 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
 import com.finderfeed.fdlib.data_structures.Pair;
+import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -43,12 +52,48 @@ public class RaidBlimpCannon {
         var level = blimp.level();
         if (!level.isClientSide) {
             this.processTargeting(entitiesAround);
-
-
-
+            this.shootCooldown = Mth.clamp(this.shootCooldown - 1,0, Integer.MAX_VALUE);
         }else {
-
             this.processRotation();
+        }
+    }
+
+    public void setCooldown(int cooldown){
+        this.shootCooldown = cooldown;
+    }
+
+    public boolean canShoot(){
+        return this.getTarget() != null && this.shootCooldown <= 0;
+    }
+
+    public void shoot(int cooldown){
+        if (this.getTarget() != null){
+            var posAndDir = this.getCannonPosAndDirection(1);
+            Vec3 pos = posAndDir.first;
+            Vec3 epos = this.getTargetPos(this.getTarget());
+            this.sendCannonParticles(target, pos);
+            Vec3 b = epos.subtract(pos);
+            RaidBlimpCannonProjectile.summon(this.getOwner().getRaidBlimp(), pos, b);
+            this.setCooldown(cooldown);
+        }
+    }
+
+    private void sendCannonParticles(LivingEntity target, Vec3 pos){
+        if (target.level() instanceof ServerLevel serverLevel){
+
+            Vec3 targetPos = this.getTargetPos(target);
+            Vec3 b = targetPos.subtract(pos).normalize();
+
+            Vec3 particlePos = pos.add(b);
+
+            for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, target.level(), pos, 120)){
+                serverLevel.sendParticles(player, ParticleTypes.GUST, true, particlePos.x, particlePos.y, particlePos.z,1,0,0,0,0);
+//                serverLevel.sendParticles(player, ParticleTypes.EXPLOSION, true, particlePos.x, particlePos.y, particlePos.z,1,0,0,0,0);
+            }
+
+            serverLevel.playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 1.5f);
+//            serverLevel.playSound(null, pos.x,pos.y,pos.z, SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.HOSTILE, 3f, 0.75f);
+
         }
     }
 
@@ -78,29 +123,45 @@ public class RaidBlimpCannon {
         Vec3 cannonDir = cannonPosDir.second;
 
         for (var entity : entities){
-            Vec3 pos = entity.position();
-
-            Vec3 between = pos.subtract(cannonPos);
-            double dot = between.normalize().dot(cannonDir.normalize());
-            if (dot < dotRadius) continue;
-
-            targets.add(entity);
+            if (this.isTargetValid(cannonPos,cannonDir,entity,dotRadius) && !this.getOwner().checkIfAlreadyHasTarget(this, entity)){
+                targets.add(entity);
+            }
         }
 
         return targets;
     }
 
     private boolean isTargetValid(LivingEntity entity, double dotRadius){
-
         var cannonPosDir = this.getCannonPosAndDirection(1);
+        return this.isTargetValid(cannonPosDir.first,cannonPosDir.second,entity, dotRadius);
+    }
 
-        Vec3 cannonPos = cannonPosDir.first;
-        Vec3 cannonDir = cannonPosDir.second;
+    private boolean isTargetValid(Vec3 cannonPos, Vec3 cannonDir, LivingEntity entity, double dotRadius){
+
+        if (entity.isDeadOrDying()){
+            return false;
+        }
+
+        Vec3 epos = this.getTargetPos(entity);
+
+        if (epos.distanceTo(cannonPos) > 40){
+            return false;
+        }
 
         Vec3 pos = entity.position();
         Vec3 between = pos.subtract(cannonPos);
         double dot = between.normalize().dot(cannonDir.normalize());
-        return dot >= dotRadius;
+
+
+        if (dot >= dotRadius){
+            ClipContext clipContext = new ClipContext(cannonPos, epos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            var res = entity.level().clip(clipContext);
+            if (res.getType() == HitResult.Type.MISS){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void processRotation(){
