@@ -28,12 +28,12 @@ public class RaidBlimp extends FDRaider {
 
     public static final String BOMB_ILLAGER_LAYER = "ropes_bombs_its_yours_my_friend";
 
-    private EntityDataAccessor<Integer> targetRight1 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
-    private EntityDataAccessor<Integer> targetRight2 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
-    private EntityDataAccessor<Integer> targetRight3 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
-    private EntityDataAccessor<Integer> targetLeft1 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
-    private EntityDataAccessor<Integer> targetLeft2 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
-    private EntityDataAccessor<Integer> targetLeft3 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetRight1 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetRight2 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetRight3 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetLeft1 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetLeft2 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> targetLeft3 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
 
     public RaidBlimpCannonsController cannonsController;
 
@@ -95,6 +95,17 @@ public class RaidBlimp extends FDRaider {
         flyingpathnavigation.setCanFloat(true);
         flyingpathnavigation.setCanPassDoors(true);
         return flyingpathnavigation;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(targetRight1, -1);
+        builder.define(targetRight2, -1);
+        builder.define(targetRight3, -1);
+        builder.define(targetLeft1 , -1);
+        builder.define(targetLeft2 , -1);
+        builder.define(targetLeft3 , -1);
     }
 
     @Override

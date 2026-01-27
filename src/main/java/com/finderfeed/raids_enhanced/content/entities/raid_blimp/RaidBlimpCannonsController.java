@@ -16,12 +16,12 @@ public class RaidBlimpCannonsController {
 
     public RaidBlimpCannonsController(RaidBlimp raidBlimp, EntityDataAccessor<Integer> targetRight1, EntityDataAccessor<Integer> targetRight2, EntityDataAccessor<Integer> targetRight3, EntityDataAccessor<Integer> targetLeft1, EntityDataAccessor<Integer> targetLeft2, EntityDataAccessor<Integer> targetLeft3) {
         this.raidBlimp = raidBlimp;
-        this.cannonRight1 = new RaidBlimpCannon(this,"cannon_right_1", targetRight1);
-        this.cannonRight2 = new RaidBlimpCannon(this,"cannon_right_2", targetRight2);
-        this.cannonRight3 = new RaidBlimpCannon(this,"cannon_right_3", targetRight3);
-        this.cannonLeft1 = new RaidBlimpCannon(this,"cannon_left_1", targetLeft1);
-        this.cannonLeft2 = new RaidBlimpCannon(this,"cannon_left_2", targetLeft2);
-        this.cannonLeft3 = new RaidBlimpCannon(this,"cannon_left_3", targetLeft3);
+        this.cannonRight1 = new RaidBlimpCannon(this,"cannon_right_1", targetRight1, false);
+        this.cannonRight2 = new RaidBlimpCannon(this,"cannon_right_2", targetRight2, false);
+        this.cannonRight3 = new RaidBlimpCannon(this,"cannon_right_3", targetRight3, false);
+        this.cannonLeft1 = new RaidBlimpCannon(this,"cannon_left_1", targetLeft1, true);
+        this.cannonLeft2 = new RaidBlimpCannon(this,"cannon_left_2", targetLeft2, true);
+        this.cannonLeft3 = new RaidBlimpCannon(this,"cannon_left_3", targetLeft3, true);
     }
 
     public void tick(){

@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRenderLayerOptions;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import net.minecraft.client.renderer.RenderType;
@@ -21,7 +22,9 @@ public class REClientEvents {
                         .addLayer(FDEntityRenderLayerOptions.<RaidBlimp>builder()
                                 .model(REModels.RAID_BLIMP)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raid_airship.png")))
+                                .addBoneController("airship", new RaidBlimpCannonBonesController())
                                 .build())
+
                 .build());
 
     }

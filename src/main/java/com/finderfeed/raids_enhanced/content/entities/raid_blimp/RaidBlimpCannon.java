@@ -19,15 +19,17 @@ public class RaidBlimpCannon {
     private String bone;
     private EntityDataAccessor<Integer> clientTarget;
     private LivingEntity target;
+    public boolean isLeft;
     public float yRot;
     public float xRot;
     public float yRotO;
     public float xRotO;
 
-    public RaidBlimpCannon(RaidBlimpCannonsController controller, String bone, EntityDataAccessor<Integer> clientTarget){
+    public RaidBlimpCannon(RaidBlimpCannonsController controller, String bone, EntityDataAccessor<Integer> clientTarget, boolean isLeft){
         this.owner = controller;
         this.clientTarget = clientTarget;
         this.bone = bone;
+        this.isLeft = isLeft;
     }
 
     public RaidBlimpCannonsController getOwner() {
@@ -40,6 +42,7 @@ public class RaidBlimpCannon {
         if (!level.isClientSide) {
             this.processTargeting(entitiesAround);
         }else {
+
             this.processRotation();
         }
     }
@@ -65,7 +68,7 @@ public class RaidBlimpCannon {
     private List<? extends LivingEntity> getValidTargets(List<? extends LivingEntity> entities, double dotRadius){
         List<LivingEntity> targets = new ArrayList<>();
 
-        var cannonPosDir = this.getCannonPosAndDirection();
+        var cannonPosDir = this.getCannonPosAndDirection(1);
         Vec3 cannonPos = cannonPosDir.first;
         Vec3 cannonDir = cannonPosDir.second;
 
@@ -84,7 +87,7 @@ public class RaidBlimpCannon {
 
     private boolean isTargetValid(LivingEntity entity, double dotRadius){
 
-        var cannonPosDir = this.getCannonPosAndDirection();
+        var cannonPosDir = this.getCannonPosAndDirection(1);
 
         Vec3 cannonPos = cannonPosDir.first;
         Vec3 cannonDir = cannonPosDir.second;
@@ -100,7 +103,7 @@ public class RaidBlimpCannon {
         this.yRotO = yRot;
         this.xRotO = xRot;
 
-        float rotationSpeed = 5f;
+        float rotationSpeed = 10f;
 
         var targetRotation = this.getTargetYXRotation();
 
@@ -132,7 +135,7 @@ public class RaidBlimpCannon {
         if (target == null){
             return new Pair<>(0f,0f);
         }else{
-            var cannonPosAndDir = this.getCannonPosAndDirection();
+            var cannonPosAndDir = this.getCannonPosAndDirection(1);
             var pos = cannonPosAndDir.first;
             var dir = cannonPosAndDir.second;
             var left = dir.cross(new Vec3(0,1,0));
@@ -152,24 +155,27 @@ public class RaidBlimpCannon {
             double verticalAngle = FDMathUtil.angleBetweenVectors(nbxz, dirxz);
             double horizontalAngle = FDMathUtil.angleBetweenVectors(nb.multiply(1,0,1), dir.multiply(1,0,1));
 
-            if (sideCheck < 0){
+            if (sideCheck > 0){
                 horizontalAngle = -horizontalAngle;
             }
-            if (upOrDown < 0){
+            if ((!isLeft && upOrDown < 0) || (isLeft && upOrDown > 0)){
                 verticalAngle = -verticalAngle;
             }
 
-            return new Pair<>((float) horizontalAngle, (float) verticalAngle);
+            return new Pair<>((float) Math.toDegrees(horizontalAngle), (float) Math.toDegrees(verticalAngle));
         }
     }
 
-    private Pair<Vec3, Vec3> getCannonPosAndDirection(){
+    private Pair<Vec3, Vec3> getCannonPosAndDirection(float pticks){
         RaidBlimp blimp = this.getOwner().getRaidBlimp();
         Matrix4f transform = blimp.getModelPartTransformation(blimp, bone, RaidBlimp.getModel(blimp));
         Vector3f cannonPosF = transform.transformPosition(new Vector3f());
         Vector3f cannonDirectionF = transform.transformDirection(new Vector3f(1,0,0));
-        Vec3 cannonPos = new Vec3(cannonPosF.x, cannonPosF.y, cannonPosF.z);
+        Vec3 cannonPos = new Vec3(cannonPosF.x, cannonPosF.y, cannonPosF.z).add(this.getOwner().getRaidBlimp().getPosition(pticks));
         Vec3 cannonDir = new Vec3(cannonDirectionF.x, cannonDirectionF.y, cannonDirectionF.z);
+        if (this.isLeft){
+            cannonDir = cannonDir.reverse();
+        }
         return new Pair<>(cannonPos, cannonDir);
     }
 

@@ -72,7 +72,7 @@
 				{
 					"name": "cannons",
 					"parent": "the_boat",
-					"pivot": [22, 0, 0]
+					"pivot": [0, 0, 0]
 				},
 				{
 					"name": "cannon_right_1",
