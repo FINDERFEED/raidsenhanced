@@ -2,8 +2,10 @@ package com.finderfeed.raids_enhanced;
 
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRenderLayerOptions;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
+import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonBonesController;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import net.minecraft.client.renderer.RenderType;
@@ -25,6 +27,18 @@ public class REClientEvents {
                                 .addBoneController("airship", new RaidBlimpCannonBonesController())
                                 .build())
 
+                .build());
+
+        event.registerEntityRenderer(REEntities.RAID_BLIMP_CANNON_PROJECTILE.get(), FDEntityRendererBuilder.<RaidBlimpCannonProjectile>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<RaidBlimpCannonProjectile>builder()
+                                .model(REModels.RAID_BLIMP_CANNON_PROJECTILE)
+                                .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raid_blimp_cannon_projectile.png")))
+                                .transformation(((entity, poseStack, v) -> {
+                                    var deltaMovement = entity.getDeltaMovement();
+                                    poseStack.translate(0,entity.getBbHeight()/2,0);
+                                    FDRenderUtil.applyMovementMatrixRotations(poseStack,deltaMovement);
+                                }))
+                                .build())
                 .build());
 
     }

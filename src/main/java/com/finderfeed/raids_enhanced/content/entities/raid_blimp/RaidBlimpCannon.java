@@ -16,6 +16,8 @@ public class RaidBlimpCannon {
 
     private RaidBlimpCannonsController owner;
 
+    private int shootCooldown = 20;
+
     private String bone;
     private EntityDataAccessor<Integer> clientTarget;
     private LivingEntity target;
@@ -41,6 +43,9 @@ public class RaidBlimpCannon {
         var level = blimp.level();
         if (!level.isClientSide) {
             this.processTargeting(entitiesAround);
+
+
+
         }else {
 
             this.processRotation();
@@ -181,6 +186,7 @@ public class RaidBlimpCannon {
 
     public void setTarget(LivingEntity target){
         if (target != null){
+            shootCooldown = 10;
             this.target = target;
             this.getOwner().getRaidBlimp().getEntityData().set(clientTarget, target.getId());
         }else{

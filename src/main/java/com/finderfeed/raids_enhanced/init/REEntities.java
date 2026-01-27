@@ -2,6 +2,7 @@ package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonProjectile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -19,10 +20,16 @@ public class REEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, RaidsEnhanced.MOD_ID);
 
     public static final Supplier<EntityType<RaidBlimp>> RAID_BLIMP = ENTITIES.register("raid_blimp",()->EntityType.Builder.<RaidBlimp>of(
-                    RaidBlimp::new, MobCategory.MISC
+                    RaidBlimp::new, MobCategory.MONSTER
             )
             .sized(3f,4f)
             .build("raid_blimp"));
+
+    public static final Supplier<EntityType<RaidBlimpCannonProjectile>> RAID_BLIMP_CANNON_PROJECTILE = ENTITIES.register("raid_blimp_cannon_projectile",()->EntityType.Builder.<RaidBlimpCannonProjectile>of(
+                    RaidBlimpCannonProjectile::new, MobCategory.MISC
+            )
+            .sized(0.25f,0.25f)
+            .build("raid_blimp_cannon_projectile"));
 
 
     @SubscribeEvent

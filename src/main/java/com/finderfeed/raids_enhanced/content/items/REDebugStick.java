@@ -2,6 +2,7 @@ package com.finderfeed.raids_enhanced.content.items;
 
 import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonProjectile;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Mob;
@@ -38,7 +39,8 @@ public class REDebugStick extends Item {
                 }
             }else {
                 if (raidBlimp != null) {
-                    raidBlimp.getNavigation().moveTo(player.getX(), player.getY(), player.getZ(), 1f);
+//                    raidBlimp.getNavigation().moveTo(player.getX(), player.getY(), player.getZ(), 1f);
+                    RaidBlimpCannonProjectile.summon((RaidBlimp) raidBlimp,player.getEyePosition().add(player.getLookAngle().scale(2)), player.getLookAngle());
                 }
             }
 
