@@ -17,18 +17,21 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class RaidBlimpPart extends Entity {
 
+
     public static final int WOODEN_STICK = 1;
     public static final int PROPELLER = 2;
 
     public static EntityDataAccessor<Integer> PART_TYPE = SynchedEntityData.defineId(RaidBlimpPart.class, EntityDataSerializers.INT);
+    public static EntityDataAccessor<Integer> LIFETIME = SynchedEntityData.defineId(RaidBlimpPart.class, EntityDataSerializers.INT);
 
     public int landedTime = -1;
     public int rotation = 0;
     public Vec3 lastDeltaMovement = Vec3.ZERO;
 
-    public static void summon(Level level, Vec3 pos, Vec3 movement, int partType){
+    public static void summon(Level level, Vec3 pos, Vec3 movement, int partType, int lifetime){
         RaidBlimpPart part = new RaidBlimpPart(REEntities.RAID_AIRSHIP_PART.get(), level);
         part.setPos(pos);
+        part.getEntityData().set(LIFETIME, lifetime);
         part.setDeltaMovement(movement);
         part.setPartType(partType);
         part.lastDeltaMovement = movement;
@@ -44,7 +47,7 @@ public class RaidBlimpPart extends Entity {
         super.tick();
 
         if (!level().isClientSide){
-            if (tickCount++ > 400){
+            if (tickCount > this.getEntityData().get(LIFETIME)){
                 this.setRemoved(RemovalReason.DISCARDED);
             }
         }else{
@@ -107,6 +110,7 @@ public class RaidBlimpPart extends Entity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         builder.define(PART_TYPE, 1);
+        builder.define(LIFETIME, 800);
     }
 
     @Override

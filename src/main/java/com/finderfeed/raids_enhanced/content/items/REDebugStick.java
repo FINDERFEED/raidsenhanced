@@ -42,7 +42,7 @@ public class REDebugStick extends Item {
 //                }
 //            }
 
-            RaidBlimpPart.summon(level, player.getEyePosition(), player.getLookAngle(), RaidBlimpPart.PROPELLER);
+            RaidBlimpPart.summon(level, player.getEyePosition(), player.getLookAngle(), RaidBlimpPart.PROPELLER, 400);
 
 
         }

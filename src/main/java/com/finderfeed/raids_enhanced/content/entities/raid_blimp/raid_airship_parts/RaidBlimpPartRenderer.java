@@ -57,7 +57,14 @@ public class RaidBlimpPartRenderer extends EntityRenderer<RaidBlimpPart> {
                 matrices.mulPose(Axis.XP.rotationDegrees((float) Math.sin((part.landedTime + Math.abs(rpt - partialTicks)) * 5) * 20 * p));
             }
 
-            model.render(matrices, src.getBuffer(RenderType.entityCutoutNoCull(texture)), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+            float alpha = 1f;
+            int lifetime = part.getEntityData().get(RaidBlimpPart.LIFETIME);
+
+            if (part.tickCount >= lifetime - 100){
+                alpha = Mth.clamp(1 - (part.tickCount + partialTicks - (lifetime - 100)) / 100f,0,1);
+            }
+
+            model.render(matrices, src.getBuffer(RenderType.entityTranslucent(texture)), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha);
         }
 
     }

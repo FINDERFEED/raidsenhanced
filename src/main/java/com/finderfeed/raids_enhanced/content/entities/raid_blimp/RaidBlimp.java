@@ -162,7 +162,7 @@ public class RaidBlimp extends FDRaider {
             Vec3 speed = v.scale(0.1f + random.nextFloat() * 1).add(0,0.15 + random.nextFloat() * 1.25f,0);
             Vec3 startPos = this.position().add(v.scale(random.nextFloat() * 3f));
 
-            RaidBlimpPart.summon(level(), startPos, speed, i == 0 ? RaidBlimpPart.PROPELLER : RaidBlimpPart.WOODEN_STICK);
+            RaidBlimpPart.summon(level(), startPos, speed, i == 0 ? RaidBlimpPart.PROPELLER : RaidBlimpPart.WOODEN_STICK, random.nextInt(200) + 400);
 
         }
 
@@ -206,11 +206,11 @@ public class RaidBlimp extends FDRaider {
         level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 0.5f);
         Vec3 pos = this.position();
         for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, level(), pos, 160)) {
-            for (int i = 0; i < 3; i++){
+            for (int i = 0; i < 5; i++){
                 Vec3 ppos = this.position().add(
-                        random.nextFloat() * 5 - 2.5,
+                        random.nextFloat() * 8 - 4,
                         random.nextFloat() * 4,
-                        random.nextFloat() * 5 - 2.5
+                        random.nextFloat() * 8 - 4
                 );
                 ((ServerLevel) level()).sendParticles(serverPlayer, ParticleTypes.EXPLOSION_EMITTER, true, ppos.x, ppos.y, ppos.z, 1, 0, 0, 0, 0);
             }
