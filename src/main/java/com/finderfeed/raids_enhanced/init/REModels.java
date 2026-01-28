@@ -14,5 +14,6 @@ public class REModels {
 
     public static final Supplier<FDModelInfo> RAID_BLIMP = MODELS.register("raid_airship",()->new FDModelInfo(RaidsEnhanced.location("raid_airship"),1f));
     public static final Supplier<FDModelInfo> RAID_BLIMP_CANNON_PROJECTILE = MODELS.register("raid_blimp_cannon_projectile",()->new FDModelInfo(RaidsEnhanced.location("raid_blimp_cannon_projectile"),1f));
+    public static final Supplier<FDModelInfo> RAID_BLIMP_BOMB = MODELS.register("raid_airship_bomb",()->new FDModelInfo(RaidsEnhanced.location("raid_airship_bomb"),1f));
 
 }

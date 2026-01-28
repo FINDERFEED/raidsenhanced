@@ -39,8 +39,8 @@ public class REDebugStick extends Item {
                 }
             }else {
                 if (raidBlimp != null) {
-//                    raidBlimp.getNavigation().moveTo(player.getX(), player.getY(), player.getZ(), 1f);
-                    RaidBlimpCannonProjectile.summon((RaidBlimp) raidBlimp,player.getEyePosition().add(player.getLookAngle().scale(2)), player.getLookAngle());
+                    raidBlimp.getNavigation().moveTo(player.getX(), player.getY(), player.getZ(), 1f);
+//                    RaidBlimpCannonProjectile.summon((RaidBlimp) raidBlimp,player.getEyePosition().add(player.getLookAngle().scale(2)), player.getLookAngle());
                 }
             }
 

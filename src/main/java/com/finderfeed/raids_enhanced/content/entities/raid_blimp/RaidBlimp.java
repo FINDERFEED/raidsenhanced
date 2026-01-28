@@ -1,7 +1,10 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
+import com.finderfeed.fdlib.systems.bedrock.animations.Animation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
+import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
@@ -10,16 +13,24 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class RaidBlimp extends FDRaider {
 
@@ -36,6 +47,9 @@ public class RaidBlimp extends FDRaider {
     private static final EntityDataAccessor<Integer> targetLeft3 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
 
     public RaidBlimpCannonsController cannonsController;
+
+    private int bombThrowTicker = -1;
+    private Vec3 bombThrowPos = null;
 
     public RaidBlimp(EntityType<? extends FDRaider> type, Level level) {
         super(type, level);
@@ -70,11 +84,83 @@ public class RaidBlimp extends FDRaider {
         super.tick();
 
         if (!level().isClientSide) {
+            this.detectEntitiesBeneathAndThrowBomb();
             this.setYRot(this.yBodyRot);
         }
 
         this.cannonsController.tick();
 
+    }
+
+    private void detectEntitiesBeneathAndThrowBomb(){
+        if (bombThrowTicker >= 0){
+
+            if (bombThrowTicker > 10){
+                this.getAnimationSystem().startAnimation(BOMB_ILLAGER_LAYER, AnimationTicker.builder(REAnimations.RAID_AIRSHIP_THROW_BOMB)
+                                .setToNullTransitionTime(0)
+                                .setLoopMode(Animation.LoopMode.HOLD_ON_LAST_FRAME)
+                        .build());
+            }
+
+            if (bombThrowTicker == 13){
+                Matrix4f mat = this.getModelPartTransformation(this,"pillager_bomb", getModel(this), 1);
+                Vec3 t = new Vec3(mat.transformPosition(new Vector3f(0,0,0))).add(this.position());
+                if (bombThrowPos == null || bombThrowPos.distanceTo(this.position()) > 200){
+                    bombThrowPos = this.position().add(0,-40,0);
+                }
+                Vec3 throwPos = bombThrowPos.add(
+                        level().random.nextGaussian(),
+                        0,
+                        level().random.nextGaussian()
+                );
+                double startSpeed = -1.5f;
+                Vec3 hb = this.calculateBombHorizontalSpeed(t, throwPos, startSpeed, ServerPlayer.DEFAULT_BASE_GRAVITY);
+                Vec3 speed = new Vec3(hb.x,startSpeed,hb.z);
+                RaidBlimpBomb.summon(this, t, speed);
+            }
+
+            bombThrowTicker--;
+        }else{
+            this.getAnimationSystem().startAnimation(BOMB_ILLAGER_LAYER, AnimationTicker.builder(REAnimations.RAID_AIRSHIP_ILLAGER_OBSERVE)
+                    .build());
+            if (tickCount % 5 == 0) {
+                float downDistance = 40;
+                var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level(), this.position().add(0, -downDistance, 0), downDistance, 5, entity -> {
+                    ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+                    var res = level().clip(clipContext);
+                    return entity != this && res.getType() == HitResult.Type.MISS;
+                });
+                if (!targets.isEmpty()) {
+                    this.bombThrowPos = targets.get(level().random.nextInt(targets.size())).position();
+                    this.bombThrowTicker = REAnimations.RAID_AIRSHIP_THROW_BOMB.get().getAnimTime();
+                }
+            }
+        }
+    }
+
+    private Vec3 calculateBombHorizontalSpeed(Vec3 startPos, Vec3 endPos, double startVerticalSpeed, double gravity){
+        double dist = startPos.y - endPos.y;
+        if (dist < 0){
+            return endPos.subtract(startPos).multiply(1,0,1).scale(0.1f);
+        }
+        if (gravity > 0){
+            gravity = -gravity;
+        }
+        if (startVerticalSpeed > 0){
+            startVerticalSpeed = -startVerticalSpeed;
+        }
+
+        double d = startVerticalSpeed * startVerticalSpeed - 4 * gravity * dist;
+        double time = (-startVerticalSpeed - Math.sqrt(d)) / (2 * gravity);
+
+        if (time <= 0){
+            return endPos.subtract(startPos).multiply(1,0,1).scale(0.1f);
+        }
+
+        double hdist = Math.sqrt(Math.pow(endPos.x - startPos.x,2) + Math.pow(endPos.z - startPos.z,2));
+        double hspeed = hdist / time;
+
+        return endPos.subtract(startPos).multiply(1,0,1).normalize().scale(hspeed);
     }
 
     @Override

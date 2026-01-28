@@ -138,7 +138,7 @@ public class RaidBlimpCannon {
 
     private boolean isTargetValid(Vec3 cannonPos, Vec3 cannonDir, LivingEntity entity, double dotRadius){
 
-        if (entity.isDeadOrDying()){
+        if (entity.isDeadOrDying() || entity.isRemoved()){
             return false;
         }
 
