@@ -43,6 +43,8 @@ public class RaidBlimp extends FDRaider {
     private static FDModel clientModel;
     private static FDModel serverModel;
 
+    private Entity lastHurtBy;
+
     public static final String BOMB_ILLAGER_LAYER = "ropes_bombs_its_yours_my_friend";
 
     private static final EntityDataAccessor<Integer> targetRight1 = SynchedEntityData.defineId(RaidBlimp.class, EntityDataSerializers.INT);
@@ -101,7 +103,7 @@ public class RaidBlimp extends FDRaider {
             if (!this.isDeadOrDying()) {
                 this.detectEntitiesBeneathAndThrowBomb();
             }
-            this.setYRot(this.yBodyRot);
+            this.turnToLastHurtBy();
         }
 
         if (!this.isDeadOrDying()) {
@@ -109,7 +111,81 @@ public class RaidBlimp extends FDRaider {
         }
     }
 
+    private void turnToLastHurtBy(){
+//        lastHurtBy = null;
+        if (this.isDeadOrDying()) return;
 
+        if (this.getLastHurtBy() != null){
+
+            var entity = this.getLastHurtBy();
+            Vec3 pos = entity.position();
+
+
+            double d0 = pos.x - this.getX();
+            double d1 = pos.y - this.getY();
+            double d2 = pos.z - this.getZ();
+            double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+
+            if (d3 >= 2.5000003E-7F) {
+                float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI);
+                this.setYRot(this.rotlerp(this.getYRot(), f, 2));
+            }
+
+
+            Vec3 b = pos.subtract(this.position()).multiply(1,0,1).normalize();
+            Vec3 l = this.getLookAngle().multiply(1,0,1).normalize();
+            double angle = FDMathUtil.angleBetweenVectors(b,l);
+            if (angle >= FDMathUtil.FPI / 2 - FDMathUtil.FPI / 16 && angle <= FDMathUtil.FPI / 2 + FDMathUtil.FPI / 16){
+                lastHurtBy = null;
+            }
+
+        }
+    }
+
+    protected float rotlerp(float p_24992_, float p_24993_, float p_24994_) {
+        float f = Mth.wrapDegrees(p_24993_ - p_24992_);
+        if (f > p_24994_) {
+            f = p_24994_;
+        }
+
+        if (f < -p_24994_) {
+            f = -p_24994_;
+        }
+
+        float f1 = p_24992_ + f;
+        if (f1 < 0.0F) {
+            f1 += 360.0F;
+        } else if (f1 > 360.0F) {
+            f1 -= 360.0F;
+        }
+
+        return f1;
+    }
+
+    public void setLastHurtBy(Entity lastHurtBy) {
+        this.lastHurtBy = lastHurtBy;
+    }
+
+    public Entity getLastHurtBy() {
+        return lastHurtBy;
+    }
+
+    @Override
+    public boolean hurt(DamageSource src, float damage) {
+        boolean result;
+        if (result = super.hurt(src, damage) && src.getEntity() != null){
+
+            var entity = src.getEntity();
+            Vec3 pos = entity.position();
+            Vec3 relativePos = pos.subtract(this.position());
+            Vec3 rotated = relativePos.yRot((float) Math.toRadians(this.getYRot()));
+
+            if (Math.abs(rotated.x) < 3) {
+                this.setLastHurtBy(src.getEntity());
+            }
+        }
+        return result;
+    }
 
     @Override
     protected void tickDeath() {

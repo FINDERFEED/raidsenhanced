@@ -45,6 +45,8 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
             speed = Mth.clamp(speed, 0, distance);
             Vec3 deltaMovement = this.mob.getLookAngle().normalize().scale(speed);
             this.mob.setDeltaMovement(deltaMovement);
+        }else{
+            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(1,0.95,1));
         }
 
     }

@@ -52,9 +52,10 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
             Vec3 ePos = this.mob.position();
 
             if (nextPos != null){
-                if (ePos.distanceTo(nextPos) < 2){
+                if (ePos.distanceTo(nextPos) < 5){
                     if (nextMoveNode >= this.path.getNodeCount() - 1){
                         this.path.setNextNodeIndex(this.path.getNodeCount());
+                        return;
                     }else {
                         currentNode = nextMoveNode;
                         recalculationCooldown = 0;
