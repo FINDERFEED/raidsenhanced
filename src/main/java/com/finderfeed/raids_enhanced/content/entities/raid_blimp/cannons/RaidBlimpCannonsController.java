@@ -43,8 +43,8 @@ public class RaidBlimpCannonsController {
 
     public void tick(){
 
-        float cylinderSideHeight = 30;
-        float cylinderRadius = 40;
+        float cylinderSideHeight = 50;
+        float cylinderRadius = 35;
         var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, raidBlimp.level(), raidBlimp.position().add(0,-cylinderSideHeight,0), cylinderSideHeight * 2, cylinderRadius, (target)->{
             return !target.isDeadOrDying() && target != this.getRaidBlimp();
         });

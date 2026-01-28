@@ -256,7 +256,7 @@ public class RaidBlimpCannon {
     }
 
     private Vec3 getTargetPos(LivingEntity livingEntity){
-        return livingEntity.position().add(0,livingEntity.getBbHeight() / 2, 0);
+        return livingEntity.getEyePosition();
     }
 
     public LivingEntity getTarget() {

@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -39,6 +41,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class RaidBlimp extends FDRaider {
+
+    public static final int HEIGHT_ABOVE_GROUND = 20;
 
     private static FDModel clientModel;
     private static FDModel serverModel;
@@ -62,6 +66,8 @@ public class RaidBlimp extends FDRaider {
     //death
     private Vec3 randomFallingDirection;
     private float fallingPower = 1f;
+
+    public boolean isMoving = false;
 
     public RaidBlimp(EntityType<? extends FDRaider> type, Level level) {
         super(type, level);
@@ -103,6 +109,7 @@ public class RaidBlimp extends FDRaider {
             if (!this.isDeadOrDying()) {
                 this.detectEntitiesBeneathAndThrowBomb();
             }
+            this.flyToHurtBy();
             this.turnToLastHurtBy();
         }
 
@@ -111,15 +118,50 @@ public class RaidBlimp extends FDRaider {
         }
     }
 
+    private void flyToHurtBy(){
+        if (this.getLastHurtBy() != null){
+            if (tickCount % 5 == 0) {
+                var entity = this.getLastHurtBy();
+
+                if (this.distanceTo(entity) > 200){
+                    lastHurtBy = null;
+                }
+
+                var pos = entity.position();
+                Vec3 b = pos.subtract(this.position()).multiply(1, 0, 1);
+
+                double yDiff = this.getY() - entity.getY();
+
+                if (b.length() > 30 || Math.abs(yDiff) > RaidBlimp.HEIGHT_ABOVE_GROUND) {
+                    Vec3 nb = b.normalize();
+                    Vec3 movePos = pos.add(nb.reverse().scale(10));
+                    movePos = this.getMovePos(movePos.x,movePos.y,movePos.z);
+
+                    this.getNavigation().moveTo(movePos.x, movePos.y, movePos.z, 1f);
+
+                }
+            }
+        }
+    }
+
+    public Vec3 getMovePos(double x, double y, double z){
+        int height = level().getHeight(Heightmap.Types.MOTION_BLOCKING, (int) Math.round(x), (int) Math.round(z));
+        return new Vec3(x,height + RaidBlimp.HEIGHT_ABOVE_GROUND,z);
+    }
+
+
     private void turnToLastHurtBy(){
-//        lastHurtBy = null;
+
         if (this.isDeadOrDying()) return;
 
-        if (this.getLastHurtBy() != null){
+        if (this.getLastHurtBy() != null && !isMoving){
 
             var entity = this.getLastHurtBy();
             Vec3 pos = entity.position();
 
+            if (this.distanceTo(entity) > 40){
+                return;
+            }
 
             double d0 = pos.x - this.getX();
             double d1 = pos.y - this.getY();
@@ -141,6 +183,8 @@ public class RaidBlimp extends FDRaider {
 
         }
     }
+
+
 
     protected float rotlerp(float p_24992_, float p_24993_, float p_24994_) {
         float f = Mth.wrapDegrees(p_24993_ - p_24992_);
@@ -175,13 +219,19 @@ public class RaidBlimp extends FDRaider {
         boolean result;
         if (result = super.hurt(src, damage) && src.getEntity() != null){
 
-            var entity = src.getEntity();
-            Vec3 pos = entity.position();
-            Vec3 relativePos = pos.subtract(this.position());
-            Vec3 rotated = relativePos.yRot((float) Math.toRadians(this.getYRot()));
+            if (this.distanceTo(src.getEntity()) < 40) {
+                var entity = src.getEntity();
+                Vec3 pos = entity.position();
+                Vec3 relativePos = pos.subtract(this.position());
+                Vec3 rotated = relativePos.yRot((float) Math.toRadians(this.getYRot()));
 
-            if (Math.abs(rotated.x) < 3) {
-                this.setLastHurtBy(src.getEntity());
+                if (Math.abs(rotated.x) < 4) {
+                    this.setLastHurtBy(src.getEntity());
+                }
+            }else{
+                if (this.distanceTo(src.getEntity()) < 200) {
+                    this.setLastHurtBy(src.getEntity());
+                }
             }
         }
         return result;
@@ -450,6 +500,16 @@ public class RaidBlimp extends FDRaider {
     @Override
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
         return false;
+    }
+
+    @Override
+    public void checkDespawn() {
+        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.discard();
+        } else {
+            this.noActionTime = 0;
+        }
     }
 
 }

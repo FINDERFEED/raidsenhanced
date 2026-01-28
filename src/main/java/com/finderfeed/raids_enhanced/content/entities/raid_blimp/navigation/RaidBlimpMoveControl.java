@@ -1,5 +1,6 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp.navigation;
 
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -24,10 +25,13 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
         double d2 = this.wantedZ - this.mob.getZ();
         double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-        if (d3 >= 2.5000003E-7F) {
+
+        if (d3 >= 25) {
 
             float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI) - 90.0F;
             this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, speed * 10f));
+
+            this.mob.yBodyRot = this.mob.getYRot();
 
             double d4 = Math.sqrt(d0 * d0 + d2 * d2);
             float f2 = (float)(-(Mth.atan2(d1, d4) * 180.0F / (float)Math.PI));
@@ -42,11 +46,17 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
 
 
         if (distance > 5) {
+            if (this.mob instanceof RaidBlimp raidBlimp){
+                raidBlimp.isMoving = true;
+            }
             speed = Mth.clamp(speed, 0, distance);
             Vec3 deltaMovement = this.mob.getLookAngle().normalize().scale(speed);
             this.mob.setDeltaMovement(deltaMovement);
-        }else{
-            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(1,0.95,1));
+        }else {
+            if (this.mob instanceof RaidBlimp raidBlimp){
+                raidBlimp.isMoving = false;
+            }
+            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(1, 0.95, 1));
         }
 
     }

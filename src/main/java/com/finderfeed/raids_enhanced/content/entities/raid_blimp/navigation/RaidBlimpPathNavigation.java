@@ -1,10 +1,13 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp.navigation;
 
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -26,12 +29,13 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
     @Override
     public void tick() {
         this.tick++;
+
         if (this.hasDelayedRecomputation) {
             this.recomputePath();
         }
 
-
         if (!this.isDone()) {
+
             this.processPath();
 
             if (nextPos != null) {
@@ -39,6 +43,7 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
             }
 
         }else{
+
             this.path = null;
             this.currentNode = 0;
             this.nextPos = null;
@@ -90,7 +95,6 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
         }
         recalculationCooldown = Mth.clamp(recalculationCooldown - 1,0,Integer.MAX_VALUE);
     }
-
 
     @Override
     public boolean moveTo(@Nullable Path p_26537_, double p_26538_) {
