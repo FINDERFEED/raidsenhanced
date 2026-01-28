@@ -8,13 +8,18 @@ import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -51,6 +56,10 @@ public class RaidBlimp extends FDRaider {
     private int bombThrowTicker = -1;
     private Vec3 bombThrowPos = null;
 
+    //death
+    private Vec3 randomFallingDirection;
+    private float fallingPower = 1f;
+
     public RaidBlimp(EntityType<? extends FDRaider> type, Level level) {
         super(type, level);
         this.cannonsController = new RaidBlimpCannonsController(this,
@@ -60,7 +69,11 @@ public class RaidBlimp extends FDRaider {
         this.moveControl = new RaidBlimpMoveControl(this, 10, false);
         this.getAnimationSystem().startAnimation("IDLE", AnimationTicker.builder(REAnimations.RAID_AIRSHIP_FLY.get())
                 .build());
-        this.getAnimationSystem().startAnimation(BOMB_ILLAGER_LAYER, AnimationTicker.builder(REAnimations.RAID_AIRSHIP_ILLAGER_OBSERVE.get()).build());
+        this.getAnimationSystem().startAnimation("IDLE2", AnimationTicker.builder(REAnimations.RAID_AIRSHIP_IDLE.get())
+                .build());
+        this.getAnimationSystem().startAnimation(BOMB_ILLAGER_LAYER, AnimationTicker.builder(REAnimations.RAID_AIRSHIP_ILLAGER_OBSERVE.get())
+                        .setToNullTransitionTime(0)
+                .build());
         this.setNoGravity(true);
 
     }
@@ -84,12 +97,109 @@ public class RaidBlimp extends FDRaider {
         super.tick();
 
         if (!level().isClientSide) {
-            this.detectEntitiesBeneathAndThrowBomb();
+            if (!this.isDeadOrDying()) {
+                this.detectEntitiesBeneathAndThrowBomb();
+            }
             this.setYRot(this.yBodyRot);
         }
 
-        this.cannonsController.tick();
+        if (!this.isDeadOrDying()) {
+            this.cannonsController.tick();
+        }
+    }
 
+
+
+    @Override
+    protected void tickDeath() {
+        this.deathTime++;
+        if (!this.level().isClientSide()) {
+
+            if (deathTime == 1){
+                level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 1f);
+                level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 0.5f);
+                level().playSound(null, this.position().x,this.position().y,this.position().z, RESounds.RAID_BLIMP_FALL.get(), SoundSource.HOSTILE, 5f, 1.1f);
+            }
+
+            this.getAnimationSystem().stopAnimation(BOMB_ILLAGER_LAYER);
+            this.getAnimationSystem().startAnimation("IDLE", AnimationTicker.builder(REAnimations.RAID_AIRSHIP_DEATH)
+                    .build());
+
+            if (randomFallingDirection == null){
+                fallingPower = 1f;
+                randomFallingDirection = new Vec3(1,0,0).yRot(random.nextFloat() * FDMathUtil.FPI * 2);
+            }
+
+            fallingPower = Mth.clamp(fallingPower - 0.05f,-0.25f,1);
+
+            Vec3 deltaMovement = this.getDeltaMovement();
+            Vec3 newDeltaMovement = new Vec3(
+                    deltaMovement.x + randomFallingDirection.x * fallingPower * 0.1,
+                    -0.8,
+                    deltaMovement.z + randomFallingDirection.z * fallingPower * 0.1
+            );
+
+            this.setDeltaMovement(newDeltaMovement);
+
+            if (this.onGround() || this.deathTime > 300){
+                this.explode();
+            }
+
+        }else{
+
+            this.deathClientParticles();
+
+        }
+    }
+
+    private void deathClientParticles(){
+        if (deathTime == 1){
+            for (int i = 0; i < 3; i++){
+                Vec3 ppos = this.position().add(
+                        random.nextFloat() * 5 - 2.5,
+                        random.nextFloat() * 4,
+                        random.nextFloat() * 5 - 2.5
+                );
+                level().addParticle(ParticleTypes.EXPLOSION_EMITTER, true, ppos.x, ppos.y, ppos.z, 0,0,0);
+            }
+
+        }
+
+        for (int i = 0; i < 10; i ++){
+            Vec3 ppos = this.position().add(
+                    random.nextFloat() * 4 - 2,
+                    random.nextFloat() * 4,
+                    random.nextFloat() * 4 - 2
+            );
+            level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, ppos.x, ppos.y, ppos.z, random.nextFloat() * 0.2f - 0.1f, random.nextFloat() * 0.2f - 0.1f, random.nextFloat() * 0.2f - 0.1f);
+        }
+
+        for (int i = 0; i < 10; i ++){
+            Vec3 ppos = this.position().add(
+                    random.nextFloat() * 4 - 2,
+                    random.nextFloat() * 4,
+                    random.nextFloat() * 4 - 2
+            );
+            level().addParticle(ParticleTypes.LARGE_SMOKE, true, ppos.x, ppos.y, ppos.z, random.nextFloat() * 0.2f - 0.1f, random.nextFloat() * 0.2f - 0.1f, random.nextFloat() * 0.2f - 0.1f);
+        }
+    }
+
+
+    private void explode(){
+        level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 1f);
+        level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 0.5f);
+        Vec3 pos = this.position();
+        for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, level(), pos, 160)) {
+            for (int i = 0; i < 3; i++){
+                Vec3 ppos = this.position().add(
+                        random.nextFloat() * 5 - 2.5,
+                        random.nextFloat() * 4,
+                        random.nextFloat() * 5 - 2.5
+                );
+                ((ServerLevel) level()).sendParticles(serverPlayer, ParticleTypes.EXPLOSION_EMITTER, true, ppos.x, ppos.y, ppos.z, 1, 0, 0, 0, 0);
+            }
+        }
+        this.setRemoved(RemovalReason.DISCARDED);
     }
 
     private void detectEntitiesBeneathAndThrowBomb(){
@@ -122,6 +232,7 @@ public class RaidBlimp extends FDRaider {
             bombThrowTicker--;
         }else{
             this.getAnimationSystem().startAnimation(BOMB_ILLAGER_LAYER, AnimationTicker.builder(REAnimations.RAID_AIRSHIP_ILLAGER_OBSERVE)
+                    .setToNullTransitionTime(0)
                     .build());
             if (tickCount % 5 == 0) {
                 float downDistance = 40;

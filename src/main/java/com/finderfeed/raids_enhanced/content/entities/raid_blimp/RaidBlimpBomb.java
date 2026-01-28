@@ -2,6 +2,7 @@ package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
 import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.FDEntity;
+import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.particles.ParticleTypes;

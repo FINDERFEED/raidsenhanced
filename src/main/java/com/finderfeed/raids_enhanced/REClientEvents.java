@@ -28,6 +28,10 @@ public class REClientEvents {
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raid_airship.png")))
                                 .addBoneController("airship", new RaidBlimpCannonBonesController())
                                 .build())
+                        .addLayer(FDEntityRenderLayerOptions.<RaidBlimp>builder()
+                                .model(REModels.RAID_BLIMP)
+                                .renderType(RenderType.eyes(RaidsEnhanced.location("textures/entities/raid_airship_emissive.png")))
+                                .build())
 
                 .build());
 

@@ -15,11 +15,19 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("raid_airship"));
     });
 
+    public static DeferredHolder<Animation,Animation> RAID_AIRSHIP_IDLE = ANIMATIONS.register("raid_airship_idle", ()->{
+        return new Animation(RaidsEnhanced.location("raid_airship"));
+    });
+
     public static DeferredHolder<Animation,Animation> RAID_AIRSHIP_ILLAGER_OBSERVE = ANIMATIONS.register("raid_airship_illager_observe", ()->{
         return new Animation(RaidsEnhanced.location("raid_airship"));
     });
 
     public static DeferredHolder<Animation,Animation> RAID_AIRSHIP_THROW_BOMB = ANIMATIONS.register("raid_airship_throw_bomb", ()->{
+        return new Animation(RaidsEnhanced.location("raid_airship"));
+    });
+
+    public static DeferredHolder<Animation,Animation> RAID_AIRSHIP_DEATH = ANIMATIONS.register("raid_airship_death", ()->{
         return new Animation(RaidsEnhanced.location("raid_airship"));
     });
 

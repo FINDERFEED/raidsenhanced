@@ -1,9 +1,6 @@
 package com.finderfeed.raids_enhanced;
 
-import com.finderfeed.raids_enhanced.init.REAnimations;
-import com.finderfeed.raids_enhanced.init.REEntities;
-import com.finderfeed.raids_enhanced.init.REItems;
-import com.finderfeed.raids_enhanced.init.REModels;
+import com.finderfeed.raids_enhanced.init.*;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -29,6 +26,7 @@ public class RaidsEnhanced {
         REAnimations.ANIMATIONS.register(modEventBus);
         REEntities.ENTITIES.register(modEventBus);
         REModels.MODELS.register(modEventBus);
+        RESounds.SOUNDS.register(modEventBus);
         REItems.ITEMS.register(modEventBus);
     }
 
