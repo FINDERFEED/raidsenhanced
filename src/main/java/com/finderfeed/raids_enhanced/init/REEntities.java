@@ -3,7 +3,8 @@ package com.finderfeed.raids_enhanced.init;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpBomb;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonProjectile;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -37,6 +38,12 @@ public class REEntities {
             )
             .sized(0.5f,0.5f)
             .build("raid_blimp_bomb"));
+
+    public static final Supplier<EntityType<RaidBlimpPart>> RAID_AIRSHIP_PART = ENTITIES.register("raid_airship_part",()->EntityType.Builder.<RaidBlimpPart>of(
+                    RaidBlimpPart::new, MobCategory.MISC
+            )
+            .sized(0.5f,0.5f)
+            .build("raid_airship_part"));
 
 
     @SubscribeEvent

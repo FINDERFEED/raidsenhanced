@@ -6,6 +6,10 @@ import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonsController;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.navigation.RaidBlimpMoveControl;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.navigation.RaidBlimpPathNavigation;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.RESounds;
@@ -24,13 +28,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -142,6 +143,7 @@ public class RaidBlimp extends FDRaider {
             this.setDeltaMovement(newDeltaMovement);
 
             if (this.onGround() || this.deathTime > 300){
+                this.spawnDeathParts();
                 this.explode();
             }
 
@@ -150,6 +152,20 @@ public class RaidBlimp extends FDRaider {
             this.deathClientParticles();
 
         }
+    }
+
+    private void spawnDeathParts(){
+
+        for (int i = 0; i < 30; i++){
+
+            Vec3 v = new Vec3(1,0,0).yRot(random.nextFloat() * FDMathUtil.FPI * 2);
+            Vec3 speed = v.scale(0.1f + random.nextFloat() * 1).add(0,0.15 + random.nextFloat() * 1.25f,0);
+            Vec3 startPos = this.position().add(v.scale(random.nextFloat() * 3f));
+
+            RaidBlimpPart.summon(level(), startPos, speed, i == 0 ? RaidBlimpPart.PROPELLER : RaidBlimpPart.WOODEN_STICK);
+
+        }
+
     }
 
     private void deathClientParticles(){

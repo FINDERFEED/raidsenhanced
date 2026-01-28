@@ -1,10 +1,11 @@
-package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
+package com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons;
 
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimatedObject;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.model_system.ModelSystem;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.model_system.entity_model_system.EntityModelSystem;
 import com.finderfeed.fdlib.util.FDProjectile;
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;

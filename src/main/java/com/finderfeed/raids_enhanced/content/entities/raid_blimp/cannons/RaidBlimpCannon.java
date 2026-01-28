@@ -1,8 +1,9 @@
-package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
+package com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons;
 
 import com.finderfeed.fdlib.data_structures.Pair;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
@@ -88,11 +89,9 @@ public class RaidBlimpCannon {
 
             for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, target.level(), pos, 120)){
                 serverLevel.sendParticles(player, ParticleTypes.GUST, true, particlePos.x, particlePos.y, particlePos.z,1,0,0,0,0);
-//                serverLevel.sendParticles(player, ParticleTypes.EXPLOSION, true, particlePos.x, particlePos.y, particlePos.z,1,0,0,0,0);
             }
 
             serverLevel.playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 1.5f);
-//            serverLevel.playSound(null, pos.x,pos.y,pos.z, SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.HOSTILE, 3f, 0.75f);
 
         }
     }

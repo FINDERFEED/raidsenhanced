@@ -5,8 +5,9 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpBomb;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonBonesController;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpCannonProjectile;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.mojang.math.Axis;
@@ -60,6 +61,8 @@ public class REClientEvents {
                                 }))
                                 .build())
                 .build());
+
+        event.registerEntityRenderer(REEntities.RAID_AIRSHIP_PART.get(), RaidBlimpPartRenderer::new);
 
     }
 

@@ -1,9 +1,9 @@
-package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
+package com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons;
 
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 public class RaidBlimpCannonsController {
 

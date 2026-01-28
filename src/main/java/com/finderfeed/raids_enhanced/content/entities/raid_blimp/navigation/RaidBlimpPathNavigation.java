@@ -1,6 +1,5 @@
-package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
+package com.finderfeed.raids_enhanced.content.entities.raid_blimp.navigation;
 
-import net.minecraft.network.protocol.common.custom.PathfindingDebugPayload;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
@@ -10,7 +9,6 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public class RaidBlimpPathNavigation extends FlyingPathNavigation {
