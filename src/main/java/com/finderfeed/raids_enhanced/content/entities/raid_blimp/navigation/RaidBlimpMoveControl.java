@@ -45,7 +45,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
         float distance = (float) between.length();
 
 
-        if (distance > 5) {
+        if (distance > 6) {
             if (this.mob instanceof RaidBlimp raidBlimp){
                 raidBlimp.isMoving = true;
             }
@@ -56,7 +56,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
             if (this.mob instanceof RaidBlimp raidBlimp){
                 raidBlimp.isMoving = false;
             }
-            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(1, 0.95, 1));
+            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(0.95, 0.95, 0.95));
         }
 
     }

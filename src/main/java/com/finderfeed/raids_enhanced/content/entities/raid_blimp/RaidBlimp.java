@@ -132,10 +132,15 @@ public class RaidBlimp extends FDRaider {
 
                 double yDiff = this.getY() - entity.getY();
 
-                if (b.length() > 30 || Math.abs(yDiff) > RaidBlimp.HEIGHT_ABOVE_GROUND) {
+                double hdist = b.length();
+                if (hdist > 30 || Math.abs(yDiff) > RaidBlimp.HEIGHT_ABOVE_GROUND) {
                     Vec3 nb = b.normalize();
-                    Vec3 movePos = pos.add(nb.reverse().scale(10));
-                    movePos = this.getMovePos(movePos.x,movePos.y,movePos.z);
+
+                    Vec3 movePos = pos.add(nb.reverse().scale(Math.min(hdist, 10)));
+
+
+                    double height = pos.y + RaidBlimp.HEIGHT_ABOVE_GROUND;
+                    movePos = this.getMovePos(movePos.x,height,movePos.z);
 
                     this.getNavigation().moveTo(movePos.x, movePos.y, movePos.z, 1f);
 
@@ -146,7 +151,8 @@ public class RaidBlimp extends FDRaider {
 
     public Vec3 getMovePos(double x, double y, double z){
         int height = level().getHeight(Heightmap.Types.MOTION_BLOCKING, (int) Math.round(x), (int) Math.round(z));
-        return new Vec3(x,height + RaidBlimp.HEIGHT_ABOVE_GROUND,z);
+        float resultHeight = (float) Math.max(y, height + RaidBlimp.HEIGHT_ABOVE_GROUND);
+        return new Vec3(x,resultHeight,z);
     }
 
 
@@ -329,7 +335,7 @@ public class RaidBlimp extends FDRaider {
 
     private void explode(){
         level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 1f);
-        level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 0.5f);
+        level().playSound(null, this.position().x,this.position().y,this.position().z, RESounds.RAID_BLIMP_EXPLODE.get(), SoundSource.HOSTILE, 5f, 1f);
         Vec3 pos = this.position();
         for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, level(), pos, 160)) {
             for (int i = 0; i < 5; i++){
@@ -361,9 +367,9 @@ public class RaidBlimp extends FDRaider {
                     bombThrowPos = this.position().add(0,-40,0);
                 }
                 Vec3 throwPos = bombThrowPos.add(
-                        level().random.nextGaussian(),
+                        level().random.nextGaussian() * 0.1,
                         0,
-                        level().random.nextGaussian()
+                        level().random.nextGaussian() * 0.1
                 );
                 double startSpeed = -1.5f;
                 Vec3 hb = this.calculateBombHorizontalSpeed(t, throwPos, startSpeed, ServerPlayer.DEFAULT_BASE_GRAVITY);

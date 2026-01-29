@@ -3,5 +3,10 @@
     "sounds": [
       "raidsenhanced:raid_blimp_falling"
     ]
+  },
+  "raid_blimp_explode": {
+    "sounds": [
+      "raidsenhanced:raid_blimp_explode"
+    ]
   }
 }
