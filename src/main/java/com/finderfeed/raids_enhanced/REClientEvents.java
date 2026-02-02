@@ -4,7 +4,7 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimpBomb;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
@@ -48,8 +48,8 @@ public class REClientEvents {
                                 .build())
                 .build());
 
-        event.registerEntityRenderer(REEntities.RAID_BLIMP_BOMB.get(), FDEntityRendererBuilder.<RaidBlimpBomb>builder()
-                        .addLayer(FDEntityRenderLayerOptions.<RaidBlimpBomb>builder()
+        event.registerEntityRenderer(REEntities.BOMB.get(), FDEntityRendererBuilder.<RaiderBomb>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<RaiderBomb>builder()
                                 .model(REModels.RAID_BLIMP_BOMB)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raid_airship_bomb.png")))
                                 .transformation(((entity, poseStack, v) -> {

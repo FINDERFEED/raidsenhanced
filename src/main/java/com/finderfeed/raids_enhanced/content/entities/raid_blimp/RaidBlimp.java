@@ -374,7 +374,7 @@ public class RaidBlimp extends FDRaider {
                 double startSpeed = -1.5f;
                 Vec3 hb = this.calculateBombHorizontalSpeed(t, throwPos, startSpeed, ServerPlayer.DEFAULT_BASE_GRAVITY);
                 Vec3 speed = new Vec3(hb.x,startSpeed,hb.z);
-                RaidBlimpBomb.summon(this, t, speed);
+                RaiderBomb.summon(this, t, speed);
             }
 
             bombThrowTicker--;

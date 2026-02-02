@@ -1,8 +1,6 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
-import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.FDEntity;
-import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,19 +23,19 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 
 import java.util.UUID;
 
-public class RaidBlimpBomb extends FDEntity {
+public class RaiderBomb extends FDEntity {
 
-    private UUID blimp;
+    private UUID owner;
 
-    public static void summon(RaidBlimp raidBlimp, Vec3 pos, Vec3 startSpeed){
-        RaidBlimpBomb blimpBomb = new RaidBlimpBomb(REEntities.RAID_BLIMP_BOMB.get(), raidBlimp.level());
-        blimpBomb.blimp = raidBlimp.getUUID();
-        blimpBomb.setPos(pos);
-        blimpBomb.setDeltaMovement(startSpeed);
-        raidBlimp.level().addFreshEntity(blimpBomb);
+    public static void summon(LivingEntity raidBlimp, Vec3 pos, Vec3 startSpeed){
+        RaiderBomb bomb = new RaiderBomb(REEntities.BOMB.get(), raidBlimp.level());
+        bomb.owner = raidBlimp.getUUID();
+        bomb.setPos(pos);
+        bomb.setDeltaMovement(startSpeed);
+        raidBlimp.level().addFreshEntity(bomb);
     }
 
-    public RaidBlimpBomb(EntityType<?> type, Level level) {
+    public RaiderBomb(EntityType<?> type, Level level) {
         super(type, level);
     }
 
@@ -78,7 +76,7 @@ public class RaidBlimpBomb extends FDEntity {
         if (res.getType() != HitResult.Type.MISS){
             this.explode(res.getLocation());
         }else {
-            var owner = ((ServerLevel) level()).getEntity(blimp);
+            var owner = ((ServerLevel) level()).getEntity(this.owner);
             var result = ProjectileUtil.getEntityHitResult(level(), owner, start, end, new AABB(start,end),(entity)->{
                 return true;
             });
@@ -89,7 +87,7 @@ public class RaidBlimpBomb extends FDEntity {
     }
 
     public void explode(Vec3 pos){
-        var entity = ((ServerLevel)level()).getEntity(blimp);
+        var entity = ((ServerLevel)level()).getEntity(owner);
         var entities = FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(), pos, 5);
         for (var e : entities){
             if (e == entity){
@@ -115,16 +113,16 @@ public class RaidBlimpBomb extends FDEntity {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        if (blimp != null){
-            tag.putUUID("blimp", this.blimp);
+        if (owner != null){
+            tag.putUUID("owner", this.owner);
         }
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        if (tag.contains("blimp")){
-            this.blimp = tag.getUUID("blimp");
+        if (tag.contains("owner")){
+            this.owner = tag.getUUID("owner");
         }
     }
 
