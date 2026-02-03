@@ -18,4 +18,6 @@ public class REModels {
     public static final Supplier<FDModelInfo> RAID_AIRSHIP_PART_1 = MODELS.register("raid_airship_part_1",()->new FDModelInfo(RaidsEnhanced.location("raid_airship_part_1"),1f));
     public static final Supplier<FDModelInfo> RAID_AIRSHIP_PART_2 = MODELS.register("raid_airship_part_2",()->new FDModelInfo(RaidsEnhanced.location("raid_airship_part_2"),1f));
 
+    public static final Supplier<FDModelInfo> GOLEM_OF_LAST_RESORT = MODELS.register("golem_of_last_resort",()->new FDModelInfo(RaidsEnhanced.location("golem_of_last_resort"),1f));
+
 }

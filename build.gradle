@@ -13,6 +13,12 @@ version = mod_version
 group = mod_group_id
 
 repositories {
+
+    flatDir {
+        dirs("libraries")
+    }
+
+
     maven {
         url "https://cursemaven.com"
         content {
@@ -74,8 +80,13 @@ dependencies {
 
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    implementation "curse.maven:fdlib-1271749:7429840"
+//    implementation "curse.maven:fdlib-1271749:7429840"
+    implementation fileTree(dir: 'build/libraries', include: ['*.jar'])
 
+    print("Added Libraries: \n")
+    fileTree('build/libraries').visit { FileVisitDetails details ->
+        print(details.name + '\n')
+    }
 }
 
 

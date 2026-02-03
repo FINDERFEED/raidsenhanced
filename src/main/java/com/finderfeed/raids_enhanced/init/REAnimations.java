@@ -31,5 +31,34 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("raid_airship"));
     });
 
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_STRIKE_1 = ANIMATIONS.register("illager_golem_strike_1", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_STRIKE_2 = ANIMATIONS.register("illager_golem_strike_2", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_IDLE = ANIMATIONS.register("illager_golem_idle", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_HEAVY_STRIKE = ANIMATIONS.register("illager_golem_heavy_strike", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_WHIRLWIND = ANIMATIONS.register("illager_golem_whirlwind", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_BOMBS = ANIMATIONS.register("illager_golem_bombs", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_WALK = ANIMATIONS.register("illager_golem_walk", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
 
 }

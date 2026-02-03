@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
+import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
@@ -9,6 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -45,6 +47,15 @@ public class REEntities {
             .sized(0.5f,0.5f)
             .build("raid_airship_part"));
 
+    public static final Supplier<EntityType<GolemOfLastResort>> GOLEM_OF_LAST_RESORT = ENTITIES.register("golem_of_last_resort",()->EntityType.Builder.<GolemOfLastResort>of(
+                    GolemOfLastResort::new, MobCategory.MISC
+            )
+            .sized(1.4f,2.6f)
+            .eyeHeight(2.05f)
+            .build("golem_of_last_resort"));
+
+
+
 
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event){
@@ -53,6 +64,11 @@ public class REEntities {
                         .add(Attributes.FOLLOW_RANGE, 40.0)
                         .add(Attributes.FLYING_SPEED, 0.3f)
                 .build());
+
+        event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
+
+                .build());
+
     }
 
 }
