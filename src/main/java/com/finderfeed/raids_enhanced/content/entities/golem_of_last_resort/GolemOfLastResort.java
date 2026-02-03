@@ -47,6 +47,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
     public static final String MAIN_LAYER = "IDLE";
     public static final String WALKING_LAYER = "WALKING";
+    public static final String WHIRLWIND_LAYER = "WHIRLWIND";
 
     private static FDModel clientModel;
     private static FDModel serverModel;
@@ -69,7 +70,9 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         this.lookControl = this.headControllerContainer;
         this.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_IDLE)
                 .build());
+        this.getAnimationSystem().setAnimationsApplyListener(this::onAnimationsApplied);
     }
+
 
     @Override
     protected void registerGoals() {
@@ -150,8 +153,33 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
 
         }else{
+
+
+
             this.getHeadControllerContainer().clientTick();
         }
+    }
+
+
+    private void onAnimationsApplied(FDModel model, Float partialTicks) {
+        var system = this.getAnimationSystem();
+        var ticker = system.getTicker(WHIRLWIND_LAYER);
+        float strength = 1f;
+        if (ticker != null) {
+            float time = ticker.getTime(partialTicks);
+            var animation = ticker.getAnimation();
+            float animTime = animation.getAnimTime();
+            float p = time / animTime;
+            if (p < 0.25f){
+                strength = 1 - p / 0.25f;
+            }else if (p >= 0.75f) {
+                strength = (p - 0.75f) / 0.25f;
+            }else{
+                strength = 0;
+            }
+        }
+        strength = Mth.clamp(strength,0,1);
+        this.getAnimationSystem().setVariable("variable.hand_strength", strength);
     }
 
     @Override
@@ -358,7 +386,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                             this.meleeAttackType = 2;
                         }
 
-//                        meleeAttackType = 2;
                         this.startAnimationAndAttackTicker(this.meleeAttackType);
                     }else {
                         this.golem.walkingWithHands = true;
@@ -388,8 +415,15 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
             this.golem.walkingWithHands = true;
             var target = this.golem.getTarget();
-            if (target != null){
-                this.golem.getNavigation().moveTo(target, 0.8f);
+            this.golem.getNavigation().stop();
+            if (target != null && attackTime < 16){
+                var movement = this.golem.getDeltaMovement();
+                Vec3 between = target.position().subtract(this.golem.position()).multiply(1,0,1);
+                if (!between.equals(Vec3.ZERO) && between.length() > 0.5){
+                    Vec3 addition = between.normalize().scale(0.1f);
+                    this.golem.setDeltaMovement(movement.add(addition));
+                }
+                this.golem.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
             }
             if (attackTime > 10 && attackTime < 16){
                 var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), this.golem.getBbHeight() + 2, this.golem.getBbWidth() + 1.5f);
@@ -401,7 +435,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         }
                     }
                 }
-            }else if (this.attackTime < 9){
             }
         }
 
@@ -469,9 +502,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         .build());
                 attackTime = 17;
             }else{
-                this.golem.getAnimationSystem().startAnimation("WHIRLWIND", AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_WHIRLWIND)
+                this.golem.getAnimationSystem().startAnimation(WHIRLWIND_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_WHIRLWIND)
                                 .setToNullTransitionTime(0)
-                        .important()
                         .build());
                 attackTime = 20;
             }
