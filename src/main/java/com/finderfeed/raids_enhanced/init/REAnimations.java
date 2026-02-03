@@ -55,8 +55,11 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
     });
 
-
     public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_WALK = ANIMATIONS.register("illager_golem_walk", ()->{
+        return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ILLAGER_GOLEM_WALK_NO_HANDS = ANIMATIONS.register("illager_golem_walk_no_hands", ()->{
         return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
     });
 
