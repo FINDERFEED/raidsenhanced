@@ -1,5 +1,7 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
+import com.finderfeed.fdlib.FDHelpers;
+import com.finderfeed.fdlib.FDLibCalls;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.FDEntity;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.init.REEntities;
@@ -100,12 +102,21 @@ public class RaiderBomb extends FDEntity {
                 damageSource = level().damageSources().generic();
             }
             e.hurt(damageSource, 5);
+            Vec3 speed = e.position().subtract(this.position()).normalize().scale(0.5f).add(0,0.5,0);
+            if (e instanceof ServerPlayer serverPlayer){
+                FDLibCalls.setServerPlayerSpeed(serverPlayer, speed);
+                serverPlayer.hasImpulse = true;
+            }else{
+                e.setDeltaMovement(speed);
+                e.hasImpulse = true;
+            }
         }
 
         level().playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f,1f);
         level().playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f,1.5f);
         for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, level(), pos, 160)) {
             ((ServerLevel) level()).sendParticles(serverPlayer, ParticleTypes.EXPLOSION_EMITTER, true, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+
         }
         this.remove(RemovalReason.DISCARDED);
     }

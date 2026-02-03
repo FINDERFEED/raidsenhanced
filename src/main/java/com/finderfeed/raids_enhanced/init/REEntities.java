@@ -66,7 +66,8 @@ public class REEntities {
                 .build());
 
         event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
-
+                .add(Attributes.FOLLOW_RANGE, 30.0)
+                        .add(Attributes.MOVEMENT_SPEED, 0.3f)
                 .build());
 
     }

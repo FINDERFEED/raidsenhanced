@@ -1,5 +1,7 @@
 package com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort;
 
+import com.finderfeed.fdlib.nbt.AutoSerializable;
+import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.fdlib.systems.bedrock.animations.Animation;
 import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
@@ -8,13 +10,18 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.h
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -26,17 +33,28 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
-public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastResort> {
+import java.util.List;
+
+public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastResort>, AutoSerializable {
 
     public static final String MAIN_LAYER = "IDLE";
 
     private static FDModel clientModel;
     private static FDModel serverModel;
+
+    @SerializableField
+    private int golemBombsCooldown = 0;
+
+    private boolean isMeleeAttacking = false;
+    private boolean isRangedAttacking = false;
 
     protected HeadControllerContainer<GolemOfLastResort> headControllerContainer;
 
@@ -60,6 +78,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
 
 
+        this.goalSelector.addGoal(3, new GolemBombsAttack(this));
         this.goalSelector.addGoal(4, new GolemMeleeAttackGoal(this));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
@@ -74,6 +93,9 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     public void tick() {
         super.tick();
         if (!this.level().isClientSide){
+
+            golemBombsCooldown = Mth.clamp(golemBombsCooldown - 1,0, Integer.MAX_VALUE);
+
             this.setYRot(this.yBodyRot);
             var animSystem = this.getAnimationSystem();
 
@@ -88,6 +110,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 this.getLookControl().setLookAt(this.getEyePosition().add(this.getLookAngle()));
             }else if (this.getTarget() == null) {
                 if (speed > 0.1) {
+                    this.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.LOOK);
                     this.getLookControl().setLookAt(this.getEyePosition().add(this.getLookAngle()));
                 }
             }
@@ -125,6 +148,18 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     @Override
     public void applyRaidBuffs(ServerLevel p_348605_, int p_37844_, boolean p_37845_) {
 
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        this.autoSave(tag);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.autoLoad(tag);
     }
 
     public boolean isIdleAnim(Animation animation){
@@ -171,8 +206,103 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         return this.headControllerContainer;
     }
 
+    public static class GolemBombsAttack extends Goal {
+
+        public int attackTime;
+        public GolemOfLastResort golem;
+
+
+        public GolemBombsAttack(GolemOfLastResort golem) {
+            this.golem = golem;
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.golem.getTarget() != null && this.golem.golemBombsCooldown <= 0 && this.golem.random.nextFloat() < 0.05 && !this.golem.isMeleeAttacking
+                    && (this.golem.getTarget().distanceTo(this.golem) > 5 || Math.abs(this.golem.getY() - this.golem.getTarget().getY()) > 2);
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            this.golem.isMeleeAttacking = false;
+            this.golem.isRangedAttacking = true;
+            attackTime = 0;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            var target = this.golem.getTarget();
+
+            if (target == null){
+                this.golem.isRangedAttacking = false;
+                return;
+            }
+
+            var system = this.golem.getAnimationSystem();
+
+            this.golem.getNavigation().stop();
+
+
+            this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.ANIMATION);
+
+            if (this.attackTime == 0){
+                this.golem.setDeltaMovement(Vec3.ZERO);
+                system.startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_BOMBS)
+                        .build());
+
+
+            } else if (this.attackTime == 12){
+
+                Matrix4f t = this.golem.getModelPartTransformation(this.golem,"cannon", getModel(golem.level()));
+                Vec3 pos = new Vec3(t.transformPosition(new Vector3f())).add(this.golem.position());
+
+                List<Player> targets = FDTargetFinder.getEntitiesInCylinder(Player.class, golem.level(), golem.position().add(0,-20,0), 40,20);
+
+                for (var tr : targets){
+                    this.launchBombAtTarget(tr, pos);
+                }
+
+                if (!targets.contains(target)){
+                    this.launchBombAtTarget(target, pos);
+                }
+
+            } else if (attackTime > 25){
+                this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.LOOK);
+                this.golem.golemBombsCooldown = 100;
+                this.golem.isRangedAttacking = false;
+            }
+            this.attackTime++;
+        }
+
+        private void launchBombAtTarget(LivingEntity target, Vec3 bombStartPos){
+            Vec3 speed = REUtil.calculateMortarProjectileVelocity(bombStartPos, target.position(), -ServerPlayer.DEFAULT_BASE_GRAVITY, 20 + golem.random.nextInt(5));
+            RaiderBomb.summon(this.golem, bombStartPos, speed);
+        }
+
+        @Override
+        public void stop() {
+            this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.LOOK);
+            this.golem.getNavigation().stop();
+            this.golem.getLookControl().setLookAt(this.golem.getEyePosition().add(this.golem.getLookAngle()));
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.golem.getTarget() != null && this.golem.golemBombsCooldown <= 0 && this.golem.isRangedAttacking;
+        }
+
+    }
+
+
 
     public static class GolemMeleeAttackGoal extends Goal {
+
+        //0 - default
+        //1 - heavy attack
+        //2 - whirlwind
+        public int meleeAttackType = 0;
 
         public int attackTime = 0;
 
@@ -184,7 +314,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         @Override
         public boolean canUse() {
-            return this.golem.getTarget() != null;
+            return this.golem.getTarget() != null && !this.golem.isRangedAttacking;
         }
 
         @Override
@@ -194,10 +324,13 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         @Override
         public void tick() {
+            if (meleeAttackType > 2){
+                this.meleeAttackType = 0;
+            }
             var target = this.golem.getTarget();
             if (target != null){
                 if (attackTime <= 0) {
-
+                    this.golem.isMeleeAttacking = false;
                     var box = this.golem.getBoundingBox().inflate(1.25f);
                     var targetBox = target.getHitbox();
 
@@ -205,14 +338,18 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     if (box.intersects(targetBox)) {
                         this.golem.getLookControl().setLookAt(target);
                         this.golem.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
-                        attackTime = 10;
-
                         this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.ANIMATION);
-                        Animation animation = this.golem.random.nextBoolean() ? REAnimations.ILLAGER_GOLEM_STRIKE_1.get() : REAnimations.ILLAGER_GOLEM_STRIKE_2.get();
-                        this.golem.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(animation)
-                                        .important()
-                                        .setSpeed(0.8f)
-                                .build());
+
+                        float rnd = this.golem.random.nextFloat();
+                        if (rnd > 0.25){
+                            this.meleeAttackType = 0;
+                        }else if (rnd > 0.125){
+                            this.meleeAttackType = 1;
+                        }else{
+                            this.meleeAttackType = 2;
+                        }
+                        meleeAttackType = 2;
+                        this.startAnimationAndAttackTicker(this.meleeAttackType);
 
                     }else {
 
@@ -223,38 +360,109 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     }
 
                 }else{
+                    this.golem.isMeleeAttacking = true;
+
                     this.golem.getNavigation().stop();
                     this.golem.getLookControl().setLookAt(this.golem.getEyePosition().add(this.golem.getLookAngle()));
                     attackTime--;
-                    if (attackTime == 6){
-                        Vec3 forward = this.golem.getForward();
 
-                        Vec2 direction = new Vec2(
-                                (float)forward.x,
-                                (float)forward.z
-                        );
-                        var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, this.golem.getBbHeight() + 2,
-                                this.golem.getBbWidth() + 1.5f);
-                        for (var t : targets) {
-                            if (t != this.golem) {
-                                this.golem.doHurtTarget(t);
-                            }
+                    if (this.meleeAttackType == 0){
+                        this.defaultMeleeAttack();
+                    }else if (this.meleeAttackType == 1){
+                        this.heavyAttack();
+                    }else if (this.meleeAttackType == 2){
+                        this.whirlwindAttack();
+                    }
+
+                }
+            }
+        }
+        private void whirlwindAttack(){
+            if (attackTime > 3 && attackTime < 6){
+                var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), this.golem.getBbHeight() + 2, this.golem.getBbWidth() + 1.5f);
+                for (var t : targets) {
+                    if (t != this.golem) {
+                        this.golem.doHurtTarget(t);
+                        if (t instanceof Player player && player.getUseItem().getItem() instanceof ShieldItem){
+                            player.disableShield();
                         }
                     }
                 }
             }
         }
 
+
+        private void heavyAttack(){
+            this.golem.lookAt(EntityAnchorArgument.Anchor.FEET, this.golem.getTarget().position());
+            if (attackTime == 8){
+                Vec3 forward = this.golem.getForward();
+
+                Vec2 direction = new Vec2(
+                        (float)forward.x,
+                        (float)forward.z
+                );
+                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, this.golem.getBbHeight() + 2,
+                        this.golem.getBbWidth() + 1.5f);
+                for (var t : targets) {
+                    if (t != this.golem) {
+                        this.golem.doHurtTarget(t);
+                        if (t instanceof Player player && player.getUseItem().getItem() instanceof ShieldItem){
+                            player.disableShield();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void defaultMeleeAttack(){
+            if (attackTime == 6){
+                Vec3 forward = this.golem.getForward();
+
+                Vec2 direction = new Vec2(
+                        (float)forward.x,
+                        (float)forward.z
+                );
+                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, this.golem.getBbHeight() + 2,
+                        this.golem.getBbWidth() + 1.5f);
+                for (var t : targets) {
+                    if (t != this.golem) {
+                        this.golem.doHurtTarget(t);
+                    }
+                }
+            }
+        }
+
+        private void startAnimationAndAttackTicker(int attackType){
+            if (attackType == 0){
+                Animation animation = this.golem.random.nextBoolean() ? REAnimations.ILLAGER_GOLEM_STRIKE_1.get() : REAnimations.ILLAGER_GOLEM_STRIKE_2.get();
+                this.golem.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(animation)
+                        .important()
+                        .setSpeed(0.8f)
+                        .build());
+                attackTime = 10;
+            }else if (attackType == 1){
+                this.golem.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_HEAVY_STRIKE)
+                        .important()
+                        .build());
+                attackTime = 15;
+            }else{
+                this.golem.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_WHIRLWIND)
+                        .important()
+                        .build());
+                attackTime = 10;
+            }
+        }
+
         @Override
         public void stop() {
-            this.golem.setTarget(null);
+            this.golem.isMeleeAttacking = false;
             this.golem.getNavigation().stop();
             this.golem.getLookControl().setLookAt(this.golem.getEyePosition().add(this.golem.getLookAngle()));
         }
 
         @Override
         public boolean canContinueToUse() {
-            return this.golem.getTarget() != null;
+            return this.golem.getTarget() != null && !this.golem.isRangedAttacking;
         }
 
     }
