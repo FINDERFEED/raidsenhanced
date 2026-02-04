@@ -4,6 +4,7 @@ import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -33,7 +34,7 @@ public class REFallingBlockRenderer extends EntityRenderer<REFallingBlock> {
 
 
         matrices.translate(-.5,-.5,-.5);
-        renderer.renderSingleBlock(state,matrices,src,light, OverlayTexture.NO_OVERLAY, ModelData.EMPTY,null);
+        renderer.renderSingleBlock(state,matrices,src, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, ModelData.EMPTY,null);
 
 
         matrices.popPose();

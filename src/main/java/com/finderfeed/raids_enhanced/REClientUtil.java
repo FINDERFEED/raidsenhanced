@@ -37,11 +37,11 @@ public class REClientUtil {
         ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 
 
-        for (int i = 0; i < 5; i++){
+        for (int i = 0; i < 7; i++){
             for (var dir : new HorizontalCircleRandomDirections(level.random, i * 5, 1f)){
 
                 float strength = i * 0.05f + level.random.nextFloat() * 0.05f;
-                float vspeed = level.random.nextFloat() * 0.2f + 0.05f;
+                float vspeed = level.random.nextFloat() * 0.4f + 0.05f;
 
                 Vec3 ppos = pos.add(dir.scale(level.random.nextFloat())).add(0,0.2,0);
                 Vec3 pspeed = dir.scale(strength).add(0,vspeed, 0);
@@ -54,6 +54,29 @@ public class REClientUtil {
                 }
             }
         }
+
+
+
+        for (int i = 0; i < 4; i++){
+            for (var dir : new HorizontalCircleRandomDirections(level.random, i * 3, 1f)){
+
+                float strength = level.random.nextFloat() * 0.03f;
+                float vspeed = level.random.nextFloat() * 0.01f;
+
+                Vec3 ppos = pos.add(dir.scale(level.random.nextFloat() * i )).add(0,0.2,0);
+                Vec3 pspeed = dir.scale(strength).add(0,vspeed, 0);
+
+                var particle = particleEngine.createParticle(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE,
+                        ppos.x,ppos.y,ppos.z,
+                        pspeed.x,pspeed.y,pspeed.z);
+                if (particle != null) {
+                    particle.setLifetime(20 + level.random.nextInt(10));
+                    particle.setParticleSpeed(pspeed.x,pspeed.y,pspeed.z);
+                }
+            }
+        }
+
+
 
     }
 

@@ -14,16 +14,19 @@ import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
+import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -299,6 +302,12 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 Matrix4f t = this.golem.getModelPartTransformation(this.golem,"cannon", getModel(golem.level()));
                 Vec3 pos = new Vec3(t.transformPosition(new Vector3f())).add(this.golem.position());
 
+                for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, target.level(), pos, 120)){
+                    ((ServerLevel)golem.level()).sendParticles(player, ParticleTypes.GUST, true, pos.x, pos.y + 0.2, pos.z,1,0,0,0,0);
+                }
+                ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 1.5f);
+                ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 0.75f);
+
                 List<Player> targets = FDTargetFinder.getEntitiesInCylinder(Player.class, golem.level(), golem.position().add(0,-20,0), 40,20);
 
                 for (var tr : targets){
@@ -313,6 +322,9 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.LOOK);
                 this.golem.golemBombsCooldown = 100;
                 this.golem.isRangedAttacking = false;
+            } else if (attackTime == 9){
+                ((ServerLevel)golem.level()).playSound(null, this.golem.getX(), this.golem.getY() + 1, this.golem.getZ(), RESounds.RAID_GOLEM_PREPARE_PUNCH.get(), SoundSource.HOSTILE, 2f, 0.75f);
+                ((ServerLevel)golem.level()).playSound(null, this.golem.getX(), this.golem.getY() + 1, this.golem.getZ(), RESounds.RAID_GOLEM_PREPARE_PUNCH.get(), SoundSource.HOSTILE, 2f, 1.25f);
             }
             this.attackTime++;
         }
@@ -372,7 +384,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             if (target != null){
                 if (attackTime <= 0) {
                     this.golem.isMeleeAttacking = false;
-                    var box = this.golem.getBoundingBox().inflate(1.4f);
+                    var box = this.golem.getBoundingBox().inflate(1.5f);
                     var targetBox = target.getHitbox();
 
 
@@ -460,14 +472,23 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         (int) Math.floor(smackPos.z)
                 );
 
-                for (int x = -2; x < 2; x++){
-                    for (int z = -2; z < 2; z++){
+                for (int x = -1; x <= 1; x++){
+                    for (int z = -1; z <= 1; z++){
+
+                        if (Math.abs(x + z) > 1 && golem.random.nextFloat() > 0.5){
+                            continue;
+                        }
 
                         BlockPos pos = basePos.offset(x,0,z);
                         BlockState blockState = golem.level().getBlockState(pos);
-                        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(EntityType.FALLING_BLOCK, golem.level());
-                        fallingBlockEntity.disableDrop();
+                        Vec3 summonPos = pos.getCenter();
+                        Vec3 between = summonPos.subtract(smackPos).multiply(1,0,1);
 
+                        Vec3 speed = between.normalize().yRot(-FDMathUtil.FPI / 8 + golem.level().random.nextFloat() * FDMathUtil.FPI / 4)
+                                .scale(0.05f + golem.random.nextFloat() * 0.1f)
+                                .add(0,0.2 + golem.level().random.nextFloat() * 0.2f, 0);
+
+                        REFallingBlock fallingBlock = REFallingBlock.summon(golem.level(), blockState, pos.getCenter(), speed, (float) ServerPlayer.DEFAULT_BASE_GRAVITY);
 
                     }
                 }

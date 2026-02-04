@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced.content.entities.falling_block;
 import com.finderfeed.fdlib.nbt.AutoSerializable;
 import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.fdlib.util.FDProjectile;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -71,8 +72,16 @@ public class REFallingBlock extends FDProjectile implements AutoSerializable {
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
         if (!level().isClientSide){
-            if (removingTicker == -1){
-                removingTicker = 5;
+            if (removingTicker == -1) {
+
+                var speed = Math.abs(this.getDeltaMovement().y);
+
+                if (speed > 0.5) {
+                    this.remove(RemovalReason.DISCARDED);
+                } else {
+                    int lifetime = (int) Math.floor(FDMathUtil.lerp(1,30,1 - speed / 0.5f));
+                    removingTicker = lifetime;
+                }
             }
         }
     }
