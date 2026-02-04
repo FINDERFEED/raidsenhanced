@@ -1,8 +1,21 @@
 package com.finderfeed.raids_enhanced;
 
+import com.finderfeed.raids_enhanced.content.packets.REPosEventPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class REUtil {
+
+    public static final int GOLEM_SMACK = 1;
+
+    public static void golemSmackParticles(ServerLevel serverLevel, Vec3 pos, double radius){
+        posEvent(serverLevel, pos, GOLEM_SMACK, 0, radius);
+    }
+
+    public static void posEvent(ServerLevel serverLevel, Vec3 pos, int event, int data, double radius){
+        PacketDistributor.sendToPlayersNear(serverLevel, null, pos.x, pos.y, pos.z, radius, new REPosEventPacket(pos, event, data));
+    }
 
     public static Vec3 calculateMortarProjectileVelocity(Vec3 startPos, Vec3 endPos, double gravity, int tickTravelTime){
 

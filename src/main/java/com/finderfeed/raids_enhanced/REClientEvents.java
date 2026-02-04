@@ -6,6 +6,7 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
+import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
@@ -33,6 +34,8 @@ public class REClientEvents {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event){
+
+        event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
 
         event.registerEntityRenderer(REEntities.GOLEM_OF_LAST_RESORT.get(), FDEntityRendererBuilder.<GolemOfLastResort>builder()
                         .addLayer(FDEntityRenderLayerOptions.<GolemOfLastResort>builder()

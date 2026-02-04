@@ -8,34 +8,38 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.Animatio
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadControllerContainer;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.IHasHead;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
+import com.finderfeed.fdlib.systems.shake.FDShakeData;
+import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.REUtil;
-import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
@@ -386,6 +390,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                             this.meleeAttackType = 2;
                         }
 
+                        this.meleeAttackType = 1;
                         this.startAnimationAndAttackTicker(this.meleeAttackType);
                     }else {
                         this.golem.walkingWithHands = true;
@@ -444,7 +449,39 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             this.golem.getLookControl().setLookAt(this.golem.getTarget());
             this.golem.getNavigation().stop();
             this.golem.lookAt(EntityAnchorArgument.Anchor.FEET, this.golem.getTarget().position());
+            Vec3 smackPos = golem.position().add(golem.getForward().scale(1.5f));
             if (attackTime == 10){
+                this.golem.level().playSound(null, smackPos.x, smackPos.y, smackPos.z, RESounds.RAID_GOLEM_HEAVY_STRKE.get(), SoundSource.HOSTILE, 2f, 0.8f + golem.random.nextFloat() * 0.2f);
+                REUtil.golemSmackParticles((ServerLevel) golem.level(), smackPos, 60);
+
+                BlockPos basePos = new BlockPos(
+                        (int) Math.floor(smackPos.x),
+                        (int) Math.floor(smackPos.y + 0.1f) - 1,
+                        (int) Math.floor(smackPos.z)
+                );
+
+                for (int x = -2; x < 2; x++){
+                    for (int z = -2; z < 2; z++){
+
+                        BlockPos pos = basePos.offset(x,0,z);
+                        BlockState blockState = golem.level().getBlockState(pos);
+                        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(EntityType.FALLING_BLOCK, golem.level());
+                        fallingBlockEntity.disableDrop();
+
+
+                    }
+                }
+
+
+                PositionedScreenShakePacket.send((ServerLevel) golem.level(), FDShakeData.builder()
+                        .frequency(5f)
+                        .amplitude(5f)
+                        .inTime(0)
+                        .stayTime(0)
+                        .outTime(6)
+                        .build(),smackPos,10);
+
+
                 Vec3 forward = this.golem.getForward();
 
                 Vec2 direction = new Vec2(
@@ -461,6 +498,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         }
                     }
                 }
+            }else if (attackTime == 16){
+                this.golem.level().playSound(null, golem.getX(),golem.getY(),golem.getZ(), RESounds.RAID_GOLEM_PREPARE_PUNCH.get(), SoundSource.HOSTILE, 2f, 0.9f + golem.random.nextFloat() * 0.2f);
             }
         }
 
@@ -499,6 +538,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             }else if (attackType == 1){
                 this.golem.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_HEAVY_STRIKE)
                         .important()
+                                .setSpeed(0.95f)
                         .build());
                 attackTime = 17;
             }else{

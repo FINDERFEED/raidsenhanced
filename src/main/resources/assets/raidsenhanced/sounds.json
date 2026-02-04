@@ -8,5 +8,15 @@
     "sounds": [
       "raidsenhanced:raid_blimp_explode"
     ]
+  },
+  "raid_golem_heavy_strike": {
+    "sounds": [
+      "raidsenhanced:raid_golem_heavy_strike"
+    ]
+  },
+  "raid_golem_prepare_punch": {
+    "sounds": [
+      "raidsenhanced:raid_golem_prepare_punch"
+    ]
   }
 }

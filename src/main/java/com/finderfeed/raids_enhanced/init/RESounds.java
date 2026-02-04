@@ -13,5 +13,7 @@ public class RESounds {
 
     public static final Supplier<SoundEvent> RAID_BLIMP_FALL = SOUNDS.register("raid_blimp_falling", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_blimp_falling")));
     public static final Supplier<SoundEvent> RAID_BLIMP_EXPLODE = SOUNDS.register("raid_blimp_explode", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_blimp_explode")));
+    public static final Supplier<SoundEvent> RAID_GOLEM_HEAVY_STRKE = SOUNDS.register("raid_golem_heavy_strike", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_golem_heavy_strike")));
+    public static final Supplier<SoundEvent> RAID_GOLEM_PREPARE_PUNCH = SOUNDS.register("raid_golem_prepare_punch", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_golem_prepare_punch")));
 
 }

@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
+import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
@@ -55,6 +56,11 @@ public class REEntities {
             .build("golem_of_last_resort"));
 
 
+    public static final Supplier<EntityType<REFallingBlock>> FALLING_BLOCK = ENTITIES.register("falling_block",()->EntityType.Builder.<REFallingBlock>of(
+                    REFallingBlock::new, MobCategory.MISC
+            )
+            .sized(0.2f,0.2f)
+            .build("falling_block"));
 
 
     @SubscribeEvent
