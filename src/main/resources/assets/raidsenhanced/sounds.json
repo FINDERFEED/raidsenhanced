@@ -18,5 +18,10 @@
     "sounds": [
       "raidsenhanced:raid_golem_prepare_punch"
     ]
+  },
+  "raid_golem_swing": {
+    "sounds": [
+      "raidsenhanced:raid_golem_swing"
+    ]
   }
 }
