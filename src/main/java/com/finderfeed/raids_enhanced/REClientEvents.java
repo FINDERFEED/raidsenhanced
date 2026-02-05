@@ -13,8 +13,10 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
+import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
+import com.finderfeed.raids_enhanced.init.REParticles;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
@@ -27,10 +29,16 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, value = Dist.CLIENT)
 public class REClientEvents {
+
+    @SubscribeEvent
+    public static void registerParticleProviders(RegisterParticleProvidersEvent event){
+        event.registerSpriteSet(REParticles.EXPLOSION.get(), RExplosionParticle.Factory::new);
+    }
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event){

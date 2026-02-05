@@ -16,6 +16,7 @@ import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
+import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticleOptions;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.RESounds;
@@ -272,7 +273,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         @Override
         public boolean canUse() {
             return this.golem.getTarget() != null && this.golem.golemBombsCooldown <= 0 && this.golem.random.nextFloat() < 0.05 && !this.golem.isMeleeAttacking
-                    && (this.golem.getTarget().distanceTo(this.golem) > 5 || Math.abs(this.golem.getY() - this.golem.getTarget().getY()) > 2);
+                    && (this.golem.getTarget().distanceTo(this.golem) > 4 || Math.abs(this.golem.getY() - this.golem.getTarget().getY()) > 2);
         }
 
         @Override
@@ -312,7 +313,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 Vec3 pos = new Vec3(t.transformPosition(new Vector3f())).add(this.golem.position());
 
                 for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, target.level(), pos, 120)){
-                    ((ServerLevel)golem.level()).sendParticles(player, ParticleTypes.GUST, true, pos.x, pos.y + 0.2, pos.z,1,0,0,0,0);
+                    ((ServerLevel)golem.level()).sendParticles(player, new RExplosionParticleOptions(1.5f,9), true, pos.x, pos.y + 0.75, pos.z,1,0,0,0,0);
                 }
                 ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 1.5f);
                 ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 0.75f);

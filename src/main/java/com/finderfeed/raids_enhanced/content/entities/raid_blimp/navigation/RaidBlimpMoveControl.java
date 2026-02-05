@@ -17,46 +17,51 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
     public void tick() {
 
 
+        if (this.operation == Operation.MOVE_TO) {
+            float speed = (float) (this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
 
-        float speed = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
-
-        double d0 = this.wantedX - this.mob.getX();
-        double d1 = this.wantedY - this.mob.getY();
-        double d2 = this.wantedZ - this.mob.getZ();
-        double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-
-
-        if (d3 >= 25) {
-
-            float f = (float)(Mth.atan2(d2, d0) * 180.0F / (float)Math.PI) - 90.0F;
-            this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, speed * 10f));
-
-            this.mob.yBodyRot = this.mob.getYRot();
-
-            double d4 = Math.sqrt(d0 * d0 + d2 * d2);
-            float f2 = (float)(-(Mth.atan2(d1, d4) * 180.0F / (float)Math.PI));
-            this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f2, (float)90));
-
-        }
+            double d0 = this.wantedX - this.mob.getX();
+            double d1 = this.wantedY - this.mob.getY();
+            double d2 = this.wantedZ - this.mob.getZ();
+            double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
 
-        Vec3 targetPos = new Vec3(this.wantedX, this.wantedY, this.wantedZ);
-        Vec3 between = targetPos.subtract(this.mob.position());
-        float distance = (float) between.length();
+            if (d3 >= 25) {
 
+                float f = (float) (Mth.atan2(d2, d0) * 180.0F / (float) Math.PI) - 90.0F;
+                this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, speed * 10f));
 
-        if (distance > 6) {
-            if (this.mob instanceof RaidBlimp raidBlimp){
-                raidBlimp.isMoving = true;
+                this.mob.yBodyRot = this.mob.getYRot();
+
+                double d4 = Math.sqrt(d0 * d0 + d2 * d2);
+                float f2 = (float) (-(Mth.atan2(d1, d4) * 180.0F / (float) Math.PI));
+                this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f2, (float) 90));
+
             }
-            speed = Mth.clamp(speed, 0, distance);
-            Vec3 deltaMovement = this.mob.getLookAngle().normalize().scale(speed);
-            this.mob.setDeltaMovement(deltaMovement);
-        }else {
-            if (this.mob instanceof RaidBlimp raidBlimp){
+
+
+            Vec3 targetPos = new Vec3(this.wantedX, this.wantedY, this.wantedZ);
+            Vec3 between = targetPos.subtract(this.mob.position());
+            float distance = (float) between.length();
+
+
+            if (distance > 6) {
+                if (this.mob instanceof RaidBlimp raidBlimp) {
+                    raidBlimp.isMoving = true;
+                }
+                speed = Mth.clamp(speed, 0, distance);
+                Vec3 deltaMovement = this.mob.getLookAngle().normalize().scale(speed);
+                this.mob.setDeltaMovement(deltaMovement);
+            } else {
+                if (this.mob instanceof RaidBlimp raidBlimp) {
+                    raidBlimp.isMoving = false;
+                }
+                this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(0.95, 0.95, 0.95));
+            }
+        }else{
+            if (this.mob instanceof RaidBlimp raidBlimp) {
                 raidBlimp.isMoving = false;
             }
-            this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(0.95, 0.95, 0.95));
         }
 
     }

@@ -69,6 +69,11 @@ public class REFallingBlock extends FDProjectile implements AutoSerializable {
     }
 
     @Override
+    public Vec3 getLightProbePosition(float p_20309_) {
+        return this.getPosition(p_20309_).add(0,1.5,0);
+    }
+
+    @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
         if (!level().isClientSide){
