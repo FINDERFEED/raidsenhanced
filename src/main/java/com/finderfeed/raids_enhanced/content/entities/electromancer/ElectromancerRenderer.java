@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced.content.entities.electromancer;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDFreeEntityRenderer;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
+import com.finderfeed.fdlib.util.rendering.renderers.QuadRenderer;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -20,6 +21,7 @@ import org.joml.Vector4f;
 public class ElectromancerRenderer implements FDFreeEntityRenderer<ElectromancerEntity> {
 
     public static final ResourceLocation ELECTRIC_RAY = RaidsEnhanced.location("textures/entities/electromancer_ray.png");
+    public static final ResourceLocation ELECTRIC_BARRIER = RaidsEnhanced.location("textures/entities/electromancer_barrier.png");
 
     @Override
     public void render(ElectromancerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
@@ -71,6 +73,21 @@ public class ElectromancerRenderer implements FDFreeEntityRenderer<Electromancer
             vertex.addVertex(matr, -width/2,0,0).setColor(1f,1f,1f,1f).setUv(0,0.25f * laserFrame).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
 
             matrices.popPose();
+
+
+            matrices.pushPose();
+            matrices.translate(0,electromancerEntity.getBbHeight() / 2,0);
+            var rotation = Minecraft.getInstance().gameRenderer.getMainCamera().rotation();
+            matrices.mulPose(rotation);
+            QuadRenderer.start(vertex = multiBufferSource.getBuffer(RenderType.text(ELECTRIC_BARRIER)))
+                    .renderBack()
+                    .setAnimated(laserFrame,4)
+                    .verticalRendering()
+                    .pose(matrices)
+                    .size(2)
+                    .render();
+            matrices.popPose();
+
         }
     }
 
