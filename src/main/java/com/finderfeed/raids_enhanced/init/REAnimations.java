@@ -63,5 +63,33 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("golem_of_last_resort"));
     });
 
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_WALK_NO_HANDS = ANIMATIONS.register("electromancer_walk_no_hands", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_WALK = ANIMATIONS.register("electromancer_walk", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_ATTACK_1 = ANIMATIONS.register("electromancer_attack_1", ()-> {
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_ATTACK_2 = ANIMATIONS.register("electromancer_attack_2", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_IDLE = ANIMATIONS.register("electromancer_idle", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_RAY_CHARGE = ANIMATIONS.register("electromancer_ray_charge", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_RAY_CAST = ANIMATIONS.register("electromancer_ray_cast", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
 
 }

@@ -89,6 +89,11 @@
 					]
 				},
 				{
+					"name": "lightning_start",
+					"parent": "lightning_staff",
+					"pivot": [6, 13.5, 21]
+				},
+				{
 					"name": "torso",
 					"parent": "main",
 					"pivot": [0, 12, 0]

@@ -6,6 +6,8 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
+import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
+import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerRenderer;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
@@ -48,6 +50,17 @@ public class REClientEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event){
 
         event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
+
+        event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()
+                                .model(REModels.ELECTROMANCER)
+                                .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/electromancer.png")))
+                                .build())
+                        .shouldRender(((electromancerEntity, frustum, v, v1, v2) -> {
+                            return true;
+                        }))
+                        .freeRender(new ElectromancerRenderer())
+                .build());
 
         event.registerEntityRenderer(REEntities.GOLEM_OF_LAST_RESORT.get(), FDEntityRendererBuilder.<GolemOfLastResort>builder()
                         .addLayer(FDEntityRenderLayerOptions.<GolemOfLastResort>builder()

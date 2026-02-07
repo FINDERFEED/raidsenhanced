@@ -1,0 +1,77 @@
+package com.finderfeed.raids_enhanced.content.entities.electromancer;
+
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDFreeEntityRenderer;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
+import com.finderfeed.raids_enhanced.RaidsEnhanced;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
+public class ElectromancerRenderer implements FDFreeEntityRenderer<ElectromancerEntity> {
+
+    public static final ResourceLocation ELECTRIC_RAY = RaidsEnhanced.location("textures/entities/electromancer_ray.png");
+
+    @Override
+    public void render(ElectromancerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
+        if (electromancerEntity.isLaserActive()) {
+
+            Vec3 laserTarget = electromancerEntity.getLaserTarget();
+            Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, ElectromancerEntity.LIGHTNING_START, ElectromancerEntity.getModel(electromancerEntity.level()), v);
+            Vec3 relativeLaserStart = new Vec3(transformation.transformPosition(new Vector3f()));
+            Vec3 laserStart = relativeLaserStart.add(electromancerEntity.getPosition(v));;
+
+            Vec3 between = laserTarget.subtract(laserStart);
+
+
+            double len = between.length();
+
+
+            Matrix4f mat = new Matrix4f();
+            mat.translate((float)relativeLaserStart.x,(float)relativeLaserStart.y,(float)relativeLaserStart.z);
+            FDRenderUtil.applyMovementMatrixRotations(mat,between);
+            Vec3 n = FDMathUtil.getNormalVectorFromLineToPoint(laserStart,between.add(laserStart), Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+
+
+            Matrix4f mt2 = new Matrix4f();
+            FDRenderUtil.applyMovementMatrixRotations(mt2,between);
+            Vector4f up = new Vector4f(0,0,1,1); mt2.transform(up);
+            Vector4f left = new Vector4f(1,0,0,1); mt2.transform(left);
+            Vec3 vup = new Vec3(up.x / up.w,up.y / up.w,up.z / up.w);
+            Vec3 vleft = new Vec3(left.x,left.y,left.z);
+            float angle = (float) FDMathUtil.angleBetweenVectors(n,vup);
+            if (vleft.dot(n) > 0) {
+                mat.rotateY(angle);
+            }else{
+                mat.rotateY(-angle);
+            }
+
+
+            matrices.pushPose();
+            matrices.mulPose(mat);
+
+            VertexConsumer vertex = multiBufferSource.getBuffer(RenderType.text(ELECTRIC_RAY));
+            int laserFrame = electromancerEntity.tickCount % 4;
+
+            float width = 1f;
+
+            Matrix4f matr = matrices.last().pose();
+            vertex.addVertex(matr, width/2,0,0).setColor(1f,1f,1f,1f).setUv(0,0.25f * (laserFrame + 1)).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
+            vertex.addVertex(matr, width/2,(float) len,0).setColor(1f,1f,1f,1f).setUv((float)len / 2f,0.25f * (laserFrame + 1)).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
+            vertex.addVertex(matr, -width/2,(float) len, 0).setColor(1f,1f,1f,1f).setUv((float)len / 2f,0.25f * laserFrame).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
+            vertex.addVertex(matr, -width/2,0,0).setColor(1f,1f,1f,1f).setUv(0,0.25f * laserFrame).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
+
+            matrices.popPose();
+        }
+    }
+
+}

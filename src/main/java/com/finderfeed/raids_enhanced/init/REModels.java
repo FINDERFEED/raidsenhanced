@@ -20,4 +20,6 @@ public class REModels {
 
     public static final Supplier<FDModelInfo> GOLEM_OF_LAST_RESORT = MODELS.register("golem_of_last_resort",()->new FDModelInfo(RaidsEnhanced.location("golem_of_last_resort"),1f));
 
+    public static final Supplier<FDModelInfo> ELECTROMANCER = MODELS.register("electromancer",()->new FDModelInfo(RaidsEnhanced.location("electromancer"),1f));
+
 }

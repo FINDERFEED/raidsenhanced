@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
+import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
@@ -49,7 +50,7 @@ public class REEntities {
             .build("raid_airship_part"));
 
     public static final Supplier<EntityType<GolemOfLastResort>> GOLEM_OF_LAST_RESORT = ENTITIES.register("golem_of_last_resort",()->EntityType.Builder.<GolemOfLastResort>of(
-                    GolemOfLastResort::new, MobCategory.MISC
+                    GolemOfLastResort::new, MobCategory.CREATURE
             )
             .sized(1.4f,2.6f)
             .eyeHeight(2.05f)
@@ -63,6 +64,13 @@ public class REEntities {
             .build("falling_block"));
 
 
+    public static final Supplier<EntityType<ElectromancerEntity>> ELECTROMANCER = ENTITIES.register("electromancer_entity",()->EntityType.Builder.<ElectromancerEntity>of(
+                    ElectromancerEntity::new, MobCategory.CREATURE
+            )
+            .sized(0.6F, 1.95F)
+            .build("electromancer_entity"));
+
+
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event){
         event.put(RAID_BLIMP.get(), RaidBlimp.createMonsterAttributes()
@@ -72,6 +80,11 @@ public class REEntities {
                 .build());
 
         event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
+                .add(Attributes.FOLLOW_RANGE, 30.0)
+                        .add(Attributes.MOVEMENT_SPEED, 0.3f)
+                .build());
+
+        event.put(ELECTROMANCER.get(), IronGolem.createAttributes()
                 .add(Attributes.FOLLOW_RANGE, 30.0)
                         .add(Attributes.MOVEMENT_SPEED, 0.3f)
                 .build());
