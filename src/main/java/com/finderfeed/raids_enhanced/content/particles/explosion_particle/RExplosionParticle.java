@@ -1,33 +1,16 @@
 package com.finderfeed.raids_enhanced.content.particles.explosion_particle;
 
-import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.content.particles.AnimatedSpriteParticle;
+import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.LightTexture;
 import org.jetbrains.annotations.Nullable;
 
-public class RExplosionParticle extends TextureSheetParticle {
+public class RExplosionParticle extends AnimatedSpriteParticle {
 
-    private SpriteSet spriteSet;
-
-    public RExplosionParticle(SpriteSet spriteSet, RExplosionParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd) {
-        super(level, x, y, z, xd, yd, zd);
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.xd = xd;
-        this.yd = yd;
-        this.zd = zd;
-        this.quadSize = options.size;
-        this.lifetime = options.lifetime;
-        this.setSpriteFromAge(spriteSet);
-        this.spriteSet = spriteSet;
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        this.setSpriteFromAge(spriteSet);
+    public RExplosionParticle(SpriteSet spriteSet, SimpleTexturedParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd) {
+        super(spriteSet, options, level, x, y, z, xd, yd, zd);
     }
 
     @Override
@@ -40,7 +23,7 @@ public class RExplosionParticle extends TextureSheetParticle {
         return LightTexture.FULL_BRIGHT;
     }
 
-    public static class Factory implements ParticleProvider<RExplosionParticleOptions>{
+    public static class Factory implements ParticleProvider<SimpleTexturedParticleOptions>{
 
         private SpriteSet spriteSet;
 
@@ -50,7 +33,7 @@ public class RExplosionParticle extends TextureSheetParticle {
 
         @Nullable
         @Override
-        public Particle createParticle(RExplosionParticleOptions options, ClientLevel p_107422_, double p_107423_, double p_107424_, double p_107425_, double p_107426_, double p_107427_, double p_107428_) {
+        public Particle createParticle(SimpleTexturedParticleOptions options, ClientLevel p_107422_, double p_107423_, double p_107424_, double p_107425_, double p_107426_, double p_107427_, double p_107428_) {
             RExplosionParticle rExplosionParticle = new RExplosionParticle(spriteSet, options,p_107422_,p_107423_,p_107424_,p_107425_,p_107426_,p_107427_,p_107428_);
             return rExplosionParticle;
         }

@@ -1,7 +1,8 @@
 package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
-import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
@@ -15,15 +16,39 @@ public class REParticles {
 
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(Registries.PARTICLE_TYPE, RaidsEnhanced.MOD_ID);
 
-    public static final Supplier<ParticleType<RExplosionParticleOptions>> EXPLOSION = PARTICLES.register("explosion", () -> new ParticleType<RExplosionParticleOptions>(true) {
+    public static final Supplier<ParticleType<SimpleTexturedParticleOptions>> EXPLOSION = PARTICLES.register("explosion", () -> new ParticleType<SimpleTexturedParticleOptions>(true) {
         @Override
-        public MapCodec<RExplosionParticleOptions> codec() {
-            return RExplosionParticleOptions.CODEC;
+        public MapCodec<SimpleTexturedParticleOptions> codec() {
+            return SimpleTexturedParticleOptions.mapCodec(this);
         }
 
         @Override
-        public StreamCodec<? super RegistryFriendlyByteBuf, RExplosionParticleOptions> streamCodec() {
-            return RExplosionParticleOptions.STREAM_CODEC;
+        public StreamCodec<? super RegistryFriendlyByteBuf, SimpleTexturedParticleOptions> streamCodec() {
+            return SimpleTexturedParticleOptions.streamCodec(this);
+        }
+    });
+
+    public static final Supplier<ParticleType<SimpleTexturedParticleOptions>> LIGHTNING_EXPLOSION = PARTICLES.register("lightning_explosion", () -> new ParticleType<SimpleTexturedParticleOptions>(true) {
+        @Override
+        public MapCodec<SimpleTexturedParticleOptions> codec() {
+            return SimpleTexturedParticleOptions.mapCodec(this);
+        }
+
+        @Override
+        public StreamCodec<? super RegistryFriendlyByteBuf, SimpleTexturedParticleOptions> streamCodec() {
+            return SimpleTexturedParticleOptions.streamCodec(this);
+        }
+    });
+
+    public static final Supplier<ParticleType<LightningStrikeParticleOptions>> LIGHTNING_STRIKE = PARTICLES.register("lightning_strike", () -> new ParticleType<LightningStrikeParticleOptions>(true) {
+        @Override
+        public MapCodec<LightningStrikeParticleOptions> codec() {
+            return LightningStrikeParticleOptions.lightningMapCodec(this);
+        }
+
+        @Override
+        public StreamCodec<? super RegistryFriendlyByteBuf, LightningStrikeParticleOptions> streamCodec() {
+            return LightningStrikeParticleOptions.lightningStreamCodec(this);
         }
     });
 

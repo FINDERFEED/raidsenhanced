@@ -16,13 +16,13 @@ import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
-import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
+import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
@@ -50,8 +49,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.UUID;
 
 public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastResort>, AutoSerializable {
+
+    public static final UUID TEST_UUID = UUID.fromString("617207e6-5b13-403d-afba-b504589eaf61");
 
     public static final String MAIN_LAYER = "IDLE";
     public static final String WALKING_LAYER = "WALKING";
@@ -72,6 +74,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     private boolean walkingWithHands = true;
 
     protected HeadControllerContainer<GolemOfLastResort> headControllerContainer;
+
 
     public GolemOfLastResort(EntityType<? extends Raider> p_37839_, Level p_37840_) {
         super(p_37839_, p_37840_);
@@ -110,6 +113,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     public void tick() {
         super.tick();
         if (!this.level().isClientSide){
+
+
 
             golemBombsCooldown = Mth.clamp(golemBombsCooldown - 1,0, Integer.MAX_VALUE);
 
@@ -170,9 +175,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
 
         }else{
-
-
-
             this.getHeadControllerContainer().clientTick();
         }
     }
@@ -313,7 +315,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 Vec3 pos = new Vec3(t.transformPosition(new Vector3f())).add(this.golem.position());
 
                 for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, target.level(), pos, 120)){
-                    ((ServerLevel)golem.level()).sendParticles(player, new RExplosionParticleOptions(1.5f,9), true, pos.x, pos.y + 0.75, pos.z,1,0,0,0,0);
+                    ((ServerLevel)golem.level()).sendParticles(player, new SimpleTexturedParticleOptions(REParticles.EXPLOSION.get(),1.5f,9), true, pos.x, pos.y + 0.75, pos.z,1,0,0,0,0);
                 }
                 ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 1.5f);
                 ((ServerLevel)golem.level()).playSound(null, pos.x,pos.y,pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f, 0.75f);

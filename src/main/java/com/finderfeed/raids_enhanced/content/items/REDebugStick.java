@@ -4,6 +4,8 @@ import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
+import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
+import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Mob;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class REDebugStick extends Item {
 
@@ -25,29 +28,10 @@ public class REDebugStick extends Item {
 
         if (!level.isClientSide){
 
-            var entities = FDHelpers.traceEntities(level, player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(5)), 0, (entity)->{
-                return entity instanceof Mob ;
-            });
 
-            if (!entities.isEmpty()){
-                var entity = entities.get(0);
-                if (raidBlimp != null) {
-                    if (entity != raidBlimp) {
-                        raidBlimp = (Mob) entity;
-                    }
-                }else{
-                    raidBlimp = (Mob) entity;
-                }
-            }else {
-                if (raidBlimp != null) {
-                    raidBlimp.getNavigation().moveTo(player.getX(), player.getY(), player.getZ(), 1f);
-//                    RaidBlimpCannonProjectile.summon((RaidBlimp) raidBlimp,player.getEyePosition().add(player.getLookAngle().scale(2)), player.getLookAngle());
-                }
-            }
-
-//            RaidBlimpPart.summon(level, player.getEyePosition(), player.getLookAngle(), RaidBlimpPart.PROPELLER, 400);
-
-
+        }else{
+            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());
+            level.addParticle(new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), player.getLookAngle(), 1f,4), ppos.x,ppos.y,ppos.z,0,0,0);
         }
 
         return super.use(level, player, hand);

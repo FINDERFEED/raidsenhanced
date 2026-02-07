@@ -14,6 +14,8 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBli
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
 import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
+import com.finderfeed.raids_enhanced.content.particles.lightning_explosion.LightningExplosionParticle;
+import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticle;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
@@ -38,6 +40,8 @@ public class REClientEvents {
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event){
         event.registerSpriteSet(REParticles.EXPLOSION.get(), RExplosionParticle.Factory::new);
+        event.registerSpriteSet(REParticles.LIGHTNING_EXPLOSION.get(), LightningExplosionParticle.Provider::new);
+        event.registerSpriteSet(REParticles.LIGHTNING_STRIKE.get(), LightningStrikeParticle.Provider::new);
     }
 
     @SubscribeEvent
