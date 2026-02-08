@@ -27,7 +27,7 @@ public class ElectromancerRenderer implements FDFreeEntityRenderer<Electromancer
     public void render(ElectromancerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
         if (electromancerEntity.isLaserActive()) {
 
-            Vec3 laserTarget = electromancerEntity.getLaserTarget();
+            Vec3 laserTarget = electromancerEntity.getLaserTarget(v);
             Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, ElectromancerEntity.LIGHTNING_START, ElectromancerEntity.getModel(electromancerEntity.level()), v);
             Vec3 relativeLaserStart = new Vec3(transformation.transformPosition(new Vector3f()));
             Vec3 laserStart = relativeLaserStart.add(electromancerEntity.getPosition(v));;

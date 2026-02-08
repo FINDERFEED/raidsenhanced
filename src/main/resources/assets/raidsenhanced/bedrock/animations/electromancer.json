@@ -940,7 +940,7 @@
 							"lerp_mode": "catmullrom"
 						},
 						"0.375": {
-							"post": [-10, 0, -82.5],
+							"post": [-10, 0, "-82.5 + variable.lightning_hand_offset"],
 							"lerp_mode": "catmullrom"
 						},
 						"0.4583": {
@@ -1109,10 +1109,8 @@
 				},
 				"right_hand": {
 					"rotation": {
-						"0.0": {
-							"post": [0, 0, "-90 + variable.lightning_hand_offset"],
-							"lerp_mode": "catmullrom"
-						}
+						"0.0": [0, 0, "-90 + variable.lightning_hand_offset"],
+						"1.0": [0, 0, "-90 + variable.lightning_hand_offset"]
 					}
 				},
 				"right_hand_1": {
