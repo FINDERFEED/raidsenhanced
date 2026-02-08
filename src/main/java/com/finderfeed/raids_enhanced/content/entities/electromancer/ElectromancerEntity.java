@@ -6,6 +6,8 @@ import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadControllerContainer;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
+import com.finderfeed.fdlib.systems.shake.FDShakeData;
+import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.client.particles.BoneAttachedParticles;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
@@ -13,6 +15,7 @@ import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOpt
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -20,6 +23,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -60,7 +65,7 @@ public class ElectromancerEntity extends FDRaider {
         this.lookControl = new LookControl(this) {
             @Override
             protected boolean resetXRotOnTick() {
-                return !((ElectromancerEntity)this.mob).isLaserActive();
+                return false;
             }
         };
         if (level().isClientSide){
@@ -106,7 +111,7 @@ public class ElectromancerEntity extends FDRaider {
         if (!level().isClientSide){
             this.controlIdleAndWalking();
         }else{
-
+            this.boneAttachedParticles.clientTick(this.position());
         }
     }
 
@@ -222,6 +227,16 @@ public class ElectromancerEntity extends FDRaider {
         return p_24957_ + f1;
     }
 
+    private void triggerPrepareParticle(){
+        var entityData = this.getEntityData();
+        byte b = entityData.get(BYTE_PARTICLE_TRIGGER);
+        if (b == 0){
+            entityData.set(BYTE_PARTICLE_TRIGGER, (byte)1);
+        }else{
+            entityData.set(BYTE_PARTICLE_TRIGGER, (byte)0);
+        }
+    }
+
     public static class LaserAttackGoal extends Goal {
 
         private ElectromancerEntity entity;
@@ -233,9 +248,22 @@ public class ElectromancerEntity extends FDRaider {
         }
 
         @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
         public void start() {
             super.start();
             useTick = 0;
+            this.entity.getNavigation().stop();
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST_STOP)
+                    .build());
         }
 
         @Override
@@ -243,35 +271,72 @@ public class ElectromancerEntity extends FDRaider {
             super.tick();
             var target = entity.getTarget();
             if (target == null) return;
-
-            this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST).build());
-
             this.entity.getNavigation().stop();
 
+            int stickChargeDuration = 20;
 
+            int rayStartTime = 8;
+            int rayDuration = 200;
+
+            boolean laserState = false;
+
+            if (useTick < rayStartTime){
+                this.entity.getLookControl().setLookAt(target);
+                this.entity.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
+            }
+
+
+            if (useTick == 0){
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_CHARGE_STICK)
+                        .build());
+
+            } else if (useTick == 10){
+
+                LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.entity.level());
+                var t = this.entity.getModelPartPosition(this.entity, LIGHTNING_START, getModel(this.entity.level()));
+                Vec3 lpos = new Vec3(t).add(this.entity.position());
+                lightningBolt.setPos(lpos);
+                lightningBolt.setVisualOnly(true);
+                PositionedScreenShakePacket.send((ServerLevel) entity.level(), FDShakeData.builder()
+                        .frequency(10f)
+                        .amplitude(10f)
+                        .inTime(0)
+                        .stayTime(0)
+                        .outTime(6)
+                        .build(),lpos,30);
+                this.entity.level().addFreshEntity(lightningBolt);
+
+            } else if (useTick == stickChargeDuration){
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CHARGE)
+                        .build());
+                this.entity.triggerPrepareParticle();
+            } else if (useTick > rayStartTime + stickChargeDuration && useTick < rayStartTime + rayDuration + stickChargeDuration){
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST)
+                        .build());
+
+                this.rotateToTarget(target);
+                laserState = true;
+            }else if (useTick == rayStartTime + rayDuration + stickChargeDuration){
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST_STOP)
+                        .build());
+            }
+
+            this.entity.setLaserState(laserState);
+
+            useTick++;
+        }
+
+        private void rotateToTarget(LivingEntity target){
             Vec3 position = target.position().add(0,target.getBbHeight() / 2, 0);
 
             Vec3 thisPos = this.entity.position().add(0,this.entity.getBbHeight() / 2,0);
             Vec3 between = position.subtract(thisPos);
 
-//            float yRot = this.entity.getYRot();
-//            float targetYRot = (float) (Mth.atan2(between.z, between.x) * 180.0F / (float) Math.PI) - 90.0F;
-//
             var distance = between.length();
             float circleLength = (float) (distance * FDMathUtil.FPI * 2);
-            float distancePerTick = 0.5f;
+            float distancePerTick = 0.25f;
             float p = distancePerTick / circleLength;
             float anglePerTick = 360 * p;
-
-
-//            float newYRot = this.entity.rotateTowards(yRot, targetYRot, anglePerTick);
-//
-//            double d4 = Math.sqrt(between.x * between.x + between.z * between.z);
-//            float targetXRot = (float) (-(Mth.atan2(between.y, d4) * 180.0F / (float) Math.PI));
-//            float currentXRot = this.entity.getXRot();
-//            float newXRot = this.entity.rotateTowards(currentXRot, targetXRot, anglePerTick);
-//            this.entity.setYRot(newYRot);
-//            this.entity.setXRot(newXRot);
 
 
             this.entity.getLookControl().setLookAt(target);
@@ -289,7 +354,6 @@ public class ElectromancerEntity extends FDRaider {
 
             this.entity.setLaserTarget(laserEnd);
             this.entity.setLaserState(true);
-
         }
 
 
@@ -300,7 +364,7 @@ public class ElectromancerEntity extends FDRaider {
 
         @Override
         public boolean canContinueToUse() {
-            return useTick < 100 && this.entity.getTarget() != null;
+            return useTick < 250 && this.entity.getTarget() != null;
         }
 
     }

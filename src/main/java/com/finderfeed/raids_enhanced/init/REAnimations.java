@@ -91,5 +91,13 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("electromancer"));
     });
 
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_RAY_CAST_STOP = ANIMATIONS.register("electromancer_ray_cast_stop", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_CHARGE_STICK = ANIMATIONS.register("electromancer_charge_stick", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
 
 }
