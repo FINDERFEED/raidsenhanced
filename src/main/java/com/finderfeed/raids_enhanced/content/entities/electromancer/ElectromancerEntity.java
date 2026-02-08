@@ -262,6 +262,7 @@ public class ElectromancerEntity extends FDRaider {
         @Override
         public void stop() {
             super.stop();
+            this.entity.setLaserState(false);
             this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST_STOP)
                     .build());
         }

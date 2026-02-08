@@ -6,6 +6,7 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
+import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningRenderer;
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerRenderer;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
@@ -15,6 +16,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
+import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.BallLightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_explosion.LightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticle;
@@ -44,12 +46,14 @@ public class REClientEvents {
         event.registerSpriteSet(REParticles.EXPLOSION.get(), RExplosionParticle.Factory::new);
         event.registerSpriteSet(REParticles.LIGHTNING_EXPLOSION.get(), LightningExplosionParticle.Provider::new);
         event.registerSpriteSet(REParticles.LIGHTNING_STRIKE.get(), LightningStrikeParticle.Provider::new);
+        event.registerSpriteSet(REParticles.BALL_LIGHTNING_EXPLOSION.get(), BallLightningExplosionParticle.Provider::new);
     }
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event){
 
         event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
+        event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
 
         event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()

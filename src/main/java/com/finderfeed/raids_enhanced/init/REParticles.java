@@ -40,6 +40,18 @@ public class REParticles {
         }
     });
 
+    public static final Supplier<ParticleType<SimpleTexturedParticleOptions>> BALL_LIGHTNING_EXPLOSION = PARTICLES.register("ball_lightning_explosion", () -> new ParticleType<SimpleTexturedParticleOptions>(true) {
+        @Override
+        public MapCodec<SimpleTexturedParticleOptions> codec() {
+            return SimpleTexturedParticleOptions.mapCodec(this);
+        }
+
+        @Override
+        public StreamCodec<? super RegistryFriendlyByteBuf, SimpleTexturedParticleOptions> streamCodec() {
+            return SimpleTexturedParticleOptions.streamCodec(this);
+        }
+    });
+
     public static final Supplier<ParticleType<LightningStrikeParticleOptions>> LIGHTNING_STRIKE = PARTICLES.register("lightning_strike", () -> new ParticleType<LightningStrikeParticleOptions>(true) {
         @Override
         public MapCodec<LightningStrikeParticleOptions> codec() {

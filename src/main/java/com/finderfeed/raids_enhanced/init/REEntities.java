@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
+import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
@@ -62,6 +63,13 @@ public class REEntities {
             )
             .sized(0.2f,0.2f)
             .build("falling_block"));
+
+
+    public static final Supplier<EntityType<BallLightningEntity>> BALL_LIGHTNING = ENTITIES.register("ball_lightning",()->EntityType.Builder.<BallLightningEntity>of(
+                    BallLightningEntity::new, MobCategory.MISC
+            )
+            .sized(0.5f,0.5f)
+            .build("ball_lightning"));
 
 
     public static final Supplier<EntityType<ElectromancerEntity>> ELECTROMANCER = ENTITIES.register("electromancer_entity",()->EntityType.Builder.<ElectromancerEntity>of(
