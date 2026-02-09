@@ -53,8 +53,6 @@ import java.util.UUID;
 
 public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastResort>, AutoSerializable {
 
-    public static final UUID TEST_UUID = UUID.fromString("617207e6-5b13-403d-afba-b504589eaf61");
-
     public static final String MAIN_LAYER = "IDLE";
     public static final String WALKING_LAYER = "WALKING";
     public static final String WHIRLWIND_LAYER = "WHIRLWIND";
