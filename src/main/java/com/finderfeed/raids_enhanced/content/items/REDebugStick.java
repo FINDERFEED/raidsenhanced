@@ -1,11 +1,13 @@
 package com.finderfeed.raids_enhanced.content.items;
 
 import com.finderfeed.fdlib.FDHelpers;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,11 +31,13 @@ public class REDebugStick extends Item {
 
         if (!level.isClientSide){
 
-            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
+//            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
+
+
 
         }else{
-//            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());
-//            level.addParticle(new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), player.getLookAngle(), 1f,4), ppos.x,ppos.y,ppos.z,0,0,0);
+            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());
+            level.addParticle(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), player.getLookAngle(), 4, 0,3f,false), ppos.x,ppos.y,ppos.z,0,0,0);
         }
 
         return super.use(level, player, hand);

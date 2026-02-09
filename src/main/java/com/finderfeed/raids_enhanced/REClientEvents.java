@@ -20,6 +20,7 @@ import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.
 import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_explosion.LightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticle;
+import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticle;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
@@ -47,6 +48,7 @@ public class REClientEvents {
         event.registerSpriteSet(REParticles.LIGHTNING_EXPLOSION.get(), LightningExplosionParticle.Provider::new);
         event.registerSpriteSet(REParticles.LIGHTNING_STRIKE.get(), LightningStrikeParticle.Provider::new);
         event.registerSpriteSet(REParticles.BALL_LIGHTNING_EXPLOSION.get(), BallLightningExplosionParticle.Provider::new);
+        event.registerSpriteSet(REParticles.ELECTRIC_SLASH.get(), SlashParticle.Provider::new);
     }
 
     @SubscribeEvent

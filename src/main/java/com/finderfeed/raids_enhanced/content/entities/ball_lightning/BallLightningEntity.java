@@ -8,6 +8,7 @@ import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
@@ -61,20 +62,27 @@ public class BallLightningEntity extends Entity {
         var owner = this.getOwner();
 
         if (result.getType() != HitResult.Type.MISS){
-            this.explode(owner);
+            this.explode(owner, this.position());
         }else {
             var entities = FDHelpers.traceEntities(level(), start, end, 0.1f, (entity) -> {
                 return entity instanceof LivingEntity livingEntity && entity != owner;
             });
             if (!entities.isEmpty()) {
-                this.explode(owner);
+                var entity = entities.get(random.nextInt(entities.size()));
+                Vec3 bbCenter = entity.getBoundingBox().getBottomCenter();
+                Vec3 pos = new Vec3(
+                        bbCenter.x,
+                        Mth.clamp(this.position().y, bbCenter.y, bbCenter.y + entity.getBbHeight()),
+                        bbCenter.z
+                );
+                this.explode(owner, pos);
             }
         }
     }
 
-    private void explode(LivingEntity owner){
+    private void explode(LivingEntity owner, Vec3 explodePos){
         if (level() instanceof ServerLevel serverLevel){
-            serverLevel.sendParticles(new SimpleTexturedParticleOptions(REParticles.BALL_LIGHTNING_EXPLOSION.get(), 1f, 3), this.getX(),this.getY(),this.getZ(),1,0,0,0,0);
+            serverLevel.sendParticles(new SimpleTexturedParticleOptions(REParticles.BALL_LIGHTNING_EXPLOSION.get(), 1f, 3), explodePos.x,explodePos.y,explodePos.z,1,0,0,0,0);
         }
         DamageSources damageSources = level().damageSources();
         DamageSource source;
@@ -86,7 +94,7 @@ public class BallLightningEntity extends Entity {
             damage = 5;
             source = damageSources.generic();
         }
-        for (var entity : FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(), this.position(), 2f, e -> e != owner)) {
+        for (var entity : FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(),explodePos, 2f, e -> e != owner)) {
             entity.hurt(source, damage);
         }
         this.setRemoved(RemovalReason.DISCARDED);
@@ -106,14 +114,16 @@ public class BallLightningEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        if (!tag.contains("owner")){
+        if (tag.contains("owner")){
             this.uuid = tag.getUUID("owner");
         }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
-        tag.putUUID("owner", this.uuid);
+        if (this.uuid != null) {
+            tag.putUUID("owner", this.uuid);
+        }
     }
 
 }

@@ -1,25 +1,31 @@
 package com.finderfeed.raids_enhanced.content.entities.electromancer;
 
 import com.finderfeed.fdlib.init.FDEDataSerializers;
+import com.finderfeed.fdlib.nbt.AutoSerializable;
+import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.fdlib.systems.bedrock.animations.Animation;
 import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
-import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadControllerContainer;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.systems.shake.FDShakeData;
 import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
+import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.client.particles.BoneAttachedParticles;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
+import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -36,12 +42,13 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class ElectromancerEntity extends FDRaider {
+public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
 
     public static final String MAIN_LAYER = "IDLE";
@@ -53,12 +60,17 @@ public class ElectromancerEntity extends FDRaider {
     public static final EntityDataAccessor<Boolean> LASER_ACTIVE = SynchedEntityData.defineId(ElectromancerEntity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Vec3> LASER_TARGET = SynchedEntityData.defineId(ElectromancerEntity.class, FDEDataSerializers.VEC3.get());
 
+    @SerializableField
+    private int laserCooldown = 300;
+
     private Vec3 laserTargetOld;
 
     private static FDModel clientModel;
     private static FDModel serverModel;
 
     private BoneAttachedParticles boneAttachedParticles;
+
+    public boolean isUsingElectricRay = false;
 
     public ElectromancerEntity(EntityType<? extends Raider> p_37839_, Level p_37840_) {
         super(p_37839_, p_37840_);
@@ -97,8 +109,19 @@ public class ElectromancerEntity extends FDRaider {
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
 
 
-        this.goalSelector.addGoal(4, new LaserAttackGoal(this));
-        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
+        this.goalSelector.addGoal(3, new BallLightningRangedAttack(this, 20));
+//        this.goalSelector.addGoal(4, new LaserAttackGoal(this));
+        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1){
+            @Override
+            public boolean canUse() {
+                return super.canUse() && ElectromancerEntity.this.getTarget() == null;
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && ElectromancerEntity.this.getTarget() == null;
+            }
+        });
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
@@ -109,7 +132,9 @@ public class ElectromancerEntity extends FDRaider {
     public void tick() {
         super.tick();
         if (!level().isClientSide){
+            this.laserCooldown = Mth.clamp(laserCooldown - 1,0, Integer.MAX_VALUE);
             this.controlIdleAndWalking();
+            this.setYRot(this.yBodyRot);
         }else{
             this.boneAttachedParticles.clientTick(this.position());
         }
@@ -184,6 +209,18 @@ public class ElectromancerEntity extends FDRaider {
     }
 
     @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.autoLoad(tag);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        this.autoSave(tag);
+    }
+
+    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(LASER_TARGET, Vec3.ZERO);
@@ -237,6 +274,110 @@ public class ElectromancerEntity extends FDRaider {
         }
     }
 
+    public static class BallLightningRangedAttack extends Goal{
+
+        private ElectromancerEntity entity;
+
+        private int attackTick = 0;
+        private float attackRange;
+        private boolean animType;
+
+        public BallLightningRangedAttack(ElectromancerEntity electromancerEntity, float attackRange){
+            this.entity = electromancerEntity;
+            this.attackRange = attackRange;
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            attackTick = 0;
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            attackTick = 0;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            var target = this.entity.getTarget();
+            if (target == null) return;
+
+            this.entity.getLookControl().setLookAt(target);
+            this.entity.lookAt(EntityAnchorArgument.Anchor.EYES, target.position());
+            if (attackTick == 0){
+
+                animType = entity.random.nextBoolean();
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(animType ? REAnimations.ELECTROMANCER_ATTACK_1 : REAnimations.ELECTROMANCER_ATTACK_2)
+                                .important()
+                        .build());
+            }else if (attackTick == 5){
+
+                Vec3 pos = this.entity.position();
+
+                Vec3 forward = this.entity.getForward().multiply(1,0,1).normalize();
+                Vec3 left = forward.yRot(FDMathUtil.FPI / 2);
+
+                Vec3 particlePos = this.entity.position();
+                Vec3 particleDirection = forward.add(0,-0.1,0);
+                float particleTilt = 0;
+                if (this.animType){
+                    particlePos = pos
+                            .add(left.scale(-0.5f))
+                            .add(forward.scale(0.5f))
+                            .add(0, this.entity.getBbHeight() / 1.5,0);
+                    particleTilt = FDMathUtil.FPI / 12f;
+                }else{
+                    particlePos = pos
+                            .add(left.scale(0.1f))
+                            .add(forward.scale(0.75f))
+                            .add(0, this.entity.getBbHeight() / 1.5,0);
+                    particleTilt = -FDMathUtil.FPI / 12f;
+                }
+                ServerLevel serverLevel = (ServerLevel) this.entity.level();
+                SlashParticleOptions options = new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), particleDirection, 3, particleTilt, 3, this.animType);
+                for (var player : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, this.entity.level(), this.entity.position(), 60f)){
+                    serverLevel.sendParticles(player, options, true, particlePos.x, particlePos.y, particlePos.z, 1, 0,0,0,0);
+
+                }
+
+            }else if (attackTick == 8){
+                Vec3 targetPos = target.position().add(0,target.getEyeHeight() * 0.9f, 0);
+                Vec3 summonPos = this.entity.position().add(0,this.entity.getBbHeight() * 0.6f,0).add(this.entity.getLookAngle().scale(0.25));
+                Vec3 between = targetPos.subtract(summonPos);
+
+                float difficultyMultiplier = (float)(14 - this.entity.level().getDifficulty().getId() * 4);
+                Vec3 speed = between.normalize()
+                        .add(
+                                this.entity.random.triangle(0.0, 0.0172275 * difficultyMultiplier / 2),
+                                this.entity.random.triangle(0.0, 0.0172275 * difficultyMultiplier / 2),
+                                this.entity.random.triangle(0.0, 0.0172275 * difficultyMultiplier / 2)
+                        )
+                        .scale(2f);
+                BallLightningEntity.summon(this.entity, this.entity.level(), summonPos, speed);
+            }
+
+            attackTick++;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !this.entity.isUsingElectricRay && this.entity.getTarget() != null && this.entity.distanceTo(this.entity.getTarget()) <= attackRange && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.entity.getTarget() != null && this.attackTick < 25;
+        }
+    }
+
     public static class LaserAttackGoal extends Goal {
 
         private ElectromancerEntity entity;
@@ -257,6 +398,7 @@ public class ElectromancerEntity extends FDRaider {
             super.start();
             useTick = 0;
             this.entity.getNavigation().stop();
+            this.entity.isUsingElectricRay = true;
         }
 
         @Override
@@ -265,11 +407,16 @@ public class ElectromancerEntity extends FDRaider {
             this.entity.setLaserState(false);
             this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST_STOP)
                     .build());
+            this.entity.isUsingElectricRay = false;
+            this.entity.laserCooldown = 200;
         }
 
         @Override
         public void tick() {
             super.tick();
+
+            this.entity.isUsingElectricRay = true;
+
             var target = entity.getTarget();
             if (target == null) return;
             this.entity.getNavigation().stop();
@@ -360,7 +507,7 @@ public class ElectromancerEntity extends FDRaider {
 
         @Override
         public boolean canUse() {
-            return this.entity.getTarget() != null;
+            return this.entity.laserCooldown == 0 && this.entity.getTarget() != null && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
         }
 
         @Override

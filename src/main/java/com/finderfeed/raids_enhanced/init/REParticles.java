@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced.init;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
@@ -61,6 +62,18 @@ public class REParticles {
         @Override
         public StreamCodec<? super RegistryFriendlyByteBuf, LightningStrikeParticleOptions> streamCodec() {
             return LightningStrikeParticleOptions.lightningStreamCodec(this);
+        }
+    });
+
+    public static final Supplier<ParticleType<SlashParticleOptions>> ELECTRIC_SLASH = PARTICLES.register("electric_slash", () -> new ParticleType<SlashParticleOptions>(true) {
+        @Override
+        public MapCodec<SlashParticleOptions> codec() {
+            return SlashParticleOptions.codec(this);
+        }
+
+        @Override
+        public StreamCodec<? super RegistryFriendlyByteBuf, SlashParticleOptions> streamCodec() {
+            return SlashParticleOptions.streamCodec(this);
         }
     });
 
