@@ -60,6 +60,8 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
     public static final EntityDataAccessor<Boolean> LASER_ACTIVE = SynchedEntityData.defineId(ElectromancerEntity.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<Vec3> LASER_TARGET = SynchedEntityData.defineId(ElectromancerEntity.class, FDEDataSerializers.VEC3.get());
 
+    private boolean rotatingFromBodyRot = true;
+
     @SerializableField
     private int laserCooldown = 300;
 
@@ -86,6 +88,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
             this.boneAttachedParticles = new BoneAttachedParticles(getModel(level()), this, LIGHTNING_START, Vec3.ZERO);
         }
         this.getModelSystem().getAnimationSystem().setAnimationsApplyListener(this::onAnimationsApplied);
+        this.moveControl = new ElectromancerMoveControl(this);
     }
 
     public static FDModel getModel(Level level){
@@ -136,7 +139,9 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         if (!level().isClientSide){
             this.laserCooldown = Mth.clamp(laserCooldown - 1,0, Integer.MAX_VALUE);
             this.controlIdleAndWalking();
-            this.setYRot(this.yBodyRot);
+            if (rotatingFromBodyRot) {
+                this.setYRot(this.yBodyRot);
+            }
         }else{
             this.boneAttachedParticles.clientTick(this.position());
         }
@@ -163,15 +168,6 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
                     this.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_WALK)
                             .build());
                 }
-
-//                if (!this.walkingWithHands){
-//                    this.getAnimationSystem().startAnimation(WALKING_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_WALK_NO_HANDS)
-//                            .setToNullTransitionTime(10)
-//                            .build());
-//                }else{
-//                    this.getAnimationSystem().stopAnimation(WALKING_LAYER);
-//                }
-
 
             } else {
                 this.getAnimationSystem().stopAnimation(WALKING_LAYER);
@@ -456,6 +452,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
             useTick = 0;
             this.entity.getNavigation().stop();
             this.entity.isUsingElectricRay = true;
+
         }
 
         @Override
@@ -466,6 +463,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
                     .build());
             this.entity.isUsingElectricRay = false;
             this.entity.laserCooldown = 200;
+            this.entity.rotatingFromBodyRot = false;
         }
 
         @Override
@@ -478,6 +476,10 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
             if (target == null) return;
             this.entity.getNavigation().stop();
 
+            if (this.entity.getMoveControl() instanceof ElectromancerMoveControl control){
+                control.cancelMovement();
+            }
+
             int stickChargeDuration = 20;
 
             int rayStartTime = 8;
@@ -485,9 +487,15 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
             boolean laserState = false;
 
+            this.entity.rotatingFromBodyRot = false;
+
             if (useTick < rayStartTime){
                 this.entity.getLookControl().setLookAt(target);
                 this.entity.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
+                this.entity.yBodyRot = this.entity.getYRot();
+                this.entity.setSpeed(0);
+                this.entity.setZza(0);
+                this.entity.setXxa(0);
             }
 
 
