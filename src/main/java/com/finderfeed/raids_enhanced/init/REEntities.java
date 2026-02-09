@@ -9,6 +9,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
+import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -62,6 +63,13 @@ public class REEntities {
                     REFallingBlock::new, MobCategory.MISC
             )
             .sized(0.2f,0.2f)
+            .build("falling_block"));
+
+
+    public static final Supplier<EntityType<VerticalLightningStrikeAttack>> VERTICAL_LIGHTNING = ENTITIES.register("vertical_lightning_strike_attack",()->EntityType.Builder.<VerticalLightningStrikeAttack>of(
+                    VerticalLightningStrikeAttack::new, MobCategory.MISC
+            )
+            .sized(0.25f,0.25f)
             .build("falling_block"));
 
 

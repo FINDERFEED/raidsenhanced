@@ -6,6 +6,7 @@ import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightni
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
+import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.init.REParticles;
@@ -33,11 +34,11 @@ public class REDebugStick extends Item {
 
 //            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
 
-
+            VerticalLightningStrikeAttack.summon(player, player.position());
 
         }else{
-            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());
-            level.addParticle(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), player.getLookAngle(), 4, 0,3f,false), ppos.x,ppos.y,ppos.z,0,0,0);
+//            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());
+//            level.addParticle(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), player.getLookAngle(), 4, 0,3f,false), ppos.x,ppos.y,ppos.z,0,0,0);
         }
 
         return super.use(level, player, hand);

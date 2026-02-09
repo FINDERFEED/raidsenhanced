@@ -16,11 +16,13 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
+import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttackRenderer;
 import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.BallLightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_explosion.LightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticle;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticle;
+import com.finderfeed.raids_enhanced.content.particles.vertical_lightning.VerticalLightningParticle;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
@@ -49,12 +51,14 @@ public class REClientEvents {
         event.registerSpriteSet(REParticles.LIGHTNING_STRIKE.get(), LightningStrikeParticle.Provider::new);
         event.registerSpriteSet(REParticles.BALL_LIGHTNING_EXPLOSION.get(), BallLightningExplosionParticle.Provider::new);
         event.registerSpriteSet(REParticles.ELECTRIC_SLASH.get(), SlashParticle.Provider::new);
+        event.registerSpriteSet(REParticles.VERTICAL_LIGHTNING.get(), VerticalLightningParticle.Provider::new);
     }
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event){
 
         event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
+        event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
 
         event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
