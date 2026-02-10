@@ -2,6 +2,7 @@ package com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike
 
 import com.finderfeed.fdlib.systems.shake.FDShakeData;
 import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
+import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
@@ -13,6 +14,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -64,6 +68,28 @@ public class VerticalLightningStrikeAttack extends Entity {
 
     private void damageEntities(){
 
+        ServerLevel level = (ServerLevel) this.level();
+
+        float damage = 10;
+        Entity ownerEntity;
+
+        if (this.owner != null) {
+            ownerEntity = level.getEntity(owner);
+            if (ownerEntity instanceof LivingEntity livingEntity && !(ownerEntity instanceof Player)){
+                damage = (float) livingEntity.getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.5f;
+            }
+        } else {
+            ownerEntity = null;
+        }
+
+        Vec3 cylinderStart = this.position().add(0,-1,0);
+        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level, cylinderStart, 5,1.5f, e -> e != ownerEntity)) {
+            if (ownerEntity instanceof LivingEntity livingEntity) {
+                entity.hurt(this.level().damageSources().mobAttack(livingEntity), (float) damage);
+            }else{
+                entity.hurt(this.level().damageSources().generic(), (float) damage);
+            }
+        }
         this.remove(RemovalReason.DISCARDED);
     }
 
