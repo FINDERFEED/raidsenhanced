@@ -1,0 +1,111 @@
+package com.finderfeed.raids_enhanced.content.items.electromancer_staff;
+
+import com.finderfeed.fdlib.FDLibCalls;
+import com.finderfeed.fdlib.systems.shake.FDShakeData;
+import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
+import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
+import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
+import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
+import com.finderfeed.raids_enhanced.init.REParticles;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+
+public class ElectromancerStaff extends Item {
+
+    public ElectromancerStaff(Properties props) {
+        super(props);
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (!level.isClientSide){
+
+            Vec3 lookAngle = player.getLookAngle();
+            if (!this.usesAsLightning(player)){
+                player.getCooldowns().addCooldown(this, 40);
+                PositionedScreenShakePacket.send((ServerLevel)level, FDShakeData.builder()
+                        .frequency(5f)
+                        .amplitude(2.5f)
+                        .inTime(0)
+                        .stayTime(0)
+                        .outTime(3)
+                        .build(),player.position(),10);
+                this.damageAndPushAwayEntities(player);
+                this.castParticles(player);
+                ElectromancerStaffCastEntity.summon(player, player.position());
+            }else{
+                player.getCooldowns().addCooldown(this, 10);
+                BallLightningEntity.summon(player, level, player.getEyePosition().add(lookAngle), lookAngle.scale(2));
+            }
+
+        }
+        return super.use(level, player, hand);
+    }
+
+    public boolean usesAsLightning(Player player){
+
+        var lookAngle = player.getLookAngle();
+        double dot = lookAngle.dot(new Vec3(0,1,0));
+
+        if (player.onGround() && dot < -0.75){
+            ClipContext clipContext = new ClipContext(player.getEyePosition(), player.getEyePosition().add(lookAngle.scale(3)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            var res = player.level().clip(clipContext);
+            if (res.getType() != HitResult.Type.MISS){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void damageAndPushAwayEntities(LivingEntity caster){
+        var damage = 10;
+
+        Vec3 cylinderStart = caster.position().add(0,-2,0);
+        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, caster.level(), cylinderStart, 3 + caster.getBbHeight(),2, e -> e != caster)){
+            entity.hurt(caster.level().damageSources().mobAttack(caster), (float) (damage * 1.5f));
+            Vec3 between = entity.position().subtract(caster.position());
+            Vec3 pushVector = between.normalize().scale(2f);
+            if (entity.onGround()){
+                pushVector = pushVector.add(0,0.25,0);
+            }
+            if (entity instanceof ServerPlayer serverPlayer){
+                FDLibCalls.setServerPlayerSpeed(serverPlayer, pushVector);
+                serverPlayer.hasImpulse = true;
+            }else{
+                entity.setDeltaMovement(pushVector);
+                entity.hasImpulse = true;
+            }
+        }
+
+    }
+
+    private void castParticles(LivingEntity caster){
+        Vec3 lpos = caster.position().add(caster.getForward().multiply(1,0,1).normalize().scale(0.75f));
+        for (var dir : new HorizontalCircleRandomDirections(caster.level().random, 6, 0)) {
+            Vec3 direction = dir.add(0, 0.5, 0);
+            Vec3 pos = lpos.add(direction.multiply(0.4, 0.25, 0.4));
+            for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, caster.level(), caster.position(), 40)) {
+
+                ((ServerLevel)caster.level()).sendParticles(serverPlayer,
+                        new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), direction, 1f, 4),
+                        true, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+            }
+        }
+    }
+
+
+}

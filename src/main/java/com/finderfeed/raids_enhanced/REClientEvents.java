@@ -5,6 +5,7 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.h
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRenderLayerOptions;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
+import com.finderfeed.fdlib.util.client.NullEntityRenderer;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningRenderer;
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
@@ -60,6 +61,7 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
         event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
+        event.registerEntityRenderer(REEntities.ELECTROMANCER_STAFF_CAST_ENTITY.get(), NullEntityRenderer::new);
 
         event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()

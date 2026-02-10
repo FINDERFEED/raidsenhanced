@@ -10,6 +10,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
+import com.finderfeed.raids_enhanced.content.items.electromancer_staff.ElectromancerStaffCastEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -71,6 +72,13 @@ public class REEntities {
             )
             .sized(0.25f,0.25f)
             .build("falling_block"));
+
+
+    public static final Supplier<EntityType<ElectromancerStaffCastEntity>> ELECTROMANCER_STAFF_CAST_ENTITY = ENTITIES.register("electromancer_staff_cast_entity",()->EntityType.Builder.<ElectromancerStaffCastEntity>of(
+                    ElectromancerStaffCastEntity::new, MobCategory.MISC
+            )
+            .sized(0.25f,0.25f)
+            .build("electromancer_staff_cast_entity"));
 
 
     public static final Supplier<EntityType<BallLightningEntity>> BALL_LIGHTNING = ENTITIES.register("ball_lightning",()->EntityType.Builder.<BallLightningEntity>of(

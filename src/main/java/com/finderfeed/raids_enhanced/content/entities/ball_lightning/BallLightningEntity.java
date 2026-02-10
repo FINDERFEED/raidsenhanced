@@ -43,6 +43,9 @@ public class BallLightningEntity extends Entity {
     public void tick() {
         super.tick();
         if (!level().isClientSide){
+            if (tickCount > 1000){
+                this.remove(RemovalReason.DISCARDED);
+            }
             var owner = this.getOwner();
             if (owner == null){
                 this.remove(RemovalReason.DISCARDED);
