@@ -62,6 +62,7 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
         event.registerEntityRenderer(REEntities.ELECTROMANCER_STAFF_CAST_ENTITY.get(), NullEntityRenderer::new);
+        event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), NullEntityRenderer::new);
 
         event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()

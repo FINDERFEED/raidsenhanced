@@ -5,6 +5,7 @@ import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightni
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
+import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
@@ -21,6 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.Random;
 import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID)
@@ -95,13 +97,28 @@ public class REEntities {
             .build("electromancer_entity"));
 
 
+    public static final Supplier<EntityType<PlayerBlimpEntity>> PLAYER_BLIMP = ENTITIES.register("player_blimp",()->EntityType.Builder.<PlayerBlimpEntity>of(
+                    PlayerBlimpEntity::new, MobCategory.MISC
+            )
+            .sized(1.375F, 0.5625F)
+            .eyeHeight(0.5625F)
+            .clientTrackingRange(10)
+            .build("electromancer_entity"));
+
+
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event){
+        Random random = new Random();
+        random.nextFloat(1, 2);
         event.put(RAID_BLIMP.get(), RaidBlimp.createMonsterAttributes()
                         .add(Attributes.MAX_HEALTH, 200)
                         .add(Attributes.FOLLOW_RANGE, 40.0)
                         .add(Attributes.FLYING_SPEED, 0.3f)
                 .build());
+//        event.put(PLAYER_BLIMP.get(), RaidBlimp.createMonsterAttributes()
+//                        .add(Attributes.MAX_HEALTH, 200)
+//                        .add(Attributes.FLYING_SPEED, 0.3f)
+//                .build());
 
         event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
                 .add(Attributes.FOLLOW_RANGE, 30.0)

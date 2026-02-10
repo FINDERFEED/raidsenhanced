@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -93,7 +94,11 @@ public class BallLightningEntity extends Entity {
         if (owner != null) {
             damage = (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
             source = damageSources.mobAttack(owner);
+            if (owner instanceof Player player){
+                damage = 5;
+            }
         } else {
+
             damage = 5;
             source = damageSources.generic();
         }

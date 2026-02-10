@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.finderfeed.raids_enhanced.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "raidsenhanced.refmap.json",
+  "mixins": [
+    "PlayerMixin"
+  ],
+  "minVersion": "0.8",
+  "client": [
+    "LocalPlayerMixin"
+  ]
+}
