@@ -99,5 +99,9 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("electromancer"));
     });
 
+    public static DeferredHolder<Animation,Animation> ELECTROMANCER_LIGHTNINGS_CAST = ANIMATIONS.register("electromancer_lightnings_cast", ()->{
+        return new Animation(RaidsEnhanced.location("electromancer"));
+    });
+
 
 }

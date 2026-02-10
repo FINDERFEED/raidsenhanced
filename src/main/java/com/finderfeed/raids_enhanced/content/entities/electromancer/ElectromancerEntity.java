@@ -14,12 +14,16 @@ import com.finderfeed.fdlib.util.client.particles.BoneAttachedParticles;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
+import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
+import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -42,8 +46,8 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -63,7 +67,10 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
     private boolean rotatingFromBodyRot = true;
 
     @SerializableField
-    private int laserCooldown = 300;
+    private int lightningRayAttackCooldown = 300;
+
+    @SerializableField
+    private int lightningsCooldown = 300;
 
     private Vec3 laserTargetOld;
 
@@ -73,6 +80,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
     private BoneAttachedParticles boneAttachedParticles;
 
     public boolean isUsingElectricRay = false;
+    public boolean isUsingLightningsAttack = false;
 
     private boolean walkingWithHands = true;
 
@@ -114,8 +122,9 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
 
 
-        this.goalSelector.addGoal(3, new BallLightningRangedAttack(this, 20));
-        this.goalSelector.addGoal(4, new LaserAttackGoal(this));
+//        this.goalSelector.addGoal(3, new BallLightningRangedAttack(this, 20));
+//        this.goalSelector.addGoal(4, new LaserAttackGoal(this));
+        this.goalSelector.addGoal(4, new LightningsAttack(this));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1){
             @Override
             public boolean canUse() {
@@ -137,7 +146,9 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
     public void tick() {
         super.tick();
         if (!level().isClientSide){
-            this.laserCooldown = Mth.clamp(laserCooldown - 1,0, Integer.MAX_VALUE);
+            this.lightningRayAttackCooldown = Mth.clamp(lightningRayAttackCooldown - 1,0, Integer.MAX_VALUE);
+//            this.lightningsCooldown = Mth.clamp(lightningsCooldown - 1,0, Integer.MAX_VALUE);
+            this.lightningsCooldown = 0;
             this.controlIdleAndWalking();
             if (rotatingFromBodyRot) {
                 this.setYRot(this.yBodyRot);
@@ -423,7 +434,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
         @Override
         public boolean canUse() {
-            return !this.entity.isUsingElectricRay && this.entity.getTarget() != null && this.entity.distanceTo(this.entity.getTarget()) <= attackRange && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
+            return !this.entity.isUsingLightningsAttack && !this.entity.isUsingElectricRay && this.entity.getTarget() != null && this.entity.distanceTo(this.entity.getTarget()) <= attackRange && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
         }
         @Override
         public boolean canContinueToUse() {
@@ -431,6 +442,162 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         }
 
     }
+
+    public void spawnLightningAttacksAround(float distance, int lightningsCount, float angle){
+        for (var dir : new HorizontalCircleRandomDirections(random, lightningsCount, 0f)){
+            Vec3 realDir = dir.yRot(angle).scale(distance);
+            BlockPos spawnPosCandidate = BlockPos.containing(this.position().add(realDir));
+            this.trySpawnLightning(spawnPosCandidate);
+        }
+    }
+
+    private void trySpawnLightning(BlockPos candidate){
+        if (this.isPosValidForLightning(candidate)){
+            this.spawnLighting(candidate);
+        }else{
+            for (int i = 1; i < 10; i++){
+                if (this.isPosValidForLightning(candidate.above(i))){
+                    this.spawnLighting(candidate.above(i));
+                    return;
+                }
+            }
+            for (int i = 1; i < 10; i++){
+                if (this.isPosValidForLightning(candidate.below(i))){
+                    this.spawnLighting(candidate.below(i));
+                    return;
+                }
+            }
+        }
+    }
+
+    private void spawnLighting(BlockPos blockPos){
+        Vec3 pos = blockPos.getCenter();
+        VerticalLightningStrikeAttack.summon(this, new Vec3(pos.x, Math.floor(pos.y), pos.z));
+    }
+
+    private boolean isPosValidForLightning(BlockPos blockPos){
+        BlockState state = level().getBlockState(blockPos);
+        BlockState stateBelow = level().getBlockState(blockPos.below());
+        return state.getCollisionShape(level(), blockPos).isEmpty() && !stateBelow.getCollisionShape(level(), blockPos.below()).isEmpty();
+    }
+
+    public static class LightningsAttack extends Goal {
+
+
+        private ElectromancerEntity entity;
+
+        private int useTick = 0;
+
+        public LightningsAttack(ElectromancerEntity electromancerEntity){
+            this.entity = electromancerEntity;
+        }
+
+        @Override
+        public void tick() {
+
+            this.entity.isUsingLightningsAttack= true;
+
+            var target = entity.getTarget();
+            if (target == null) return;
+            this.entity.getNavigation().stop();
+
+            if (this.entity.getMoveControl() instanceof ElectromancerMoveControl control){
+                control.cancelMovement();
+            }
+
+            this.entity.rotatingFromBodyRot = false;
+
+            if (useTick < 10){
+                this.entity.getLookControl().setLookAt(target);
+                this.entity.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
+                this.entity.yBodyRot = this.entity.getYRot();
+                this.entity.setSpeed(0);
+                this.entity.setZza(0);
+                this.entity.setXxa(0);
+            }
+
+            int firstLightningStart = 20;
+
+            float ryRot = (float) Math.toRadians(-this.entity.getYRot() + 180);
+            if (useTick == 0){
+                this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_LIGHTNINGS_CAST)
+                                .important()
+                        .build());
+            }else if (useTick == 13){
+                this.entity.triggerPrepareParticle();
+            }else if (useTick == firstLightningStart){
+
+                Vec3 lpos = this.entity.position().add(this.entity.getForward().multiply(1,0,1).normalize().scale(0.75f));
+                for (var dir : new HorizontalCircleRandomDirections(this.entity.level().random, 6, 0)) {
+                    Vec3 direction = dir.add(0, 0.5, 0);
+                    Vec3 pos = lpos.add(direction.multiply(0.4, 0.25, 0.4));
+                    for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, this.entity.level(), this.entity.position(), 40)) {
+
+                        ((ServerLevel)this.entity.level()).sendParticles(serverPlayer,
+                                new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), direction, 1f, 4),
+                                true, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+                    }
+                }
+
+
+                this.entity.spawnLightningAttacksAround(4, 4, ryRot);
+            }else if (useTick == firstLightningStart + 5){
+                this.entity.spawnLightningAttacksAround(8, 8, ryRot + FDMathUtil.FPI / 2);
+            }else if (useTick == firstLightningStart + 10){
+                this.entity.spawnLightningAttacksAround(12, 12, ryRot);
+            }else if (useTick == firstLightningStart + 15){
+                this.entity.spawnLightningAttacksAround(16, 16, ryRot + FDMathUtil.FPI / 2);
+            }
+
+            useTick++;
+
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            useTick = 0;
+            this.entity.getNavigation().stop();
+            this.entity.isUsingLightningsAttack = true;
+            this.entity.lightningRayAttackCooldown = 200;
+            this.entity.rotatingFromBodyRot = false;
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.entity.isUsingElectricRay = false;
+            this.entity.lightningRayAttackCooldown = 200;
+            this.entity.lightningsCooldown = 200;
+            this.entity.rotatingFromBodyRot = true;
+            if (this.entity.getTarget() != null){
+                this.entity.getLookControl().setLookAt(this.entity.getTarget());
+                this.entity.lookAt(EntityAnchorArgument.Anchor.FEET, this.entity.getTarget().position());
+            }
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !this.entity.isUsingElectricRay
+                    && this.entity.onGround()
+                    && this.entity.random.nextFloat() < 0.25
+                    && this.entity.lightningsCooldown == 0
+                    && this.entity.getTarget() != null
+                    && this.entity.distanceTo(this.entity.getTarget()) < 16
+                    && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.entity.getTarget() != null && useTick < 40;
+        }
+    }
+
     public static class LaserAttackGoal extends Goal {
 
         private ElectromancerEntity entity;
@@ -452,7 +619,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
             useTick = 0;
             this.entity.getNavigation().stop();
             this.entity.isUsingElectricRay = true;
-
+            this.entity.lightningsCooldown = 200;
         }
 
         @Override
@@ -462,8 +629,13 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
             this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CAST_STOP)
                     .build());
             this.entity.isUsingElectricRay = false;
-            this.entity.laserCooldown = 200;
-            this.entity.rotatingFromBodyRot = false;
+            this.entity.lightningRayAttackCooldown = 200;
+            this.entity.lightningsCooldown = 200;
+            this.entity.rotatingFromBodyRot = true;
+            if (this.entity.getTarget() != null){
+                this.entity.getLookControl().setLookAt(this.entity.getTarget());
+                this.entity.lookAt(EntityAnchorArgument.Anchor.FEET, this.entity.getTarget().position());
+            }
         }
 
         @Override
@@ -575,7 +747,11 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
         @Override
         public boolean canUse() {
-            return this.entity.laserCooldown == 0 && this.entity.getTarget() != null && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
+            return !this.entity.isUsingLightningsAttack
+                    && this.entity.random.nextFloat() < 0.25
+                    && this.entity.lightningRayAttackCooldown == 0
+                    && this.entity.getTarget() != null
+                    && this.entity.getSensing().hasLineOfSight(this.entity.getTarget());
         }
 
         @Override
