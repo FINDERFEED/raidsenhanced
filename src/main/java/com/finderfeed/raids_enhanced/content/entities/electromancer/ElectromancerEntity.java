@@ -147,8 +147,8 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         super.tick();
         if (!level().isClientSide){
             this.lightningRayAttackCooldown = Mth.clamp(lightningRayAttackCooldown - 1,0, Integer.MAX_VALUE);
-//            this.lightningsCooldown = Mth.clamp(lightningsCooldown - 1,0, Integer.MAX_VALUE);
-            this.lightningsCooldown = 0;
+            this.lightningsCooldown = Mth.clamp(lightningsCooldown - 1,0, Integer.MAX_VALUE);
+//            this.lightningsCooldown = 0;
             this.controlIdleAndWalking();
             if (rotatingFromBodyRot) {
                 this.setYRot(this.yBodyRot);
@@ -346,9 +346,9 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
                 Vec3 forward = this.entity.getForward().multiply(1,0,1).normalize();
                 Vec3 left = forward.yRot(FDMathUtil.FPI / 2);
 
-                Vec3 particlePos = this.entity.position();
+                Vec3 particlePos;
                 Vec3 particleDirection = forward.add(0,-0.1,0);
-                float particleTilt = 0;
+                float particleTilt;
                 if (this.animType){
                     particlePos = pos
                             .add(left.scale(-0.5f))
@@ -438,7 +438,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         }
         @Override
         public boolean canContinueToUse() {
-            return this.entity.getTarget() != null && !this.entity.isUsingElectricRay;
+            return this.entity.getTarget() != null && !this.entity.isUsingElectricRay && !this.entity.isUsingLightningsAttack;
         }
 
     }
@@ -566,7 +566,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
         @Override
         public void stop() {
             super.stop();
-            this.entity.isUsingElectricRay = false;
+            this.entity.isUsingLightningsAttack = false;
             this.entity.lightningRayAttackCooldown = 200;
             this.entity.lightningsCooldown = 200;
             this.entity.rotatingFromBodyRot = true;
@@ -594,7 +594,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
         @Override
         public boolean canContinueToUse() {
-            return this.entity.getTarget() != null && useTick < 40;
+            return this.entity.getTarget() != null && useTick < 50;
         }
     }
 
@@ -756,7 +756,7 @@ public class ElectromancerEntity extends FDRaider implements AutoSerializable {
 
         @Override
         public boolean canContinueToUse() {
-            return useTick < 250 && this.entity.getTarget() != null;
+            return useTick < 240 && this.entity.getTarget() != null;
         }
 
     }
