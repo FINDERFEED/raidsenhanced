@@ -2,10 +2,11 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"player_blimp_perpeller": {
+			"loop": true,
 			"animation_length": 1,
 			"bones": {
 				"perpeller": {
-					"rotation": [0, 0, "variable.propeller_rotation"]
+					"rotation": [0, 0, "0+variable.propeller_rotation"]
 				}
 			}
 		},
@@ -22,13 +23,13 @@
 				"lamp_left": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.5": [-12.5, 0, 7.08333]
+						"0.5": [-11.93845, 3.73171, 24.193]
 					}
 				},
 				"lamp_right": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.5": [-12.39638, 1.61888, 7.32417]
+						"0.5": [-11.93845, 3.73171, 17.10967]
 					}
 				}
 			}
@@ -46,13 +47,13 @@
 				"lamp_left": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.5": [-12.5, 0, -7.08333]
+						"0.5": [-12.08681, -3.21132, -21.74326]
 					}
 				},
 				"lamp_right": {
 					"rotation": {
 						"0.0": [0, 0, 0],
-						"0.5": [-12.39638, 1.61888, -7.32417]
+						"0.5": [-12.37841, -3.28085, -29.31006]
 					}
 				}
 			}

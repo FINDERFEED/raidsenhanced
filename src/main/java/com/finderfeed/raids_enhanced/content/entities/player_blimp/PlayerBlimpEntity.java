@@ -1,5 +1,9 @@
 package com.finderfeed.raids_enhanced.content.entities.player_blimp;
 
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
+import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.google.common.collect.Lists;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
@@ -9,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -25,11 +30,16 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PlayerBlimpEntity extends VehicleEntity {
+public class PlayerBlimpEntity extends FDVehicle {
+
+    public static final String ROTATION_LAYER = "ROTATION";
+    public static final String DANGLING_LIGHTS = "DANGLING_LIGHTS";
+
 
     private boolean inputLeft;
     private boolean inputRight;
@@ -47,11 +57,24 @@ public class PlayerBlimpEntity extends VehicleEntity {
 
     private float blimpRotationSpeed = 0;
 
+    private float perpellerRotation;
+    private float perpellerRotationO;
+    private int perpellerStartTicks = 0;
+    private double lastKnownSpeed;
+
+    private int rotationDirection;
+
     public PlayerBlimpEntity(EntityType<? extends PlayerBlimpEntity> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
+        this.getAnimationSystem().startAnimation("PERPELLER", AnimationTicker.builder(REAnimations.PLAYER_BLIMP_PERPELLER)
+                .build());
+        this.getAnimationSystem().setAnimationsApplyListener(this::onAnimationsApplied);
     }
 
+    private void onAnimationsApplied(FDModel model, Float pticks) {
+        this.getAnimationSystem().setVariable("variable.propeller_rotation", FDMathUtil.lerp(perpellerRotationO, perpellerRotation, pticks));
+    }
 
 
     @Override
@@ -72,28 +95,81 @@ public class PlayerBlimpEntity extends VehicleEntity {
             this.setDamage(this.getDamage() - 1.0F);
         }
 
+
+
         super.tick();
         this.tickLerp();
 
 
 
-        if (this.isControlledByLocalInstance()){
 
+
+        if (this.isControlledByLocalInstance()){
             this.blimpMovement();
             if (level().isClientSide) {
                 this.controlBlimp();
+                this.sendRotationToServer();
             }
-
-
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.95f));
-
-
         }else{
             this.setDeltaMovement(Vec3.ZERO);
             blimpRotationSpeed = 0;
         }
 
+
+
+        if (level().isClientSide){
+            perpellerRotationO = perpellerRotation;
+            if (this.getControllingPassenger() != null) {
+                Vec3 delta = this.getKnownMovement().multiply(1,0,1);
+                double speed = delta.length();
+                int startTicksTime = 20;
+                if (speed > 0){
+                    perpellerStartTicks = Mth.clamp(perpellerStartTicks + 1,0, startTicksTime);
+                    lastKnownSpeed = speed;
+                }else{
+                    perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0, startTicksTime);
+                }
+                float p = (float) perpellerStartTicks / startTicksTime;
+                perpellerRotation += (float) lastKnownSpeed * 1000 * p;
+
+            }else{
+                lastKnownSpeed = 0;
+                perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0,Integer.MAX_VALUE);
+            }
+        }else{
+            if (this.getFirstPassenger() instanceof Player) {
+                if (rotationDirection == 0) {
+                    this.getAnimationSystem().stopAnimation(ROTATION_LAYER);
+                    this.getAnimationSystem().stopAnimation(DANGLING_LIGHTS);
+                } else if (rotationDirection == 1) {
+                    this.getAnimationSystem().startAnimation(DANGLING_LIGHTS, AnimationTicker.builder(REAnimations.PLAYER_BLIMP_DANGLE_LIGHTS).build());
+                    this.getAnimationSystem().startAnimation(ROTATION_LAYER, AnimationTicker.builder(REAnimations.PLAYER_BLIMP_TURN_LEFT).build());
+                } else if (rotationDirection == -1) {
+                    this.getAnimationSystem().startAnimation(DANGLING_LIGHTS, AnimationTicker.builder(REAnimations.PLAYER_BLIMP_DANGLE_LIGHTS).build());
+                    this.getAnimationSystem().startAnimation(ROTATION_LAYER, AnimationTicker.builder(REAnimations.PLAYER_BLIMP_TURN_RIGHT).build());
+                }
+            }else{
+                this.getAnimationSystem().stopAnimation(ROTATION_LAYER);
+                this.getAnimationSystem().stopAnimation(DANGLING_LIGHTS);
+            }
+        }
+
+    }
+
+    public void setRotatingState(int rotationDirection){
+        this.rotationDirection = rotationDirection;
+    }
+
+    private void sendRotationToServer(){
+        int rotationDirection = 0;
+        if (inputLeft){
+            rotationDirection = 1;
+        }else if (inputRight){
+            rotationDirection = -1;
+        }
+        PacketDistributor.sendToServer(new PlayerBlimpRotatingPacket(this.getId(), rotationDirection));
     }
 
     private void blimpMovement(){
@@ -108,6 +184,30 @@ public class PlayerBlimpEntity extends VehicleEntity {
         }
     }
 
+    @Override
+    protected void positionRider(Entity entity, MoveFunction func) {
+        super.positionRider(entity, func);
+
+    }
+
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity p_294665_, EntityDimensions p_295933_, float p_295585_) {
+        float f = 0;
+        if (this.getPassengers().size() > 1) {
+            int i = this.getPassengers().indexOf(p_294665_);
+            if (i == 0) {
+                f = 0.2F;
+            } else {
+                f = -0.6F;
+            }
+
+            if (p_294665_ instanceof Animal) {
+                f += 0.2F;
+            }
+        }
+
+        return new Vec3(0.0, (double)(p_295933_.height() / 3.0F), (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0));
+    }
 
     private void tickLerp() {
         if (this.isControlledByLocalInstance()) {
@@ -166,7 +266,7 @@ public class PlayerBlimpEntity extends VehicleEntity {
             boolean rotating = false;
 
             float rotspeedPerTick = 0.25f;
-            float maxRotSpeed = 5;
+            float maxRotSpeed = 3;
             if (inputLeft) {
                 blimpRotationSpeed -= rotspeedPerTick;
                 rotating = true;
@@ -412,13 +512,15 @@ public class PlayerBlimpEntity extends VehicleEntity {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag p_20052_) {
-
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundTag p_20139_) {
-
+    public AABB getBoundingBoxForCulling() {
+        return new AABB(
+                this.getX() - 3,
+                this.getY() - 1,
+                this.getZ() - 3,
+                this.getX() + 3,
+                this.getY() + 6,
+                this.getZ() + 3
+        );
     }
 
     @Override

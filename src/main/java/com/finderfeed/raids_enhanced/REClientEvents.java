@@ -12,6 +12,7 @@ import com.finderfeed.raids_enhanced.content.entities.electromancer.Electromance
 import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerRenderer;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
+import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
@@ -62,7 +63,13 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
         event.registerEntityRenderer(REEntities.ELECTROMANCER_STAFF_CAST_ENTITY.get(), NullEntityRenderer::new);
-        event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), NullEntityRenderer::new);
+
+        event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), FDEntityRendererBuilder.<PlayerBlimpEntity>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<PlayerBlimpEntity>builder()
+                                .model(REModels.PLAYER_BLIMP)
+                                .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/player_blimp.png")))
+                                .build())
+                        .build());
 
         event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()

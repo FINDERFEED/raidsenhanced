@@ -103,5 +103,21 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("electromancer"));
     });
 
+    public static DeferredHolder<Animation,Animation> PLAYER_BLIMP_PERPELLER = ANIMATIONS.register("player_blimp_perpeller", ()->{
+        return new Animation(RaidsEnhanced.location("player_blimp"));
+    });
+
+    public static DeferredHolder<Animation,Animation> PLAYER_BLIMP_TURN_LEFT = ANIMATIONS.register("player_blimp_turn_left", ()->{
+        return new Animation(RaidsEnhanced.location("player_blimp"));
+    });
+
+    public static DeferredHolder<Animation,Animation> PLAYER_BLIMP_TURN_RIGHT = ANIMATIONS.register("player_blimp_turn_right", ()->{
+        return new Animation(RaidsEnhanced.location("player_blimp"));
+    });
+
+    public static DeferredHolder<Animation,Animation> PLAYER_BLIMP_DANGLE_LIGHTS = ANIMATIONS.register("player_blimp_dangle_lights", ()->{
+        return new Animation(RaidsEnhanced.location("player_blimp"));
+    });
+
 
 }

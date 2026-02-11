@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced;
 
 import com.finderfeed.fdlib.FDClientHelpers;
+import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
@@ -16,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class REClientUtil {
+
+    public static void playerBlimpRotationPacket(int entityId, int rotationDirection){
+        if (FDClientHelpers.getClientLevel().getEntity(entityId) instanceof PlayerBlimpEntity playerBlimp){
+            playerBlimp.setRotatingState(rotationDirection);
+        }
+    }
 
     public static void handlePosEvent(Vec3 pos, int event, int data){
         switch (event){
