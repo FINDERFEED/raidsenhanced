@@ -16,9 +16,14 @@ import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.WaterlilyBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +38,13 @@ public class PlayerBlimpEntity extends VehicleEntity {
     private boolean inputUp;
     private boolean inputDown;
 
+    private int lerpSteps;
+    private double lerpX;
+    private double lerpY;
+    private double lerpZ;
+    private double lerpYRot;
+    private double lerpXRot;
+
     private float blimpRotationSpeed = 0;
 
     public PlayerBlimpEntity(EntityType<? extends PlayerBlimpEntity> type, Level level) {
@@ -46,6 +58,12 @@ public class PlayerBlimpEntity extends VehicleEntity {
     public void tick() {
 
 
+        if (!level().isClientSide){
+            if (this.isUnderWater()){
+                this.ejectPassengers();
+            }
+        }
+
         if (this.getHurtTime() > 0) {
             this.setHurtTime(this.getHurtTime() - 1);
         }
@@ -54,25 +72,23 @@ public class PlayerBlimpEntity extends VehicleEntity {
             this.setDamage(this.getDamage() - 1.0F);
         }
 
-
         super.tick();
-        if (!level().isClientSide){
+        this.tickLerp();
 
-            if (this.isUnderWater()){
-                this.ejectPassengers();
-            }
 
-        }else{
-
-        }
 
         if (this.isControlledByLocalInstance()){
 
+            this.blimpMovement();
             if (level().isClientSide) {
                 this.controlBlimp();
             }
 
+
             this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.95f));
+
+
         }else{
             this.setDeltaMovement(Vec3.ZERO);
             blimpRotationSpeed = 0;
@@ -80,13 +96,77 @@ public class PlayerBlimpEntity extends VehicleEntity {
 
     }
 
+    private void blimpMovement(){
+        float groundFriction = this.getGroundFriction();
+        if (groundFriction > 0){
+            var movement = this.getDeltaMovement();
+            this.setDeltaMovement(
+                    movement.x * groundFriction,
+                    movement.y,
+                    movement.z * groundFriction
+            );
+        }
+    }
+
+
+    private void tickLerp() {
+        if (this.isControlledByLocalInstance()) {
+            this.lerpSteps = 0;
+            this.syncPacketPositionCodec(this.getX(), this.getY(), this.getZ());
+        }
+
+        if (this.lerpSteps > 0) {
+            this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
+            this.lerpSteps--;
+        }
+    }
+
+    @Override
+    protected Entity.MovementEmission getMovementEmission() {
+        return Entity.MovementEmission.EVENTS;
+    }
+
+    @Override
+    public void lerpTo(double p_38299_, double p_38300_, double p_38301_, float p_38302_, float p_38303_, int p_38304_) {
+        this.lerpX = p_38299_;
+        this.lerpY = p_38300_;
+        this.lerpZ = p_38301_;
+        this.lerpYRot = (double)p_38302_;
+        this.lerpXRot = (double)p_38303_;
+        this.lerpSteps = 10;
+    }
+
+    @Override
+    public double lerpTargetX() {
+        return this.lerpSteps > 0 ? this.lerpX : this.getX();
+    }
+
+    @Override
+    public double lerpTargetY() {
+        return this.lerpSteps > 0 ? this.lerpY : this.getY();
+    }
+
+    @Override
+    public double lerpTargetZ() {
+        return this.lerpSteps > 0 ? this.lerpZ : this.getZ();
+    }
+
+    @Override
+    public float lerpTargetXRot() {
+        return this.lerpSteps > 0 ? (float)this.lerpXRot : this.getXRot();
+    }
+
+    @Override
+    public float lerpTargetYRot() {
+        return this.lerpSteps > 0 ? (float)this.lerpYRot : this.getYRot();
+    }
 
     private void controlBlimp(){
         if (this.isVehicle()) {
             boolean rotating = false;
 
             float rotspeedPerTick = 0.25f;
-            float maxRotSpeed = 3;
+            float maxRotSpeed = 5;
             if (inputLeft) {
                 blimpRotationSpeed -= rotspeedPerTick;
                 rotating = true;
@@ -137,7 +217,7 @@ public class PlayerBlimpEntity extends VehicleEntity {
 
 
             this.setDeltaMovement(
-                    this.getDeltaMovement().scale(0.97f)
+                    this.getDeltaMovement()
                             .add((Mth.sin(-this.getYRot() * (float) (Math.PI / 180.0)) * speed),
                                     speedVertical,
                                     (Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * speed)
@@ -145,6 +225,46 @@ public class PlayerBlimpEntity extends VehicleEntity {
             );
 
         }
+    }
+
+    public float getGroundFriction() {
+        AABB aabb = this.getBoundingBox();
+        AABB aabb1 = new AABB(aabb.minX, aabb.minY - 0.001, aabb.minZ, aabb.maxX, aabb.minY, aabb.maxZ);
+        int i = Mth.floor(aabb1.minX) - 1;
+        int j = Mth.ceil(aabb1.maxX) + 1;
+        int k = Mth.floor(aabb1.minY) - 1;
+        int l = Mth.ceil(aabb1.maxY) + 1;
+        int i1 = Mth.floor(aabb1.minZ) - 1;
+        int j1 = Mth.ceil(aabb1.maxZ) + 1;
+        VoxelShape voxelshape = Shapes.create(aabb1);
+        float f = 0.0F;
+        int k1 = 0;
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+        for (int l1 = i; l1 < j; l1++) {
+            for (int i2 = i1; i2 < j1; i2++) {
+                int j2 = (l1 != i && l1 != j - 1 ? 0 : 1) + (i2 != i1 && i2 != j1 - 1 ? 0 : 1);
+                if (j2 != 2) {
+                    for (int k2 = k; k2 < l; k2++) {
+                        if (j2 <= 0 || k2 != k && k2 != l - 1) {
+                            blockpos$mutableblockpos.set(l1, k2, i2);
+                            BlockState blockstate = this.level().getBlockState(blockpos$mutableblockpos);
+                            if (!(blockstate.getBlock() instanceof WaterlilyBlock)
+                                    && Shapes.joinIsNotEmpty(
+                                    blockstate.getCollisionShape(this.level(), blockpos$mutableblockpos).move((double)l1, (double)k2, (double)i2),
+                                    voxelshape,
+                                    BooleanOp.AND
+                            )) {
+                                f += blockstate.getFriction(this.level(), blockpos$mutableblockpos, this);
+                                k1++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return f / (float)k1;
     }
 
     @Override
