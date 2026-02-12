@@ -49,7 +49,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.List;
-import java.util.UUID;
 
 public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastResort>, AutoSerializable {
 
@@ -96,8 +95,9 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
 
 
+        this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(3, new GolemBombsAttack(this));
-        this.goalSelector.addGoal(4, new GolemMeleeAttackGoal(this));
+        this.goalSelector.addGoal(4, new GolemMeleeAttackGoal(this, 2.5f, 2.5f));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
@@ -272,7 +272,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         @Override
         public boolean canUse() {
-            return this.golem.getTarget() != null && this.golem.golemBombsCooldown <= 0 && this.golem.random.nextFloat() < 0.05 && !this.golem.isMeleeAttacking
+            return this.golem.getTarget() != null && this.golem.onGround() && this.golem.golemBombsCooldown <= 0 && this.golem.random.nextFloat() < 0.05 && !this.golem.isMeleeAttacking
                     && (this.golem.getTarget().distanceTo(this.golem) > 4 || Math.abs(this.golem.getY() - this.golem.getTarget().getY()) > 2);
         }
 
@@ -321,6 +321,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                 List<Player> targets = FDTargetFinder.getEntitiesInCylinder(Player.class, golem.level(), golem.position().add(0,-20,0), 40,20);
 
                 for (var tr : targets){
+                    if (tr.isSpectator() || tr.isCreative()) continue;
                     this.launchBombAtTarget(tr, pos);
                 }
 
@@ -371,8 +372,13 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         public GolemOfLastResort golem;
 
-        public GolemMeleeAttackGoal(GolemOfLastResort golem) {
+        public float golemAttackHeight;
+        public float horizontalAttackRange;
+
+        public GolemMeleeAttackGoal(GolemOfLastResort golem, float golemAttackHeight, float horizontalAttackRange) {
             this.golem = golem;
+            this.golemAttackHeight = golemAttackHeight;
+            this.horizontalAttackRange = horizontalAttackRange;
         }
 
         @Override
@@ -385,6 +391,16 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             attackTime = 0;
         }
 
+        public boolean isTargetInAttackRange(LivingEntity target){
+            Vec3 between = target.position().subtract(golem.position());
+            double yDiff = between.y;
+            if (yDiff >= -1 && yDiff <= golemAttackHeight){
+                double horizontalDistance = between.multiply(1,0,1).length();
+                return horizontalDistance < horizontalAttackRange;
+            }
+            return false;
+        }
+
         @Override
         public void tick() {
             if (meleeAttackType > 2){
@@ -394,11 +410,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             if (target != null){
                 if (attackTime <= 0) {
                     this.golem.isMeleeAttacking = false;
-                    var box = this.golem.getBoundingBox().inflate(1.25f);
-                    var targetBox = target.getHitbox();
 
-
-                    if (box.intersects(targetBox)) {
+                    if (this.isTargetInAttackRange(target)) {
                         this.golem.getLookControl().setLookAt(target);
                         this.golem.lookAt(EntityAnchorArgument.Anchor.FEET, target.position());
                         this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.ANIMATION);
@@ -454,7 +467,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
             if (attackTime > 10 && attackTime < 16){
                  this.golem.level().playSound(null, golem.getX(),golem.getY(),golem.getZ(), RESounds.RAID_GOLEM_SWING.get(), SoundSource.HOSTILE, 1f, 1.1f + golem.random.nextFloat() * 0.2f);
 
-                var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), this.golem.getBbHeight() + 2, this.golem.getBbWidth() + 1.5f);
+                var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), golemAttackHeight + 1, horizontalAttackRange);
                 for (var t : targets) {
                     if (t != this.golem) {
                         this.golem.doHurtTarget(t);
@@ -522,8 +535,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         (float)forward.x,
                         (float)forward.z
                 );
-                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, this.golem.getBbHeight() + 2,
-                        this.golem.getBbWidth() + 1.5f);
+                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, golemAttackHeight + 1,
+                        horizontalAttackRange);
                 for (var t : targets) {
                     if (t != this.golem) {
                         this.golem.doHurtTarget(t);
@@ -553,8 +566,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                         (float)forward.x,
                         (float)forward.z
                 );
-                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, this.golem.getBbHeight() + 2,
-                        this.golem.getBbWidth() + 1.25f);
+                var targets = FDTargetFinder.getEntitiesInArc(LivingEntity.class, this.golem.level(), this.golem.position().add(0,-1,0), direction, FDMathUtil.FPI, golemAttackHeight + 1,
+                        horizontalAttackRange);
                 for (var t : targets) {
                     if (t != this.golem) {
                         this.golem.doHurtTarget(t);

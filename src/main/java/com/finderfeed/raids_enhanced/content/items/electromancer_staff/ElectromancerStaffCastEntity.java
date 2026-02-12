@@ -23,7 +23,7 @@ public class ElectromancerStaffCastEntity extends Entity {
     public float ownerRotation;
 
     public static void summon(LivingEntity owner, Vec3 pos){
-        ElectromancerStaffCastEntity staff = new ElectromancerStaffCastEntity(REEntities.ELECTROMANCER_STAFF_CAST_ENTITY.get(), owner.level());
+        ElectromancerStaffCastEntity staff = new ElectromancerStaffCastEntity(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), owner.level());
         staff.setPos(pos);
         staff.owner = owner.getUUID();
         staff.ownerRotation = (float) Math.toRadians(-owner.getYRot() + 180);

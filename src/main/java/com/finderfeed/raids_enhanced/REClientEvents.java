@@ -1,15 +1,13 @@
 package com.finderfeed.raids_enhanced;
 
-import com.finderfeed.fdlib.FDClientHelpers;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadBoneTransformation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRenderLayerOptions;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
-import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.client.NullEntityRenderer;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningRenderer;
-import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
-import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerRenderer;
+import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerEntity;
+import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerRenderer;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
@@ -28,20 +26,13 @@ import com.finderfeed.raids_enhanced.content.particles.vertical_lightning.Vertic
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, value = Dist.CLIENT)
 public class REClientEvents {
@@ -62,7 +53,7 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.FALLING_BLOCK.get(), REFallingBlockRenderer::new);
         event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
-        event.registerEntityRenderer(REEntities.ELECTROMANCER_STAFF_CAST_ENTITY.get(), NullEntityRenderer::new);
+        event.registerEntityRenderer(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), NullEntityRenderer::new);
 
         event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), FDEntityRendererBuilder.<PlayerBlimpEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<PlayerBlimpEntity>builder()
@@ -71,15 +62,15 @@ public class REClientEvents {
                                 .build())
                         .build());
 
-        event.registerEntityRenderer(REEntities.ELECTROMANCER.get(), FDEntityRendererBuilder.<ElectromancerEntity>builder()
-                        .addLayer(FDEntityRenderLayerOptions.<ElectromancerEntity>builder()
+        event.registerEntityRenderer(REEntities.ENGINEER.get(), FDEntityRendererBuilder.<EngineerEntity>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<EngineerEntity>builder()
                                 .model(REModels.ELECTROMANCER)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/electromancer.png")))
                                 .build())
                         .shouldRender(((electromancerEntity, frustum, v, v1, v2) -> {
                             return true;
                         }))
-                        .freeRender(new ElectromancerRenderer())
+                        .freeRender(new EngineerRenderer())
                 .build());
 
         event.registerEntityRenderer(REEntities.GOLEM_OF_LAST_RESORT.get(), FDEntityRendererBuilder.<GolemOfLastResort>builder()

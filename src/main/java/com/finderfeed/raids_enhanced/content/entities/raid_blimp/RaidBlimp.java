@@ -1,5 +1,7 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_blimp;
 
+import com.finderfeed.fdlib.nbt.AutoSerializable;
+import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.fdlib.systems.bedrock.animations.Animation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
@@ -15,6 +17,7 @@ import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -29,7 +32,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.PathfindToRaidGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,9 +49,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class RaidBlimp extends FDRaider {
+public class RaidBlimp extends FDRaider implements AutoSerializable {
 
-    public static final int HEIGHT_ABOVE_GROUND = 20;
+    public static final int HEIGHT_ABOVE_GROUND = 25;
 
     private static FDModel clientModel;
     private static FDModel serverModel;
@@ -69,6 +78,8 @@ public class RaidBlimp extends FDRaider {
 
     public boolean isMoving = false;
 
+    private boolean isInRaidRadius = false;
+
     public RaidBlimp(EntityType<? extends FDRaider> type, Level level) {
         super(type, level);
         this.cannonsController = new RaidBlimpCannonsController(this,
@@ -84,6 +95,12 @@ public class RaidBlimp extends FDRaider {
                         .setToNullTransitionTime(0)
                 .build());
         this.setNoGravity(true);
+
+    }
+
+
+    @Override
+    protected void registerGoals() {
 
     }
 
@@ -109,13 +126,59 @@ public class RaidBlimp extends FDRaider {
             if (!this.isDeadOrDying()) {
                 this.detectEntitiesBeneathAndThrowBomb();
             }
-            this.flyToHurtBy();
-            this.turnToLastHurtBy();
+            if (!this.shouldFlyToRaidCenter()) {
+                this.flyToHurtBy();
+                this.turnToLastHurtBy();
+            }else{
+                lastHurtBy = null;
+                this.flyToRaidCenter();
+            }
         }
 
         if (!this.isDeadOrDying()) {
             this.cannonsController.tick();
         }
+    }
+
+    private void flyToRaidCenter(){
+        BlockPos pos = this.getRaidFlyToPos();
+        Vec3 vcenter = pos.getCenter();
+        Vec3 between = vcenter.subtract(this.position());
+        var length = between.length();
+        if (length > 10){
+            this.getNavigation().moveTo(vcenter.x,vcenter.y,vcenter.z,1f);
+        }else{
+            isInRaidRadius = true;
+        }
+    }
+
+    private BlockPos getRaidFlyToPos(){
+        if (raid != null){
+            BlockPos blockPos = raid.getCenter();
+            int y = this.level().getHeight(Heightmap.Types.MOTION_BLOCKING, blockPos.getX(), blockPos.getZ()) + RaidBlimp.HEIGHT_ABOVE_GROUND;
+            return new BlockPos(blockPos.getX(), y, blockPos.getZ());
+        }
+        return null;
+    }
+
+    private boolean shouldFlyToRaidCenter(){
+        if (this.raid != null && this.raid.isActive()){
+            BlockPos center = this.getRaidFlyToPos();
+            Vec3 vcenter = center.getCenter();
+            Vec3 between = vcenter.subtract(this.position());
+            var length = between.length();
+            if (length > 50){
+                isInRaidRadius = false;
+                return true;
+            }else{
+                if (!isInRaidRadius){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     private void flyToHurtBy(){
@@ -231,7 +294,7 @@ public class RaidBlimp extends FDRaider {
                 Vec3 relativePos = pos.subtract(this.position());
                 Vec3 rotated = relativePos.yRot((float) Math.toRadians(this.getYRot()));
 
-                if (Math.abs(rotated.x) < 4) {
+                if (Math.abs(rotated.x) < 8) {
                     this.setLastHurtBy(src.getEntity());
                 }
             }else{
@@ -385,16 +448,37 @@ public class RaidBlimp extends FDRaider {
             if (tickCount % 5 == 0) {
                 float downDistance = 40;
                 var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level(), this.position().add(0, -downDistance, 0), downDistance, 5, entity -> {
-                    ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
-                    var res = level().clip(clipContext);
-                    return entity != this && res.getType() == HitResult.Type.MISS;
+                    if (!entity.isDeadOrDying() && entity != this){
+                        if (entity instanceof AbstractVillager || (entity instanceof Player player && !player.isSpectator() && !player.isCreative()) || entity instanceof IronGolem){
+                            ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+                            var res = level().clip(clipContext);
+                            return res.getType() == HitResult.Type.MISS;
+                        }else{
+                            return false;
+                        }
+                    }else{
+                        return false;
+                    }
                 });
+
                 if (!targets.isEmpty()) {
                     this.bombThrowPos = targets.get(level().random.nextInt(targets.size())).position();
                     this.bombThrowTicker = REAnimations.RAID_AIRSHIP_THROW_BOMB.get().getAnimTime();
                 }
             }
         }
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.autoLoad(tag);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        this.autoSave(tag);
     }
 
     private Vec3 calculateBombHorizontalSpeed(Vec3 startPos, Vec3 endPos, double startVerticalSpeed, double gravity){

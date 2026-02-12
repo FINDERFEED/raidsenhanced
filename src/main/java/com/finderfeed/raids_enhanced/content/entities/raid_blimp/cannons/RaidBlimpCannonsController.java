@@ -4,6 +4,10 @@ import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.player.Player;
 
 public class RaidBlimpCannonsController {
 
@@ -46,7 +50,11 @@ public class RaidBlimpCannonsController {
         float cylinderSideHeight = 50;
         float cylinderRadius = 35;
         var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, raidBlimp.level(), raidBlimp.position().add(0,-cylinderSideHeight,0), cylinderSideHeight * 2, cylinderRadius, (target)->{
-            return !target.isDeadOrDying() && target != this.getRaidBlimp();
+            if (!target.isDeadOrDying() && target != this.getRaidBlimp()){
+                return target instanceof AbstractVillager || (target instanceof Player player && !player.isSpectator() && !player.isCreative()) || target instanceof IronGolem;
+            }else{
+                return false;
+            }
         });
 
         cannonRight1.tick(targets);

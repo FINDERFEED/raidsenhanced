@@ -1,4 +1,4 @@
-package com.finderfeed.raids_enhanced.content.entities.electromancer;
+package com.finderfeed.raids_enhanced.content.entities.engineer;
 
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDFreeEntityRenderer;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
@@ -18,17 +18,17 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-public class ElectromancerRenderer implements FDFreeEntityRenderer<ElectromancerEntity> {
+public class EngineerRenderer implements FDFreeEntityRenderer<EngineerEntity> {
 
     public static final ResourceLocation ELECTRIC_RAY = RaidsEnhanced.location("textures/entities/electromancer_ray.png");
     public static final ResourceLocation ELECTRIC_BARRIER = RaidsEnhanced.location("textures/entities/electromancer_barrier.png");
 
     @Override
-    public void render(ElectromancerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
+    public void render(EngineerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
         if (electromancerEntity.isLaserActive()) {
 
             Vec3 laserTarget = electromancerEntity.getLaserTarget(v);
-            Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, ElectromancerEntity.LIGHTNING_START, ElectromancerEntity.getModel(electromancerEntity.level()), v);
+            Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, EngineerEntity.LIGHTNING_START, EngineerEntity.getModel(electromancerEntity.level()), v);
             Vec3 relativeLaserStart = new Vec3(transformation.transformPosition(new Vector3f()));
             Vec3 laserStart = relativeLaserStart.add(electromancerEntity.getPosition(v));;
 

@@ -1,4 +1,4 @@
-package com.finderfeed.raids_enhanced.content.entities.electromancer;
+package com.finderfeed.raids_enhanced.content.entities.engineer;
 
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.MoveControl;

@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "raidsenhanced.refmap.json",
   "mixins": [
-    "PlayerMixin"
+    "PlayerMixin",
+    "RaidMixin"
   ],
   "minVersion": "0.8",
   "client": [

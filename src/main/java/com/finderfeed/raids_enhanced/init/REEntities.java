@@ -2,7 +2,7 @@ package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
-import com.finderfeed.raids_enhanced.content.entities.electromancer.ElectromancerEntity;
+import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerEntity;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
@@ -17,6 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Pillager;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -31,7 +32,7 @@ public class REEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, RaidsEnhanced.MOD_ID);
 
     public static final Supplier<EntityType<RaidBlimp>> RAID_BLIMP = ENTITIES.register("raid_blimp",()->EntityType.Builder.<RaidBlimp>of(
-                    RaidBlimp::new, MobCategory.MONSTER
+                    RaidBlimp::new, MobCategory.CREATURE
             )
             .sized(3f,4f)
             .build("raid_blimp"));
@@ -76,11 +77,11 @@ public class REEntities {
             .build("falling_block"));
 
 
-    public static final Supplier<EntityType<ElectromancerStaffCastEntity>> ELECTROMANCER_STAFF_CAST_ENTITY = ENTITIES.register("electromancer_staff_cast_entity",()->EntityType.Builder.<ElectromancerStaffCastEntity>of(
+    public static final Supplier<EntityType<ElectromancerStaffCastEntity>> ENGINEER_STAFF_CAST_ENTTITY = ENTITIES.register("engineer_staff_cast_entity",()->EntityType.Builder.<ElectromancerStaffCastEntity>of(
                     ElectromancerStaffCastEntity::new, MobCategory.MISC
             )
             .sized(0.25f,0.25f)
-            .build("electromancer_staff_cast_entity"));
+            .build("engineer_staff_cast_entity"));
 
 
     public static final Supplier<EntityType<BallLightningEntity>> BALL_LIGHTNING = ENTITIES.register("ball_lightning",()->EntityType.Builder.<BallLightningEntity>of(
@@ -90,11 +91,11 @@ public class REEntities {
             .build("ball_lightning"));
 
 
-    public static final Supplier<EntityType<ElectromancerEntity>> ELECTROMANCER = ENTITIES.register("electromancer_entity",()->EntityType.Builder.<ElectromancerEntity>of(
-                    ElectromancerEntity::new, MobCategory.CREATURE
+    public static final Supplier<EntityType<EngineerEntity>> ENGINEER = ENTITIES.register("engineer",()->EntityType.Builder.<EngineerEntity>of(
+                    EngineerEntity::new, MobCategory.CREATURE
             )
             .sized(0.6F, 1.95F)
-            .build("electromancer_entity"));
+            .build("engineer"));
 
 
     public static final Supplier<EntityType<PlayerBlimpEntity>> PLAYER_BLIMP = ENTITIES.register("player_blimp",()->EntityType.Builder.<PlayerBlimpEntity>of(
@@ -115,20 +116,19 @@ public class REEntities {
                         .add(Attributes.FOLLOW_RANGE, 40.0)
                         .add(Attributes.FLYING_SPEED, 0.3f)
                 .build());
-//        event.put(PLAYER_BLIMP.get(), RaidBlimp.createMonsterAttributes()
-//                        .add(Attributes.MAX_HEALTH, 200)
-//                        .add(Attributes.FLYING_SPEED, 0.3f)
-//                .build());
+
 
         event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
+                .add(Attributes.MAX_HEALTH, 300)
                 .add(Attributes.FOLLOW_RANGE, 30.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.3f)
                 .build());
 
-        event.put(ELECTROMANCER.get(), IronGolem.createAttributes()
-                .add(Attributes.FOLLOW_RANGE, 30.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.3f)
+        event.put(ENGINEER.get(), Pillager.createAttributes()
+                        .add(Attributes.KNOCKBACK_RESISTANCE, 0.8f)
+                        .add(Attributes.MAX_HEALTH, 100)
                 .build());
+
 
     }
 
