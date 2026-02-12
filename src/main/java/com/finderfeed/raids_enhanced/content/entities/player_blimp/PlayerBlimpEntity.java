@@ -125,12 +125,12 @@ public class PlayerBlimpEntity extends FDVehicle {
         }
 
 
-
         if (level().isClientSide){
             perpellerRotationO = perpellerRotation;
             if (this.getControllingPassenger() != null) {
                 Vec3 delta = this.getKnownMovement().multiply(1,0,1);
                 double speed = delta.length();
+
                 int startTicksTime = 20;
                 if (speed > 0 && !(this.getGroundFriction() > 0)){
                     perpellerStartTicks = Mth.clamp(perpellerStartTicks + 1,0, startTicksTime);
@@ -147,8 +147,14 @@ public class PlayerBlimpEntity extends FDVehicle {
             }
         }else{
 
-            for (var passenger : this.getPassengers()){
-                passenger.resetFallDistance();
+            if (tickCount % 4 == 0) {
+                if (this.getGroundFriction() > 0) {
+                    this.getAnimationSystem().stopAnimation("SOMEOTHERIDLE");
+                } else {
+                    this.getAnimationSystem().startAnimation("SOMEOTHERIDLE", AnimationTicker.builder(REAnimations.PLAYER_BLIMP_IDLE)
+                                    .setToNullTransitionTime(10)
+                            .build());
+                }
             }
 
             if (this.getFirstPassenger() instanceof Player) {
@@ -189,9 +195,9 @@ public class PlayerBlimpEntity extends FDVehicle {
         if (groundFriction > 0){
             var movement = this.getDeltaMovement();
             this.setDeltaMovement(
-                    movement.x * groundFriction,
+                    movement.x * 0.1,
                     movement.y,
-                    movement.z * groundFriction
+                    movement.z * 0.1
             );
         }
     }

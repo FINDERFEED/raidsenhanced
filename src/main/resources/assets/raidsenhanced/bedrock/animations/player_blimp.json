@@ -69,6 +69,21 @@
 					"rotation": [0, 0, "math.sin(query.anim_time * 1080 + 180) * 2"]
 				}
 			}
+		},
+		"player_blimp_air_idle": {
+			"loop": true,
+			"animation_length": 4,
+			"bones": {
+				"main": {
+					"position": [0, "math.sin(query.anim_time * 90) * 0.2", 0]
+				},
+				"lamp_left": {
+					"rotation": ["math.sin(-query.anim_time * 90) * 2.5", 0, 0]
+				},
+				"lamp_right": {
+					"rotation": ["math.sin(query.anim_time * 90) * 2.5", 0, 0]
+				}
+			}
 		}
 	}
 }

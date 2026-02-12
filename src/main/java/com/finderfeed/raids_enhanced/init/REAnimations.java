@@ -119,5 +119,9 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("player_blimp"));
     });
 
+    public static DeferredHolder<Animation,Animation> PLAYER_BLIMP_IDLE = ANIMATIONS.register("player_blimp_air_idle", ()->{
+        return new Animation(RaidsEnhanced.location("player_blimp"));
+    });
+
 
 }
