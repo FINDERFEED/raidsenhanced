@@ -1,3 +1,6 @@
 {
-
+  "item.raidsenhanced.player_blimp": "Blimp",
+  "item.raidsenhanced.engineer_staff": "Engineer Staff",
+  "item.raidsenhanced.blimp_parts": "Blimp Parts",
+  "itemGroup.raidsenhanced": "Raids: Enhanced"
 }

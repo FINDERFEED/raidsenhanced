@@ -6,6 +6,7 @@ import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
+import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,16 +23,16 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-public class ElectromancerStaff extends Item {
+public class EngineerStaff extends Item {
 
-    public ElectromancerStaff(Properties props) {
+    public EngineerStaff(Properties props) {
         super(props);
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide){
-
+            ServerLevel serverLevel = (ServerLevel) level;
             Vec3 lookAngle = player.getLookAngle();
             if (!this.usesAsLightning(player)){
                 player.getCooldowns().addCooldown(this, 40);
@@ -47,9 +47,13 @@ public class ElectromancerStaff extends Item {
                 this.castParticles(player);
                 ElectromancerStaffCastEntity.summon(player, player.position());
             }else{
+                Vec3 ppos = player.position().add(0,player.getEyeHeight() * 0.8f, 0).add(lookAngle.scale(0.5));
+                serverLevel.sendParticles(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), lookAngle, 3,0f,2,level.random.nextBoolean()), ppos.x, ppos.y, ppos.z, 1,0,0,0,0);
+
                 player.getCooldowns().addCooldown(this, 10);
                 BallLightningEntity.summon(player, level, player.getEyePosition().add(lookAngle), lookAngle.scale(2));
             }
+            return InteractionResultHolder.success(player.getItemInHand(hand));
 
         }
         return super.use(level, player, hand);

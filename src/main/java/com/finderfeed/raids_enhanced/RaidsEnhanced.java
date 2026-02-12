@@ -25,6 +25,7 @@ public class RaidsEnhanced {
     public RaidsEnhanced(IEventBus modEventBus, ModContainer modContainer) {
         REAnimations.ANIMATIONS.register(modEventBus);
         REParticles.PARTICLES.register(modEventBus);
+        RECreativeTabs.TABS.register(modEventBus);
         REEntities.ENTITIES.register(modEventBus);
         REModels.MODELS.register(modEventBus);
         RESounds.SOUNDS.register(modEventBus);

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "boat",
+  "ingredients": [
+    {
+      "item": "raidsenhanced:blimp_parts"
+    },
+    {
+      "tag": "minecraft:boats"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "raidsenhanced:player_blimp"
+  }
+}

@@ -3,7 +3,9 @@ package com.finderfeed.raids_enhanced.content.entities.player_blimp;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.init.REAnimations;
+import com.finderfeed.raids_enhanced.init.REItems;
 import com.google.common.collect.Lists;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
@@ -12,6 +14,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +33,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -125,20 +132,25 @@ public class PlayerBlimpEntity extends FDVehicle {
                 Vec3 delta = this.getKnownMovement().multiply(1,0,1);
                 double speed = delta.length();
                 int startTicksTime = 20;
-                if (speed > 0){
+                if (speed > 0 && !(this.getGroundFriction() > 0)){
                     perpellerStartTicks = Mth.clamp(perpellerStartTicks + 1,0, startTicksTime);
                     lastKnownSpeed = speed;
                 }else{
                     perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0, startTicksTime);
                 }
                 float p = (float) perpellerStartTicks / startTicksTime;
-                perpellerRotation += (float) lastKnownSpeed * 2000 * p;
+                perpellerRotation += (float) lastKnownSpeed * 1500 * p;
 
             }else{
                 lastKnownSpeed = 0;
                 perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0,Integer.MAX_VALUE);
             }
         }else{
+
+            for (var passenger : this.getPassengers()){
+                passenger.resetFallDistance();
+            }
+
             if (this.getFirstPassenger() instanceof Player) {
                 if (rotationDirection == 0) {
                     this.getAnimationSystem().stopAnimation(ROTATION_LAYER);
@@ -398,37 +410,6 @@ public class PlayerBlimpEntity extends FDVehicle {
     }
 
 
-    private boolean isUnderwater() {
-        AABB aabb = this.getBoundingBox();
-        double d0 = aabb.maxY + 0.001;
-        int i = Mth.floor(aabb.minX);
-        int j = Mth.ceil(aabb.maxX);
-        int k = Mth.floor(aabb.maxY);
-        int l = Mth.ceil(d0);
-        int i1 = Mth.floor(aabb.minZ);
-        int j1 = Mth.ceil(aabb.maxZ);
-        boolean flag = false;
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-
-        for (int k1 = i; k1 < j; k1++) {
-            for (int l1 = k; l1 < l; l1++) {
-                for (int i2 = i1; i2 < j1; i2++) {
-                    blockpos$mutableblockpos.set(k1, l1, i2);
-                    FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
-                    if (d0 < (double)((float)blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level(), blockpos$mutableblockpos))) {
-                        if (!fluidstate.isSource()) {
-                            return true;
-                        }
-
-                        flag = true;
-                    }
-                }
-            }
-        }
-
-        return flag;
-    }
-
     @Override
     public boolean canRiderInteract() {
         return true;
@@ -570,6 +551,20 @@ public class PlayerBlimpEntity extends FDVehicle {
 
     @Override
     protected Item getDropItem() {
-        return Items.AIR;
+        return REItems.PLAYER_BLIMP.get();
     }
+
+    @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID)
+    public static class Events {
+
+        @SubscribeEvent
+        public static void hurtEvent(LivingIncomingDamageEvent event){
+            var source = event.getSource();
+            if (source != null && source.is(DamageTypes.FALL) && event.getEntity().getVehicle() instanceof PlayerBlimpEntity){
+                event.setCanceled(true);
+            }
+        }
+
+    }
+
 }
