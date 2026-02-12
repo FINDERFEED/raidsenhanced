@@ -2,5 +2,6 @@
   "item.raidsenhanced.player_blimp": "Blimp",
   "item.raidsenhanced.engineer_staff": "Engineer Staff",
   "item.raidsenhanced.blimp_parts": "Blimp Parts",
-  "itemGroup.raidsenhanced": "Raids: Enhanced"
+  "itemGroup.raidsenhanced": "Raids: Enhanced",
+  "raidsenhanced.mount": "Interact with the blimp again to Dismount."
 }

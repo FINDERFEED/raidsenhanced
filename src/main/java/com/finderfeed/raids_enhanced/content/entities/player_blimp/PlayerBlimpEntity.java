@@ -11,6 +11,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -71,6 +72,8 @@ public class PlayerBlimpEntity extends FDVehicle {
 
     private int rotationDirection;
 
+    private Vec3 oldPos;
+
     public PlayerBlimpEntity(EntityType<? extends PlayerBlimpEntity> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
@@ -86,6 +89,7 @@ public class PlayerBlimpEntity extends FDVehicle {
 
     @Override
     public void tick() {
+
 
 
         if (!level().isClientSide){
@@ -124,12 +128,15 @@ public class PlayerBlimpEntity extends FDVehicle {
             blimpRotationSpeed = 0;
         }
 
+        if (oldPos == null){
+            oldPos = this.position();
+        }
 
         if (level().isClientSide){
             perpellerRotationO = perpellerRotation;
             if (this.getControllingPassenger() != null) {
-                Vec3 delta = this.getKnownMovement().multiply(1,0,1);
-                double speed = delta.length();
+                Vec3 delta = this.position().subtract(oldPos).multiply(1,0,1);
+                double speed = Mth.clamp(delta.length(),0, 10);
 
                 int startTicksTime = 20;
                 if (speed > 0 && !(this.getGroundFriction() > 0)){
@@ -139,7 +146,7 @@ public class PlayerBlimpEntity extends FDVehicle {
                     perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0, startTicksTime);
                 }
                 float p = (float) perpellerStartTicks / startTicksTime;
-                perpellerRotation += (float) lastKnownSpeed * 1500 * p;
+                perpellerRotation += (float) lastKnownSpeed * 50 * p;
 
             }else{
                 lastKnownSpeed = 0;
@@ -173,6 +180,8 @@ public class PlayerBlimpEntity extends FDVehicle {
                 this.getAnimationSystem().stopAnimation(DANGLING_LIGHTS);
             }
         }
+
+        oldPos = this.position();
 
     }
 
@@ -404,7 +413,11 @@ public class PlayerBlimpEntity extends FDVehicle {
                         player.stopRiding();
                         return InteractionResult.CONSUME;
                     }
-                    return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
+                    if (player.startRiding(this)){
+                        return InteractionResult.CONSUME;
+                    } else{
+                        return InteractionResult.PASS;
+                    }
                 } else {
                     return InteractionResult.SUCCESS;
                 }
