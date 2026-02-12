@@ -16,6 +16,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -97,10 +98,14 @@ public class RaiderBomb extends FDEntity {
                 continue;
             }
             DamageSource damageSource;
-            float damage = 5;
+            float damage = 10;
             if (entity != null){
                 damageSource = level().damageSources().mobAttack((LivingEntity) entity);
-                damage = (float) ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_DAMAGE);
+                if (!(entity instanceof Player player)) {
+                    damage = (float) ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_DAMAGE);
+                }else{
+                    damage = 10;
+                }
             }else{
                 damageSource = level().damageSources().generic();
             }

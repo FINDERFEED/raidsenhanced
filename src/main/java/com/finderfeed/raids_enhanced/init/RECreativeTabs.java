@@ -21,6 +21,7 @@ public class RECreativeTabs {
                         output.accept(REItems.ENGINEER_STAFF.get());
                         output.accept(REItems.PLAYER_BLIMP.get());
                         output.accept(REItems.BLIMP_PARTS.get());
+                        output.accept(REItems.HANDCANNON.get());
                     })
                     .build()
     );

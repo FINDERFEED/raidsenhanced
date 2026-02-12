@@ -35,7 +35,9 @@ public class EngineerStaff extends Item {
             ServerLevel serverLevel = (ServerLevel) level;
             Vec3 lookAngle = player.getLookAngle();
             if (!this.usesAsLightning(player)){
-                player.getCooldowns().addCooldown(this, 40);
+                if (!player.isCreative()) {
+                    player.getCooldowns().addCooldown(this, 40);
+                }
                 PositionedScreenShakePacket.send((ServerLevel)level, FDShakeData.builder()
                         .frequency(5f)
                         .amplitude(2.5f)
@@ -50,7 +52,9 @@ public class EngineerStaff extends Item {
                 Vec3 ppos = player.position().add(0,player.getEyeHeight() * 0.8f, 0).add(lookAngle.scale(0.5));
                 serverLevel.sendParticles(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), lookAngle, 3,0f,2,level.random.nextBoolean()), ppos.x, ppos.y, ppos.z, 1,0,0,0,0);
 
-                player.getCooldowns().addCooldown(this, 10);
+                if (!player.isCreative()) {
+                    player.getCooldowns().addCooldown(this, 10);
+                }
                 BallLightningEntity.summon(player, level, player.getEyePosition().add(lookAngle), lookAngle.scale(2));
             }
             return InteractionResultHolder.success(player.getItemInHand(hand));

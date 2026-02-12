@@ -17,6 +17,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBli
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttackRenderer;
+import com.finderfeed.raids_enhanced.content.items.handcannon.HandCannonClientItemExtensions;
 import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.BallLightningExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.explosion_particle.RExplosionParticle;
 import com.finderfeed.raids_enhanced.content.particles.lightning_explosion.LightningExplosionParticle;
@@ -24,6 +25,7 @@ import com.finderfeed.raids_enhanced.content.particles.lightning_strike.Lightnin
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticle;
 import com.finderfeed.raids_enhanced.content.particles.vertical_lightning.VerticalLightningParticle;
 import com.finderfeed.raids_enhanced.init.REEntities;
+import com.finderfeed.raids_enhanced.init.REItems;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.mojang.math.Axis;
@@ -33,9 +35,15 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, value = Dist.CLIENT)
 public class REClientEvents {
+
+    @SubscribeEvent
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event){
+        event.registerItem(new HandCannonClientItemExtensions(), REItems.HANDCANNON.get());
+    }
 
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event){
