@@ -30,6 +30,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -69,6 +71,8 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     private boolean isRangedAttacking = false;
 
     private boolean walkingWithHands = true;
+
+    private int destroyBlocksTick;
 
     protected HeadControllerContainer<GolemOfLastResort> headControllerContainer;
 
@@ -112,7 +116,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         super.tick();
         if (!this.level().isClientSide){
 
-
+            this.destroyBlocks();
 
             golemBombsCooldown = Mth.clamp(golemBombsCooldown - 1,0, Integer.MAX_VALUE);
 
@@ -177,6 +181,34 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         }
     }
 
+    private void destroyBlocks() {
+        if (this.destroyBlocksTick > 0) {
+            this.destroyBlocksTick--;
+            if (this.destroyBlocksTick == 0 && net.neoforged.neoforge.event.EventHooks.canEntityGrief(this.level(), this)) {
+                boolean flag = false;
+                int l = Mth.floor(this.getBbWidth() / 2.0F + 1.5F);
+                int i1 = Mth.floor(this.getBbHeight());
+
+                for (BlockPos blockpos : BlockPos.betweenClosed(this.getBlockX() - l, this.getBlockY(), this.getBlockZ() - l, this.getBlockX() + l, this.getBlockY() + i1, this.getBlockZ() + l)) {
+
+                    Vec3 center = blockpos.getCenter();
+                    Vec3 pos = this.position();
+                    Vec3 between = pos.subtract(center).multiply(1,0,1);
+                    if (between.length() < 2.5) {
+                        BlockState blockstate = this.level().getBlockState(blockpos);
+                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate)) {
+                            flag = this.level().destroyBlock(blockpos, true, this) || flag;
+                        }
+                    }
+                }
+
+                if (flag) {
+                    this.level().levelEvent(null, 1022, this.blockPosition(), 0);
+                }
+            }
+        }
+    }
+
 
     private void onAnimationsApplied(FDModel model, Float partialTicks) {
         var system = this.getAnimationSystem();
@@ -202,6 +234,25 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     @Override
     public void applyRaidBuffs(ServerLevel p_348605_, int p_37844_, boolean p_37845_) {
 
+    }
+
+    @Override
+    public boolean hurt(DamageSource src, float damage) {
+
+        var entity = src.getEntity();
+        if (entity == null || entity.distanceTo(this) < 10) {
+            if (super.hurt(src, damage)) {
+                this.destroyBlocksTick = 5;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource src) {
+        return super.isInvulnerableTo(src) || src.is(DamageTypes.MOB_PROJECTILE) || src.is(DamageTypes.ARROW);
     }
 
     @Override
@@ -425,11 +476,18 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
                         this.startAnimationAndAttackTicker(this.meleeAttackType);
                     }else {
+
+                        var movement = this.golem.getDeltaMovement();
+                        Vec3 between = target.position().subtract(this.golem.position()).multiply(1,0,1);
+                        if (!between.equals(Vec3.ZERO) && between.length() > 0.5){
+                            Vec3 addition = between.normalize().scale(0.01f);
+                            this.golem.setDeltaMovement(movement.add(addition));
+                        }
+
                         this.golem.walkingWithHands = true;
                         this.golem.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.LOOK);
                         this.golem.getLookControl().setLookAt(target);
                         var navigation = this.golem.getNavigation();
-//                        navigation.moveTo(target, 1.2f);
                         navigation.moveTo(target.getX(),target.getY(),target.getZ(), 1.2f);
                     }
 
@@ -603,6 +661,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         @Override
         public void stop() {
+            this.golem.walkingWithHands = true;
             this.golem.isMeleeAttacking = false;
             this.golem.getNavigation().stop();
             this.golem.getLookControl().setLookAt(this.golem.getEyePosition().add(this.golem.getLookAngle()));

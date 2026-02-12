@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -96,12 +97,14 @@ public class RaiderBomb extends FDEntity {
                 continue;
             }
             DamageSource damageSource;
+            float damage = 5;
             if (entity != null){
                 damageSource = level().damageSources().mobAttack((LivingEntity) entity);
+                damage = (float) ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_DAMAGE);
             }else{
                 damageSource = level().damageSources().generic();
             }
-            e.hurt(damageSource, 5);
+            e.hurt(damageSource, damage);
             Vec3 speed = e.position().subtract(this.position()).normalize().scale(0.5f).add(0,0.5,0);
             if (e instanceof ServerPlayer serverPlayer){
                 FDLibCalls.setServerPlayerSpeed(serverPlayer, speed);

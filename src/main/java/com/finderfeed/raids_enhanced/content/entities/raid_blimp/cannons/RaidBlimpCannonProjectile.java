@@ -17,6 +17,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.level.Level;
@@ -86,12 +87,14 @@ public class RaidBlimpCannonProjectile extends FDProjectile implements AnimatedO
                 continue;
             }
             DamageSource damageSource;
+            float damage = 5;
             if (entity != null){
                 damageSource = level().damageSources().mobAttack((LivingEntity) entity);
+                damage = (float) ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_DAMAGE);
             }else{
                 damageSource = level().damageSources().generic();
             }
-            e.hurt(damageSource, 5);
+            e.hurt(damageSource, damage);
         }
 
         level().playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3f,1f);

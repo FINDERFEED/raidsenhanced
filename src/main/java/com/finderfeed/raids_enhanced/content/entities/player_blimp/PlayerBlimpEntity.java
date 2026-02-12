@@ -132,7 +132,7 @@ public class PlayerBlimpEntity extends FDVehicle {
                     perpellerStartTicks = Mth.clamp(perpellerStartTicks - 1,0, startTicksTime);
                 }
                 float p = (float) perpellerStartTicks / startTicksTime;
-                perpellerRotation += (float) lastKnownSpeed * 1000 * p;
+                perpellerRotation += (float) lastKnownSpeed * 2000 * p;
 
             }else{
                 lastKnownSpeed = 0;
