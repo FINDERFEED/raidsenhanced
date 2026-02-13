@@ -38,5 +38,20 @@
     "sounds": [
       "raidsenhanced:engineer_ray"
     ]
+  },
+  "engineer_lightning_cast": {
+    "sounds": [
+      "raidsenhanced:engineer_lightning_cast"
+    ]
+  },
+  "ball_lightning_explosion": {
+    "sounds": [
+      "raidsenhanced:ball_lightning_explosion"
+    ]
+  },
+  "engineer_lightning_orb_launch": {
+    "sounds": [
+      "raidsenhanced:engineer_lightning_orb_launch"
+    ]
   }
 }

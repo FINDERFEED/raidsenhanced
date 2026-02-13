@@ -47,7 +47,7 @@ public class VerticalLightningStrikeAttack extends Entity {
         if (!level().isClientSide){
             if (tickCount >= PREPARATION_TIME + 1){
                 this.damageEntities();
-                ((ServerLevel)level()).playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.LIGHTNING_STRIKE.get(), SoundSource.HOSTILE, 2f,random.nextFloat() * 0.8f + 0.2f);
+                ((ServerLevel)level()).playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.LIGHTNING_STRIKE.get(), SoundSource.HOSTILE, 2f,random.nextFloat() * 0.2f + 0.8f);
             }else if (tickCount == PREPARATION_TIME){
                 PositionedScreenShakePacket.send((ServerLevel) level(), FDShakeData.builder()
                         .frequency(5f)

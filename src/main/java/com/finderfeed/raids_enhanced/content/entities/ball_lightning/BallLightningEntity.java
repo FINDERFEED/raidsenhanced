@@ -5,9 +5,11 @@ import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REParticles;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
@@ -88,6 +90,7 @@ public class BallLightningEntity extends Entity {
         if (level() instanceof ServerLevel serverLevel){
             serverLevel.sendParticles(new SimpleTexturedParticleOptions(REParticles.BALL_LIGHTNING_EXPLOSION.get(), 1f, 3), explodePos.x,explodePos.y,explodePos.z,1,0,0,0,0);
         }
+        level().playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.ENGINEER_BALL_LIGHTNING_EXPLOSION.get(), SoundSource.HOSTILE, 2f, random.nextFloat() * 0.2f + 0.9f);
         DamageSources damageSources = level().damageSources();
         DamageSource source;
         float damage;

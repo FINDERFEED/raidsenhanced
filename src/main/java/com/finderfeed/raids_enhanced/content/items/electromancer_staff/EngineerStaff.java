@@ -9,8 +9,10 @@ import com.finderfeed.raids_enhanced.content.particles.lightning_strike.Lightnin
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import com.finderfeed.raids_enhanced.init.REParticles;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,6 +50,7 @@ public class EngineerStaff extends Item {
                 this.damageAndPushAwayEntities(player);
                 this.castParticles(player);
                 ElectromancerStaffCastEntity.summon(player, player.position());
+                level.playSound(null, player.getX(),player.getY(), player.getZ(), RESounds.ENGINEER_LIGHTNING_CAST.get(), SoundSource.PLAYERS, 1f,1f);
             }else{
                 Vec3 ppos = player.position().add(0,player.getEyeHeight() * 0.8f, 0).add(lookAngle.scale(0.5));
                 serverLevel.sendParticles(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), lookAngle, 3,0f,2,level.random.nextBoolean()), ppos.x, ppos.y, ppos.z, 1,0,0,0,0);
@@ -55,6 +58,7 @@ public class EngineerStaff extends Item {
                 if (!player.isCreative()) {
                     player.getCooldowns().addCooldown(this, 10);
                 }
+                level.playSound(null, player.getX(), player.getY(), player.getZ(), RESounds.ENGINEER_BALL_LIGHTNING_LAUNCH.get(), SoundSource.HOSTILE, 2f, level.random.nextFloat() * 0.1f + 0.8f);
                 BallLightningEntity.summon(player, level, player.getEyePosition().add(lookAngle), lookAngle.scale(2));
             }
             return InteractionResultHolder.success(player.getItemInHand(hand));
@@ -83,7 +87,7 @@ public class EngineerStaff extends Item {
         var damage = 10;
 
         Vec3 cylinderStart = caster.position().add(0,-2,0);
-        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, caster.level(), cylinderStart, 3 + caster.getBbHeight(),2, e -> e != caster)){
+        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, caster.level(), cylinderStart, 3 + caster.getBbHeight(),3, e -> e != caster)){
             entity.hurt(caster.level().damageSources().mobAttack(caster), (float) (damage * 1.5f));
             Vec3 between = entity.position().subtract(caster.position());
             Vec3 pushVector = between.normalize().scale(2f);
