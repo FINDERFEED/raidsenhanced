@@ -4,6 +4,7 @@ import com.finderfeed.raids_enhanced.content.particles.AnimatedSpriteParticle;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.renderer.LightTexture;
 import org.jetbrains.annotations.Nullable;
 
 public class VerticalLightningParticle extends AnimatedSpriteParticle {
@@ -20,6 +21,11 @@ public class VerticalLightningParticle extends AnimatedSpriteParticle {
     @Override
     public FacingCameraMode getFacingCameraMode() {
         return FacingCameraMode.LOOKAT_Y;
+    }
+
+    @Override
+    protected int getLightColor(float p_107249_) {
+        return LightTexture.FULL_BRIGHT;
     }
 
     public static class Provider implements ParticleProvider<SimpleTexturedParticleOptions> {

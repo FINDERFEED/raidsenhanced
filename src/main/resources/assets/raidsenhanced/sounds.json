@@ -23,5 +23,20 @@
     "sounds": [
       "raidsenhanced:raid_golem_swing"
     ]
+  },
+  "lightning_strike": {
+    "sounds": [
+      "raidsenhanced:lightning_strike"
+    ]
+  },
+  "engineer_start_ray": {
+    "sounds": [
+      "raidsenhanced:engineer_start_ray"
+    ]
+  },
+  "engineer_ray": {
+    "sounds": [
+      "raidsenhanced:engineer_ray"
+    ]
   }
 }
