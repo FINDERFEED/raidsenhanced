@@ -8,9 +8,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class REUtil {
 
     public static final int GOLEM_SMACK = 1;
+    public static final int LIGHTNING_DEBRIS = 2;
 
     public static void golemSmackParticles(ServerLevel serverLevel, Vec3 pos, double radius){
         posEvent(serverLevel, pos, GOLEM_SMACK, 0, radius);
+    }
+
+    public static void lightningDebris(ServerLevel serverLevel, Vec3 pos, double radius){
+        posEvent(serverLevel, pos, LIGHTNING_DEBRIS, 0, radius);
     }
 
     public static void posEvent(ServerLevel serverLevel, Vec3 pos, int event, int data, double radius){

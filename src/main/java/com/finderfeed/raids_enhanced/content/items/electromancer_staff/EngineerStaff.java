@@ -4,7 +4,9 @@ import com.finderfeed.fdlib.FDLibCalls;
 import com.finderfeed.fdlib.systems.shake.FDShakeData;
 import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
+import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
@@ -107,15 +109,26 @@ public class EngineerStaff extends Item {
 
     private void castParticles(LivingEntity caster){
         Vec3 lpos = caster.position().add(caster.getForward().multiply(1,0,1).normalize().scale(0.75f));
+        REUtil.lightningDebris((ServerLevel) caster.level(), lpos, 60);
+
+        var players = FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, caster.level(), caster.position(), 40);
+
         for (var dir : new HorizontalCircleRandomDirections(caster.level().random, 6, 0)) {
             Vec3 direction = dir.add(0, 0.5, 0);
             Vec3 pos = lpos.add(direction.multiply(0.4, 0.25, 0.4));
-            for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, caster.level(), caster.position(), 40)) {
+            for (var serverPlayer : players) {
 
                 ((ServerLevel)caster.level()).sendParticles(serverPlayer,
                         new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), direction, 1f, 4),
                         true, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
             }
+        }
+
+        for (var serverPlayer : players) {
+
+            ((ServerLevel)caster.level()).sendParticles(serverPlayer,
+                    new SimpleTexturedParticleOptions(REParticles.VERTICAL_LIGHTNING.get(), 2f, 5),
+                    true, lpos.x, lpos.y + 2, lpos.z, 1, 0, 0, 0, 0);
         }
     }
 

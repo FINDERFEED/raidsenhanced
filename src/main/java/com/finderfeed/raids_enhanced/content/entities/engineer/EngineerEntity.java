@@ -14,6 +14,7 @@ import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.client.particles.BoneAttachedParticles;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
@@ -24,6 +25,7 @@ import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirectio
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +36,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -341,7 +344,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
     }
 
 
-    public static class BallLightningRangedAttack extends Goal{
+    public static class BallLightningRangedAttack extends Goal {
 
         private EngineerEntity entity;
 
@@ -410,6 +413,8 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                         .important()
                         .build());
             }else if (attackTick == 5){
+
+                this.entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), RESounds.ENGINEER_BALL_LIGHTNING_LAUNCH.get(), SoundSource.HOSTILE, 2f, entity.random.nextFloat() * 0.1f + 0.9f);
 
                 Vec3 pos = this.entity.position();
 
@@ -597,6 +602,8 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
             }else if (useTick == 13){
                 this.entity.triggerPrepareParticle();
             }else if (useTick == firstLightningStart){
+
+                ((ServerLevel)entity.level()).playSound(null, entity.getX(), entity.getY(), entity.getZ(), RESounds.LIGHTNING_STRIKE.get(), SoundSource.HOSTILE, 2f,entity.random.nextFloat() * 0.2f + 0.8f);
                 this.castParticles();
                 this.damageAndPushAwayEntities();
                 this.entity.spawnLightningAttacksAround(4, 4, ryRot);
@@ -637,15 +644,26 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
 
         private void castParticles(){
             Vec3 lpos = this.entity.position().add(this.entity.getForward().multiply(1,0,1).normalize().scale(0.75f));
+            REUtil.lightningDebris((ServerLevel) entity.level(), lpos, 60);
+
+            var players = FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, this.entity.level(), this.entity.position(), 40);
+
             for (var dir : new HorizontalCircleRandomDirections(this.entity.level().random, 6, 0)) {
                 Vec3 direction = dir.add(0, 0.5, 0);
                 Vec3 pos = lpos.add(direction.multiply(0.4, 0.25, 0.4));
-                for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, this.entity.level(), this.entity.position(), 40)) {
+                for (var serverPlayer : players) {
 
                     ((ServerLevel)this.entity.level()).sendParticles(serverPlayer,
                             new LightningStrikeParticleOptions(REParticles.LIGHTNING_STRIKE.get(), direction, 1f, 4),
                             true, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
                 }
+            }
+
+            for (var serverPlayer : players) {
+
+                ((ServerLevel)this.entity.level()).sendParticles(serverPlayer,
+                        new SimpleTexturedParticleOptions(REParticles.VERTICAL_LIGHTNING.get(), 2f, 5),
+                        true, lpos.x, lpos.y + 2, lpos.z, 1, 0, 0, 0, 0);
             }
         }
 
@@ -771,7 +789,6 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
             if (useTick == 0){
                 this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_CHARGE_STICK)
                         .build());
-
             } else if (useTick == 10){
 
                 LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, this.entity.level());
@@ -788,7 +805,10 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                         .build(),lpos,30);
                 this.entity.level().addFreshEntity(lightningBolt);
 
-            } else if (useTick == stickChargeDuration){
+                this.entity.level().playSound(null, this.entity.getX(), this.entity.getY(), this.entity.getZ(), RESounds.ENGINEER_START_RAY.get(), SoundSource.HOSTILE, 2f, 1f);
+            } else if (useTick == stickChargeDuration - 11){
+            }else if (useTick == stickChargeDuration){
+
                 this.entity.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_RAY_CHARGE)
                         .build());
                 this.entity.triggerPrepareParticle();
@@ -798,7 +818,12 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                 this.rotateToTarget(target);
                 laserState = true;
 
+                if (useTick % 3 == 0 && useTick < rayStartTime + rayDuration + stickChargeDuration - 15){
+                    this.entity.level().playSound(null, this.entity.getX(), this.entity.getY(), this.entity.getZ(), RESounds.ENGINEER_RAY.get(), SoundSource.HOSTILE, 2f, 1f);
+                }
+
                 if (useTick % 2 == 0) {
+
                     Vec3 start = this.entity.getEyePosition();
                     Vec3 end = this.entity.getLaserTarget(1);
                     var damage = this.entity.getAttributeValue(Attributes.ATTACK_DAMAGE);

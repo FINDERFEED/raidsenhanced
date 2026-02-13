@@ -29,8 +29,45 @@ public class REClientUtil {
             case REUtil.GOLEM_SMACK -> {
                 golemSmack(pos, data);
             }
+            case REUtil.LIGHTNING_DEBRIS -> {
+                lightningDebris(pos, data);
+            }
         }
     }
+
+
+
+    public static void lightningDebris(Vec3 pos, int data){
+
+        var level = FDClientHelpers.getClientLevel();
+
+        var states = collectStates(level, pos, 2);
+        if (states.isEmpty()){
+            return;
+        }
+
+        ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+
+        for (int i = 0; i < 4; i++){
+            for (var dir : new HorizontalCircleRandomDirections(level.random, (i + 1) * 5, 1f)){
+
+                float strength = i * 0.05f + level.random.nextFloat() * 0.025f;
+                float vspeed = level.random.nextFloat() * 0.4f + 0.2f;
+
+                Vec3 ppos = pos.add(dir.scale(level.random.nextFloat())).add(0,0.1,0);
+                Vec3 pspeed = dir.scale(strength).add(0,vspeed, 0);
+
+                var particle = particleEngine.createParticle(new BlockParticleOption(ParticleTypes.BLOCK, states.get(level.random.nextInt(states.size()))),
+                        ppos.x,ppos.y,ppos.z,
+                        pspeed.x,pspeed.y,pspeed.z);
+                if (particle != null) {
+                    particle.setParticleSpeed(pspeed.x,pspeed.y,pspeed.z);
+                }
+            }
+        }
+
+    }
+
 
     public static void golemSmack(Vec3 pos, int data){
 

@@ -3,6 +3,8 @@ package com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike
 import com.finderfeed.fdlib.systems.shake.FDShakeData;
 import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.REClientUtil;
+import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
@@ -48,6 +50,7 @@ public class VerticalLightningStrikeAttack extends Entity {
             if (tickCount >= PREPARATION_TIME + 1){
                 this.damageEntities();
                 ((ServerLevel)level()).playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.LIGHTNING_STRIKE.get(), SoundSource.HOSTILE, 2f,random.nextFloat() * 0.2f + 0.8f);
+
             }else if (tickCount == PREPARATION_TIME){
                 PositionedScreenShakePacket.send((ServerLevel) level(), FDShakeData.builder()
                         .frequency(5f)
@@ -59,6 +62,7 @@ public class VerticalLightningStrikeAttack extends Entity {
             }
         }else{
             if (tickCount == PREPARATION_TIME){
+                REClientUtil.lightningDebris(this.position(), 0);
                 this.level().addParticle(new SimpleTexturedParticleOptions(REParticles.VERTICAL_LIGHTNING.get(), 2f, 5), true, this.getX(), this.getY() + 2, this.getZ(), 0,0,0);
                 for (var dir : new HorizontalCircleRandomDirections(level().random, 6, 0)){
                     Vec3 direction = dir.add(0,0.5,0);
