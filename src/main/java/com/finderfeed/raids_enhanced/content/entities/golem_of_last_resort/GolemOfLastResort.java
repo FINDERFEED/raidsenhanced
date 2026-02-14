@@ -196,7 +196,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     Vec3 between = pos.subtract(center).multiply(1,0,1);
                     if (between.length() < 2.5) {
                         BlockState blockstate = this.level().getBlockState(blockpos);
-                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate)) {
+                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate) && !blockstate.getCollisionShape(level(), blockpos).isEmpty()) {
                             flag = this.level().destroyBlock(blockpos, true, this) || flag;
                         }
                     }
@@ -309,6 +309,11 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     @Override
     public HeadControllerContainer<GolemOfLastResort> getHeadControllerContainer() {
         return this.headControllerContainer;
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource p_33034_) {
+        return RESounds.RAID_GOLEM_HIT.get();
     }
 
     public static class GolemBombsAttack extends Goal {

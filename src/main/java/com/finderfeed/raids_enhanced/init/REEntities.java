@@ -120,14 +120,16 @@ public class REEntities {
 
 
         event.put(GOLEM_OF_LAST_RESORT.get(), IronGolem.createAttributes()
-                .add(Attributes.MAX_HEALTH, 300)
+                .add(Attributes.MAX_HEALTH, 200)
                 .add(Attributes.FOLLOW_RANGE, 30.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.3f)
+                .add(Attributes.ARMOR, 8.0)
                 .build());
 
         event.put(ENGINEER.get(), Pillager.createAttributes()
                         .add(Attributes.KNOCKBACK_RESISTANCE, 0.8f)
                         .add(Attributes.MAX_HEALTH, 100)
+                        .add(Attributes.ARMOR, 8.0)
                 .build());
 
 

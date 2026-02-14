@@ -74,6 +74,7 @@ public class REClientEvents {
                         .addLayer(FDEntityRenderLayerOptions.<EngineerEntity>builder()
                                 .model(REModels.ELECTROMANCER)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/electromancer.png")))
+                                .addBoneController("head", new HeadBoneTransformation<>())
                                 .build())
                         .shouldRender(((electromancerEntity, frustum, v, v1, v2) -> {
                             return true;

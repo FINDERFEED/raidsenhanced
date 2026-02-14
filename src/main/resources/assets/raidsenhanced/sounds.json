@@ -53,5 +53,10 @@
     "sounds": [
       "raidsenhanced:engineer_lightning_orb_launch"
     ]
+  },
+  "raid_golem_hit": {
+    "sounds": [
+      "raidsenhanced:raid_golem_hit"
+    ]
   }
 }

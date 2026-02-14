@@ -8,6 +8,8 @@ import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.fdlib.systems.bedrock.animations.Animation;
 import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadControllerContainer;
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.IHasHead;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.systems.shake.FDShakeData;
 import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
@@ -63,7 +65,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class EngineerEntity extends FDRaider implements AutoSerializable {
+public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHead<EngineerEntity> {
 
 
     public static final String MAIN_LAYER = "IDLE";
@@ -93,17 +95,19 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
     public boolean isUsingElectricRay = false;
     public boolean isUsingLightningsAttack = false;
 
-    private boolean walkingWithHands = true;
+    private HeadControllerContainer<EngineerEntity> headControllerContainer;
 
     public EngineerEntity(EntityType<? extends Raider> p_37839_, Level p_37840_) {
         super(p_37839_, p_37840_);
         this.getNavigation().setCanFloat(true);
-        this.lookControl = new LookControl(this) {
+
+        this.lookControl = headControllerContainer = (new HeadControllerContainer<>(this) {
             @Override
             protected boolean resetXRotOnTick() {
                 return false;
             }
-        };
+        }).addHeadController(getModel(level()), "head");
+
         if (level().isClientSide){
             this.boneAttachedParticles = new BoneAttachedParticles(getModel(level()), this, LIGHTNING_START, Vec3.ZERO);
         }
@@ -167,6 +171,8 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                 this.setYRot(this.yBodyRot);
             }
         }else{
+
+            this.getHeadControllerContainer().clientTick();
             this.boneAttachedParticles.clientTick(this.position());
         }
     }
@@ -190,6 +196,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
 
                 if (this.isIdleAnim(animation) || animation.isToNullTransition()) {
                     this.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_WALK)
+                                    .setSpeed(1.5f)
                             .build());
                 }
 
@@ -343,6 +350,11 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
         return SoundEvents.PILLAGER_HURT;
     }
 
+    @Override
+    public HeadControllerContainer<EngineerEntity> getHeadControllerContainer() {
+        return headControllerContainer;
+    }
+
 
     public static class BallLightningRangedAttack extends Goal {
 
@@ -371,7 +383,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
         public void stop() {
             super.stop();
             attackTick = 0;
-            this.entity.walkingWithHands = false;
+//            this.entity.walkingWithHands = false;
             this.entity.getAnimationSystem().stopAnimation(WALKING_LAYER);
             this.entity.setSpeed(0);
             this.entity.setZza(0);
@@ -387,7 +399,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                 this.tickAttack(target);
             }else{
                 this.attackTick = 0;
-                this.entity.walkingWithHands = false;
+//                this.entity.walkingWithHands = false;
                 this.entity.getNavigation().moveTo(target, 1f);
             }
         }
@@ -399,7 +411,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
             this.entity.lookAt(EntityAnchorArgument.Anchor.EYES, target.position());
             this.processStrafing(target);
 
-            this.entity.walkingWithHands = true;
+//            this.entity.walkingWithHands = true;
             this.entity.getAnimationSystem().startAnimation(WALKING_LAYER, AnimationTicker.builder(REAnimations.ELECTROMANCER_WALK_NO_HANDS)
                     .setToNullTransitionTime(10)
                     .build());
@@ -608,7 +620,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                 this.damageAndPushAwayEntities();
                 this.entity.spawnLightningAttacksAround(4, 4, ryRot);
 
-                this.entity.spawnLighting(target.getOnPos());
+                this.entity.trySpawnLightning(target.getOnPos());
 
             }else if (useTick == firstLightningStart + 5){
                 this.entity.spawnLightningAttacksAround(8, 8, ryRot + FDMathUtil.FPI / 2);
@@ -625,7 +637,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
         private void damageAndPushAwayEntities(){
             var damage = this.entity.getAttributeValue(Attributes.ATTACK_DAMAGE);
             Vec3 cylinderStart = this.entity.position().add(0,-2,0);
-            for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.entity.level(), cylinderStart, 3 + this.entity.getBbHeight(),2, e -> e != this.entity)){
+            for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, this.entity.level(), cylinderStart, 3 + this.entity.getBbHeight(),2.5f, e -> e != this.entity)){
                 entity.hurt(this.entity.level().damageSources().mobAttack(this.entity), (float) (damage * 1.5f));
                 Vec3 between = entity.position().subtract(this.entity.position());
                 Vec3 pushVector = between.normalize().scale(2f);
@@ -828,7 +840,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable {
                     Vec3 end = this.entity.getLaserTarget(1);
                     var damage = this.entity.getAttributeValue(Attributes.ATTACK_DAMAGE);
                     for (var entity : FDHelpers.traceEntities(this.entity.level(), start, end, 0.1f, (entity) -> entity != this.entity)) {
-                        entity.hurt(this.entity.level().damageSources().mobAttack(this.entity), (float) damage * 0.25f);
+                        entity.hurt(this.entity.level().damageSources().mobAttack(this.entity), (float) damage * 0.5f);
                     }
                 }
 

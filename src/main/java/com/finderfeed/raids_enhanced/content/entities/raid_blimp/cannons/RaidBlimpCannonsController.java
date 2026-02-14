@@ -51,7 +51,7 @@ public class RaidBlimpCannonsController {
         float cylinderRadius = 35;
         var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, raidBlimp.level(), raidBlimp.position().add(0,-cylinderSideHeight,0), cylinderSideHeight * 2, cylinderRadius, (target)->{
             if (!target.isDeadOrDying() && target != this.getRaidBlimp()){
-                return target instanceof AbstractVillager || (target instanceof Player player && !player.isSpectator() && !player.isCreative()) || target instanceof IronGolem;
+                return raidBlimp.checkTargetClass(target);
             }else{
                 return false;
             }
@@ -69,6 +69,20 @@ public class RaidBlimpCannonsController {
             this.processShooting(this.leftCannons);
         }
 
+    }
+
+    public boolean hasTargets(){
+        for (var cannon : rightCannons){
+            if (cannon.getTarget() != null){
+                return true;
+            }
+        }
+        for (var cannon : leftCannons){
+            if (cannon.getTarget() != null){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processShooting(RaidBlimpCannon[] cannons) {

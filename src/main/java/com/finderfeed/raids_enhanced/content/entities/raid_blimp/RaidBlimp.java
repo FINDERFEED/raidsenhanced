@@ -127,6 +127,8 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
                 this.detectEntitiesBeneathAndThrowBomb();
             }
             if (!this.shouldFlyToRaidCenter()) {
+                this.lowerBlimpIfNoTargets();
+                this.tickPlayersNearby();
                 this.flyToHurtBy();
                 this.turnToLastHurtBy();
             }else{
@@ -149,6 +151,32 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
             this.getNavigation().moveTo(vcenter.x,vcenter.y,vcenter.z,1f);
         }else{
             isInRaidRadius = true;
+        }
+    }
+
+    private void tickPlayersNearby(){
+        if (this.tickCount % 4 == 0) {
+            var players = FDTargetFinder.getEntitiesInCylinder(Player.class, level(), this.position().add(0, -15, 0), 30, 20, player -> {
+                return !(player.isCreative() || player.isSpectator());
+            });
+            if (!players.isEmpty()) {
+                Player player = players.get(random.nextInt(players.size()));
+                this.lastHurtBy = player;
+            }
+        }
+    }
+
+    private void lowerBlimpIfNoTargets(){
+        if (!this.isMoving && lastHurtBy == null){
+            var controller = this.cannonsController;
+            if (!controller.hasTargets()){
+                int y = this.level().getHeight(Heightmap.Types.MOTION_BLOCKING, this.getBlockX(), this.getBlockZ()) + HEIGHT_ABOVE_GROUND;
+                double ty = this.getY();
+                if (ty - y > 5){
+                    this.setDeltaMovement(this.getDeltaMovement().add(0,-0.01,0));
+                }
+            }
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.97f));
         }
     }
 
@@ -306,6 +334,10 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
         return result;
     }
 
+    public boolean checkTargetClass(Entity target){
+        return target instanceof AbstractVillager || (target instanceof Player player && !player.isSpectator() && !player.isCreative()) || target instanceof IronGolem;
+    }
+
     @Override
     protected void tickDeath() {
         this.deathTime++;
@@ -449,7 +481,7 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
                 float downDistance = 40;
                 var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level(), this.position().add(0, -downDistance, 0), downDistance, 5, entity -> {
                     if (!entity.isDeadOrDying() && entity != this){
-                        if (entity instanceof AbstractVillager || (entity instanceof Player player && !player.isSpectator() && !player.isCreative()) || entity instanceof IronGolem){
+                        if (this.checkTargetClass(entity)){
                             ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
                             var res = level().clip(clipContext);
                             return res.getType() == HitResult.Type.MISS;

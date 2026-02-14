@@ -90,7 +90,7 @@ public class VerticalLightningStrikeAttack extends Entity {
         }
 
         Vec3 cylinderStart = this.position().add(0,-1,0);
-        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level, cylinderStart, 5,1.5f, e -> e != ownerEntity)) {
+        for (var entity : FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level, cylinderStart, 5,2f, e -> e != ownerEntity)) {
             if (ownerEntity instanceof LivingEntity livingEntity) {
                 entity.hurt(this.level().damageSources().mobAttack(livingEntity), (float) damage);
             }else{
