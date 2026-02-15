@@ -1,11 +1,18 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_drill;
 
+import com.finderfeed.fdlib.nbt.AutoSerializable;
+import com.finderfeed.fdlib.nbt.SerializableField;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
@@ -14,6 +21,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -22,20 +30,45 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RaidDrill extends FDRaider {
+public class RaidDrill extends FDRaider implements AutoSerializable {
+
+    public static final EntityDataAccessor<Boolean> IS_VISIBLE = SynchedEntityData.defineId(RaidDrill.class, EntityDataSerializers.BOOLEAN);
 
     public static TagKey<Block> CANNOT_DIG_OUT_FROM = BlockTags.create(RaidsEnhanced.location("cannot_dig_out_from"));
 
+    @SerializableField
+    public int reDigTicker = 0;
+
+    @SerializableField
+    public int hits = 0;
+
+    @SerializableField
+    public int raidersSpawningTicker = -1;
+
+    @SerializableField
+    private int raidersToSpawn = 0;
+
     public BlockPos testRaidPos;
+
 
     public RaidDrill(EntityType<? extends Raider> drill, Level level) {
         super(drill, level);
         this.setNoGravity(true);
+    }
+
+    @Override
+    protected void registerGoals() {
+
     }
 
     @Override
@@ -46,29 +79,101 @@ public class RaidDrill extends FDRaider {
             if (testRaidPos == null){
                 this.remove(RemovalReason.DISCARDED);
             }else{
-                if (tickCount % 50 == 0){
-                    BlockPos blockPos = this.calculateDigOutPos(testRaidPos);
-                    if (blockPos != null) {
-                        this.teleportTo(blockPos.getX() + 0.5, blockPos.getY() + 1, blockPos.getZ() + 0.5);
-                    }
+
+                if (this.getVehicle() != null){
+                    this.stopRiding();
                 }
-                this.addEffect(new MobEffectInstance(MobEffects.GLOWING,20,1));
+
+                this.tickReDig();
+                this.tickRaidersSpawning();
             }
         }
 
     }
 
-    @Override
-    public boolean hurt(DamageSource src, float damage) {
-        if (super.hurt(src, 0.01f)){
-            if (testRaidPos != null) {
+    public void tickRaidersSpawning(){
+        if (this.raidersSpawningTicker != -1){
+
+            if (this.raidersToSpawn > 0 && this.raidersSpawningTicker % 60 == 0){
+                if (this.spawnRaider()){
+                    this.raidersToSpawn--;
+                }
+            }
+
+            this.raidersSpawningTicker++;
+        }
+    }
+
+    private boolean spawnRaider(){
+        EntityType<? extends Raider> type;
+        if (random.nextInt(2) == 1){
+            type = EntityType.VINDICATOR;
+        }else{
+            type = EntityType.PILLAGER;
+        }
+        Entity entity = type.create(level());
+        if (entity instanceof Raider raider) {
+            if (this.raid != null){
+                this.raid.joinRaid(this.raid.getGroupsSpawned(), raider, this.getOnPos(), false);
+            }else{
+                entity.setPos(this.position());
+                raider.finalizeSpawn((ServerLevel) this.level(), this.level().getCurrentDifficultyAt(this.getOnPos()), MobSpawnType.EVENT, null);
+                level().addFreshEntity(raider);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void tickReDig(){
+        if (this.reDigTicker != -1){
+
+            if (this.reDigTicker == 0){
                 BlockPos blockPos = this.calculateDigOutPos(testRaidPos);
                 if (blockPos != null) {
                     this.teleportTo(blockPos.getX() + 0.5, blockPos.getY() + 1, blockPos.getZ() + 0.5);
                 }
             }
+
+            this.reDigTicker++;
+            if (this.reDigTicker > 10) {
+                this.raidersSpawningTicker = 0;
+                this.raidersToSpawn = 3 + random.nextInt(2);
+                this.reDigTicker = -1;
+
+            }
         }
+    }
+
+    @Override
+    public boolean hurt(DamageSource src, float damage) {
+
+        if (src.getEntity() != null){
+            if (reDigTicker == -1 && super.hurt(src, 0.1f)){
+                if (++hits >= 3){
+                    int newHealth = (int) this.getHealth();
+                    if (newHealth == 0){
+                        this.setHealth(0);
+                        this.die(src);
+                    }else {
+                        this.launchReDig();
+                        this.setHealth(newHealth);
+                    }
+                }
+                return true;
+            }
+        }else{
+            return (src.is(DamageTypes.FELL_OUT_OF_WORLD) || src.is(DamageTypes.GENERIC_KILL)) && super.hurt(src, damage);
+        }
+
         return false;
+    }
+
+    private void launchReDig(){
+        this.raidersToSpawn = 0;
+        this.raidersSpawningTicker = -1;
+        this.reDigTicker = 0;
+        hits = 0;
     }
 
     private BlockPos calculateDigOutPos(BlockPos origin){
@@ -130,9 +235,18 @@ public class RaidDrill extends FDRaider {
     }
 
     private boolean isBlockNotValidForSpawn(BlockState blockState){
-        Block block = blockState.getBlock();
-//        return blockState.is(BlockTags.PLANKS) || blockState.is(BlockTags.FENCES) || blockState.is(Blocks.COBBLESTONE);
         return blockState.is(CANNOT_DIG_OUT_FROM);
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource p_33034_) {
+        return SoundEvents.WOOD_BREAK;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(IS_VISIBLE, false);
     }
 
     @Override
@@ -149,6 +263,7 @@ public class RaidDrill extends FDRaider {
     protected boolean canRide(Entity p_20339_) {
         return false;
     }
+
 
     @Override
     public SoundEvent getCelebrateSound() {
@@ -167,6 +282,37 @@ public class RaidDrill extends FDRaider {
 
     @Override
     public void setDeltaMovement(double p_20335_, double p_20336_, double p_20337_) {
+
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        this.autoSave(tag);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.autoLoad(tag);
+    }
+
+    @EventBusSubscriber
+    public static class Events {
+
+        @SubscribeEvent
+        public static void effectEvent(MobEffectEvent.Applicable event){
+            if (event.getEntity() instanceof RaidDrill raidDrill && event.getEffectInstance() != null && !event.getEffectInstance().is(MobEffects.GLOWING)){
+                event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+            }
+        }
+
+        @SubscribeEvent
+        public static void targetEvent(LivingChangeTargetEvent event){
+            if (event.getNewAboutToBeSetTarget() instanceof RaidDrill){
+                event.setCanceled(true);
+            }
+        }
 
     }
 
