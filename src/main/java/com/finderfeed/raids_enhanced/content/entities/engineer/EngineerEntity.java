@@ -40,6 +40,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -569,6 +570,22 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
         return state.getCollisionShape(level(), blockPos).isEmpty() && !stateBelow.getCollisionShape(level(), blockPos.below()).isEmpty();
     }
 
+    @Override
+    public void checkDespawn() {
+        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.discard();
+        } else {
+            this.noActionTime = 0;
+        }
+    }
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return true;
+    }
+
+
     public static class LightningsAttack extends Goal {
 
 
@@ -678,6 +695,8 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
                         true, lpos.x, lpos.y + 2, lpos.z, 1, 0, 0, 0, 0);
             }
         }
+
+
 
         @Override
         public void start() {

@@ -30,6 +30,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
@@ -206,6 +207,17 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     this.level().levelEvent(null, 1022, this.blockPosition(), 0);
                 }
             }
+        }
+    }
+
+
+    @Override
+    public void checkDespawn() {
+        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.discard();
+        } else {
+            this.noActionTime = 0;
         }
     }
 

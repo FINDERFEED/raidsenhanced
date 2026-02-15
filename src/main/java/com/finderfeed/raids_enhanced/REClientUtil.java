@@ -124,7 +124,7 @@ public class REClientUtil {
 
     }
 
-    private static List<BlockState> collectStates(Level level, Vec3 pos, int radius){
+    public static List<BlockState> collectStates(Level level, Vec3 pos, int radius){
 
         BlockPos blockPos = new BlockPos(
                 (int) Math.floor(pos.x),

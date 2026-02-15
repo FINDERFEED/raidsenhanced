@@ -2,8 +2,13 @@ package com.finderfeed.raids_enhanced.content.entities.raid_drill;
 
 import com.finderfeed.fdlib.nbt.AutoSerializable;
 import com.finderfeed.fdlib.nbt.SerializableField;
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
+import com.finderfeed.fdlib.util.math.FDMathUtil;
+import com.finderfeed.raids_enhanced.REClientUtil;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
+import com.finderfeed.raids_enhanced.init.REAnimations;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +20,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -42,9 +48,13 @@ import java.util.List;
 
 public class RaidDrill extends FDRaider implements AutoSerializable {
 
+    public static final String BURROW_LAYER = "BURROWED";
+
     public static final EntityDataAccessor<Boolean> IS_VISIBLE = SynchedEntityData.defineId(RaidDrill.class, EntityDataSerializers.BOOLEAN);
 
     public static TagKey<Block> CANNOT_DIG_OUT_FROM = BlockTags.create(RaidsEnhanced.location("cannot_dig_out_from"));
+
+    protected List<BlockState> blocksToRender = new ArrayList<>();
 
     @SerializableField
     public int reDigTicker = 0;
@@ -64,6 +74,10 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     public RaidDrill(EntityType<? extends Raider> drill, Level level) {
         super(drill, level);
         this.setNoGravity(true);
+        this.getAnimationSystem().startAnimation("IDLE", AnimationTicker.builder(REAnimations.RAIDER_DRILL_IDLE)
+                .build());
+        this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_UNBURROW)
+                .build());
     }
 
     @Override
@@ -76,6 +90,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
         super.tick();
 
         if (!level().isClientSide){
+
             if (testRaidPos == null){
                 this.remove(RemovalReason.DISCARDED);
             }else{
@@ -86,6 +101,10 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
 
                 this.tickReDig();
                 this.tickRaidersSpawning();
+            }
+        }else {
+            if (tickCount % 4 == 0) {
+                this.blocksToRender = REClientUtil.collectStates(level(), this.position().add(0,-0.5,0), 1);
             }
         }
 
@@ -128,21 +147,65 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     public void tickReDig(){
         if (this.reDigTicker != -1){
 
+            int burrowedTime = REAnimations.RAIDER_DRILL_BURROW.get().getAnimTime();
+
+            int unburrowTime = burrowedTime + 10;
+
+            if (this.reDigTicker >= burrowedTime && this.reDigTicker <= unburrowTime){
+                this.setVisible(false);
+            }else{
+                this.setVisible(true);
+            }
+
             if (this.reDigTicker == 0){
+                this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_BURROW)
+                        .build());
+            } else if (this.reDigTicker == burrowedTime + 5){
                 BlockPos blockPos = this.calculateDigOutPos(testRaidPos);
                 if (blockPos != null) {
                     this.teleportTo(blockPos.getX() + 0.5, blockPos.getY() + 1, blockPos.getZ() + 0.5);
-                }
-            }
 
-            this.reDigTicker++;
-            if (this.reDigTicker > 10) {
+                    Vec3 lookAtPos;
+                    if (this.raid != null){
+                        lookAtPos = blockPos.getCenter();
+                    }else{
+                        lookAtPos = this.position().add(new Vec3(1,0,0).yRot(FDMathUtil.FPI * 2 * random.nextFloat()));
+                    }
+
+                    this.lookAt(EntityAnchorArgument.Anchor.FEET, lookAtPos);
+                }
+            } else if (this.reDigTicker == burrowedTime + 10){
+                this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_UNBURROW)
+                        .build());
+            } else if (this.reDigTicker >= unburrowTime + REAnimations.RAIDER_DRILL_UNBURROW.get().getAnimTime() + 10){
                 this.raidersSpawningTicker = 0;
                 this.raidersToSpawn = 3 + random.nextInt(2);
                 this.reDigTicker = -1;
-
+                return;
             }
+
+            this.reDigTicker++;
+
+        }else{
+            this.setVisible(true);
+            this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_UNBURROW)
+                    .build());
         }
+    }
+
+    @Override
+    public void checkDespawn() {
+        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.discard();
+        } else {
+            this.noActionTime = 0;
+        }
+    }
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return true;
     }
 
     @Override
@@ -167,6 +230,14 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
         }
 
         return false;
+    }
+
+    public boolean isVisible(){
+        return this.getEntityData().get(IS_VISIBLE);
+    }
+
+    public void setVisible(boolean state){
+        this.getEntityData().set(IS_VISIBLE, state);
     }
 
     private void launchReDig(){

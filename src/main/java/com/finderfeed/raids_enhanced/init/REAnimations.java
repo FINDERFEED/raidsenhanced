@@ -123,5 +123,17 @@ public class REAnimations {
         return new Animation(RaidsEnhanced.location("player_blimp"));
     });
 
+    public static DeferredHolder<Animation,Animation> RAIDER_DRILL_BURROW = ANIMATIONS.register("raider_drill_burrow", ()->{
+        return new Animation(RaidsEnhanced.location("raider_drill"));
+    });
+
+    public static DeferredHolder<Animation,Animation> RAIDER_DRILL_UNBURROW = ANIMATIONS.register("raider_drill_unburrow", ()->{
+        return new Animation(RaidsEnhanced.location("raider_drill"));
+    });
+
+    public static DeferredHolder<Animation,Animation> RAIDER_DRILL_IDLE = ANIMATIONS.register("raider_drill_idle", ()->{
+        return new Animation(RaidsEnhanced.location("raider_drill"));
+    });
+
 
 }

@@ -17,6 +17,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBli
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
 import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
+import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrillRenderer;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttackRenderer;
 import com.finderfeed.raids_enhanced.content.items.handcannon.HandCannonClientItemExtensions;
 import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.BallLightningExplosionParticle;
@@ -69,6 +70,14 @@ public class REClientEvents {
                                 .model(REModels.RAID_DRILL)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raider_drill.png")))
                                 .build())
+                        .addLayer(FDEntityRenderLayerOptions.<RaidDrill>builder()
+                                .model(REModels.RAID_DRILL)
+                                .renderType(RenderType.entityTranslucentCull(RaidsEnhanced.location("textures/entities/raider_drill_culled.png")))
+                                .build())
+                        .shouldRender(((raidDrill, frustum, v, v1, v2) -> {
+                            return raidDrill.isVisible();
+                        }))
+                        .freeRender(new RaidDrillRenderer())
                         .build());
 
         event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), FDEntityRendererBuilder.<PlayerBlimpEntity>builder()

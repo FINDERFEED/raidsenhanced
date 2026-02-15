@@ -33,7 +33,7 @@ public class REEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, RaidsEnhanced.MOD_ID);
 
     public static final Supplier<EntityType<RaidBlimp>> RAID_BLIMP = ENTITIES.register("raid_blimp",()->EntityType.Builder.<RaidBlimp>of(
-                    RaidBlimp::new, MobCategory.CREATURE
+                    RaidBlimp::new, MobCategory.MONSTER
             )
             .sized(3f,4f)
             .build("raid_blimp"));
@@ -57,7 +57,7 @@ public class REEntities {
             .build("raid_airship_part"));
 
     public static final Supplier<EntityType<GolemOfLastResort>> GOLEM_OF_LAST_RESORT = ENTITIES.register("golem_of_last_resort",()->EntityType.Builder.<GolemOfLastResort>of(
-                    GolemOfLastResort::new, MobCategory.CREATURE
+                    GolemOfLastResort::new, MobCategory.MONSTER
             )
             .sized(1.4f,2.6f)
             .eyeHeight(2.05f)
@@ -93,16 +93,16 @@ public class REEntities {
 
 
     public static final Supplier<EntityType<EngineerEntity>> ENGINEER = ENTITIES.register("engineer",()->EntityType.Builder.<EngineerEntity>of(
-                    EngineerEntity::new, MobCategory.CREATURE
+                    EngineerEntity::new, MobCategory.MONSTER
             )
             .sized(0.6F, 1.95F)
             .build("engineer"));
 
 
     public static final Supplier<EntityType<RaidDrill>> RAID_DRILL = ENTITIES.register("raid_drill",()->EntityType.Builder.<RaidDrill>of(
-                    RaidDrill::new, MobCategory.CREATURE
+                    RaidDrill::new, MobCategory.MONSTER
             )
-            .sized(0.6F, 2.2F)
+            .sized(1.2F, 2F)
             .build("raid_drill"));
 
 

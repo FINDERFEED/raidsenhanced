@@ -281,8 +281,6 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
         }
     }
 
-
-
     protected float rotlerp(float p_24992_, float p_24993_, float p_24994_) {
         float f = Mth.wrapDegrees(p_24993_ - p_24992_);
         if (f > p_24994_) {
@@ -623,6 +621,12 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
     public boolean causeFallDamage(float p_147187_, float p_147188_, DamageSource p_147189_) {
         return false;
     }
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return true;
+    }
+
 
     @Override
     public void checkDespawn() {
