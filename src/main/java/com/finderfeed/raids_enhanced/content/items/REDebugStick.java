@@ -6,9 +6,11 @@ import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightni
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
+import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
+import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -34,7 +36,12 @@ public class REDebugStick extends Item {
 
 //            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
 
-            VerticalLightningStrikeAttack.summon(player, player.position());
+//            VerticalLightningStrikeAttack.summon(player, player.position());
+
+            RaidDrill raidDrill = new RaidDrill(REEntities.RAID_DRILL.get(), level);
+            raidDrill.testRaidPos = player.getOnPos();
+            raidDrill.setPos(player.position().add(player.getLookAngle().scale(15)));
+            level.addFreshEntity(raidDrill);
 
         }else{
 //            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());

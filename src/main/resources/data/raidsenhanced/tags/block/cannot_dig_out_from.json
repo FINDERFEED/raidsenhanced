@@ -1,0 +1,16 @@
+{
+  "values": [
+    "#minecraft:wool",
+    "#minecraft:stairs",
+    "#minecraft:fences",
+    "#minecraft:walls",
+    "#minecraft:fence_gates",
+    "#minecraft:logs",
+    "minecraft:cobblestone",
+    "minecraft:glass",
+    "minecraft:glass_pane",
+    "minecraft:sandstone",
+    "minecraft:mossy_cobblestone",
+    "#minecraft:ice"
+  ]
+}

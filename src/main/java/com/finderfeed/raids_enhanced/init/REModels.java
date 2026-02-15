@@ -24,4 +24,6 @@ public class REModels {
 
     public static final Supplier<FDModelInfo> PLAYER_BLIMP = MODELS.register("player_blimp",()->new FDModelInfo(RaidsEnhanced.location("player_blimp"),1f));
 
+    public static final Supplier<FDModelInfo> RAID_DRILL = MODELS.register("raider_drill",()->new FDModelInfo(RaidsEnhanced.location("raider_drill"),1f));
+
 }

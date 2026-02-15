@@ -10,6 +10,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
+import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
 import com.finderfeed.raids_enhanced.content.items.electromancer_staff.ElectromancerStaffCastEntity;
 import net.minecraft.core.registries.Registries;
@@ -98,6 +99,13 @@ public class REEntities {
             .build("engineer"));
 
 
+    public static final Supplier<EntityType<RaidDrill>> RAID_DRILL = ENTITIES.register("raid_drill",()->EntityType.Builder.<RaidDrill>of(
+                    RaidDrill::new, MobCategory.CREATURE
+            )
+            .sized(0.6F, 2.2F)
+            .build("raid_drill"));
+
+
     public static final Supplier<EntityType<PlayerBlimpEntity>> PLAYER_BLIMP = ENTITIES.register("player_blimp",()->EntityType.Builder.<PlayerBlimpEntity>of(
                     PlayerBlimpEntity::new, MobCategory.MISC
             )
@@ -128,6 +136,13 @@ public class REEntities {
 
         event.put(ENGINEER.get(), Pillager.createAttributes()
                         .add(Attributes.KNOCKBACK_RESISTANCE, 0.8f)
+                        .add(Attributes.MAX_HEALTH, 100)
+                        .add(Attributes.ARMOR, 8.0)
+                .build());
+
+
+        event.put(RAID_DRILL.get(), Pillager.createAttributes()
+                        .add(Attributes.KNOCKBACK_RESISTANCE, 1f)
                         .add(Attributes.MAX_HEALTH, 100)
                         .add(Attributes.ARMOR, 8.0)
                 .build());

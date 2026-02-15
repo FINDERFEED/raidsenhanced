@@ -16,6 +16,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonBonesController;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPartRenderer;
+import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttackRenderer;
 import com.finderfeed.raids_enhanced.content.items.handcannon.HandCannonClientItemExtensions;
 import com.finderfeed.raids_enhanced.content.particles.ball_lightning_explosion.BallLightningExplosionParticle;
@@ -62,6 +63,13 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.VERTICAL_LIGHTNING.get(), VerticalLightningStrikeAttackRenderer::new);
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
         event.registerEntityRenderer(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), NullEntityRenderer::new);
+
+        event.registerEntityRenderer(REEntities.RAID_DRILL.get(), FDEntityRendererBuilder.<RaidDrill>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<RaidDrill>builder()
+                                .model(REModels.RAID_DRILL)
+                                .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raider_drill.png")))
+                                .build())
+                        .build());
 
         event.registerEntityRenderer(REEntities.PLAYER_BLIMP.get(), FDEntityRendererBuilder.<PlayerBlimpEntity>builder()
                         .addLayer(FDEntityRenderLayerOptions.<PlayerBlimpEntity>builder()
