@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.head.HeadBoneTransformation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRenderLayerOptions;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityRendererBuilder;
+import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.renderer.FDEntityTransformation;
 import com.finderfeed.fdlib.util.client.NullEntityRenderer;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningRenderer;
@@ -32,6 +33,7 @@ import com.finderfeed.raids_enhanced.init.REModels;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -65,14 +67,22 @@ public class REClientEvents {
         event.registerEntityRenderer(REEntities.BALL_LIGHTNING.get(), BallLightningRenderer::new);
         event.registerEntityRenderer(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), NullEntityRenderer::new);
 
+        FDEntityTransformation<RaidDrill> drillTransform = ((raidDrill, poseStack, v) -> {
+            float time = raidDrill.tickCount + v;
+            float p = Mth.clamp((raidDrill.hurtTime - v) / raidDrill.hurtDuration,0,1);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float) Math.sin(time * 2) * 5 * p));
+        });
+
         event.registerEntityRenderer(REEntities.RAID_DRILL.get(), FDEntityRendererBuilder.<RaidDrill>builder()
                         .addLayer(FDEntityRenderLayerOptions.<RaidDrill>builder()
                                 .model(REModels.RAID_DRILL)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/raider_drill.png")))
+                                .transformation(drillTransform)
                                 .build())
                         .addLayer(FDEntityRenderLayerOptions.<RaidDrill>builder()
                                 .model(REModels.RAID_DRILL)
                                 .renderType(RenderType.entityTranslucentCull(RaidsEnhanced.location("textures/entities/raider_drill_culled.png")))
+                                .transformation(drillTransform)
                                 .build())
                         .shouldRender(((raidDrill, frustum, v, v1, v2) -> {
                             return raidDrill.isVisible();

@@ -58,5 +58,15 @@
     "sounds": [
       "raidsenhanced:raid_golem_hit"
     ]
+  },
+  "raid_drill_dig_out": {
+    "sounds": [
+      "raidsenhanced:raid_drill_dig_out"
+    ]
+  },
+  "raid_drill_idle": {
+    "sounds": [
+      "raidsenhanced:raid_drill_idle"
+    ]
   }
 }

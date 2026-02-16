@@ -23,5 +23,7 @@ public class RESounds {
     public static final Supplier<SoundEvent> ENGINEER_BALL_LIGHTNING_EXPLOSION = SOUNDS.register("ball_lightning_explosion", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("ball_lightning_explosion")));
     public static final Supplier<SoundEvent> ENGINEER_BALL_LIGHTNING_LAUNCH = SOUNDS.register("engineer_lightning_orb_launch", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("engineer_lightning_orb_launch")));
     public static final Supplier<SoundEvent> RAID_GOLEM_HIT = SOUNDS.register("raid_golem_hit", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_golem_hit")));
+    public static final Supplier<SoundEvent> RAID_DRILL_IDLE = SOUNDS.register("raid_drill_idle", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_drill_idle")));
+    public static final Supplier<SoundEvent> RAID_DRILL_DIG_OUT = SOUNDS.register("raid_drill_dig_out", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_drill_dig_out")));
 
 }

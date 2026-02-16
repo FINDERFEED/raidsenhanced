@@ -1,13 +1,16 @@
 package com.finderfeed.raids_enhanced.content.entities.raid_drill;
 
+import com.finderfeed.fdlib.FDClientHelpers;
 import com.finderfeed.fdlib.nbt.AutoSerializable;
 import com.finderfeed.fdlib.nbt.SerializableField;
+import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.REClientUtil;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.init.REAnimations;
+import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -18,6 +21,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Difficulty;
@@ -106,6 +110,25 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
             if (tickCount % 4 == 0) {
                 this.blocksToRender = REClientUtil.collectStates(level(), this.position().add(0,-0.5,0), 1);
             }
+
+            AnimationTicker animationTicker = this.getAnimationSystem().getTicker(BURROW_LAYER);
+            boolean shouldPlaySound = true;
+            if (animationTicker != null){
+                var animation = animationTicker.getAnimation();
+                if (animation instanceof TransitionAnimation transitionAnimation){
+                    animation = transitionAnimation.getTransitionTo();
+                }
+                if (animation == REAnimations.RAIDER_DRILL_BURROW.get()){
+                    float time = animationTicker.getTime(1);
+                    if (time > 0){
+                        shouldPlaySound = false;
+                    }
+                }
+            }
+
+            if (shouldPlaySound && tickCount % 7 == 0){
+                this.level().playSound(FDClientHelpers.getClientPlayer(), this.getX(), this.getY(), this.getZ(), RESounds.RAID_DRILL_IDLE.get(), SoundSource.HOSTILE, 1f, 1f);
+            }
         }
 
     }
@@ -177,9 +200,11 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
             } else if (this.reDigTicker == burrowedTime + 10){
                 this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_UNBURROW)
                         .build());
+            }else if (this.reDigTicker == burrowedTime + 12){
+                this.level().playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.RAID_DRILL_DIG_OUT.get(), SoundSource.HOSTILE, 5f, 1f);
             } else if (this.reDigTicker >= unburrowTime + REAnimations.RAIDER_DRILL_UNBURROW.get().getAnimTime() + 10){
                 this.raidersSpawningTicker = 0;
-                this.raidersToSpawn = 3 + random.nextInt(2);
+                this.raidersToSpawn = 2 + random.nextInt(2);
                 this.reDigTicker = -1;
                 return;
             }
