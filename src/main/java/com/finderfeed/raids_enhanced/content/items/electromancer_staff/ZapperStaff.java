@@ -6,12 +6,15 @@ import com.finderfeed.fdlib.systems.shake.PositionedScreenShakePacket;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
+import com.finderfeed.raids_enhanced.content.items.ItemWithDescription;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -27,10 +30,10 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-public class EngineerStaff extends Item {
+public class ZapperStaff extends ItemWithDescription {
 
-    public EngineerStaff(Properties props) {
-        super(props);
+    public ZapperStaff(Properties props) {
+        super(props, Component.translatable("raidsenhanced.item_description.zapper_staff").withStyle(ChatFormatting.AQUA));
     }
 
     @Override
@@ -51,7 +54,7 @@ public class EngineerStaff extends Item {
                         .build(),player.position(),10);
                 this.damageAndPushAwayEntities(player);
                 this.castParticles(player);
-                ElectromancerStaffCastEntity.summon(player, player.position());
+                ZapperStaffCastEntity.summon(player, player.position());
                 level.playSound(null, player.getX(),player.getY(), player.getZ(), RESounds.ENGINEER_LIGHTNING_CAST.get(), SoundSource.PLAYERS, 1f,1f);
             }else{
                 Vec3 ppos = player.position().add(0,player.getEyeHeight() * 0.8f, 0).add(lookAngle.scale(0.5));

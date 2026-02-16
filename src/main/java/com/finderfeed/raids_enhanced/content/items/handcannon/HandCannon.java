@@ -1,9 +1,12 @@
 package com.finderfeed.raids_enhanced.content.items.handcannon;
 
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
+import com.finderfeed.raids_enhanced.content.items.ItemWithDescription;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.init.REItems;
 import com.finderfeed.raids_enhanced.init.REParticles;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,10 +21,10 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
-public class HandCannon extends Item {
+public class HandCannon extends ItemWithDescription {
 
     public HandCannon(Properties p_41383_) {
-        super(p_41383_);
+        super(p_41383_, Component.translatable("raidsenhanced.item_description.handcannon").withStyle(ChatFormatting.GOLD));
     }
 
     @Override

@@ -7,8 +7,8 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.r
 import com.finderfeed.fdlib.util.client.NullEntityRenderer;
 import com.finderfeed.fdlib.util.rendering.FDRenderUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningRenderer;
-import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerEntity;
-import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerRenderer;
+import com.finderfeed.raids_enhanced.content.entities.engineer.ZapperIllager;
+import com.finderfeed.raids_enhanced.content.entities.engineer.ZapperIllagerRenderer;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlockRenderer;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
@@ -97,8 +97,8 @@ public class REClientEvents {
                                 .build())
                         .build());
 
-        event.registerEntityRenderer(REEntities.ENGINEER.get(), FDEntityRendererBuilder.<EngineerEntity>builder()
-                        .addLayer(FDEntityRenderLayerOptions.<EngineerEntity>builder()
+        event.registerEntityRenderer(REEntities.ZAPPER_ILLAGER.get(), FDEntityRendererBuilder.<ZapperIllager>builder()
+                        .addLayer(FDEntityRenderLayerOptions.<ZapperIllager>builder()
                                 .model(REModels.ELECTROMANCER)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/electromancer.png")))
                                 .addBoneController("head", new HeadBoneTransformation<>())
@@ -117,7 +117,7 @@ public class REClientEvents {
                         .shouldRender(((electromancerEntity, frustum, v, v1, v2) -> {
                             return true;
                         }))
-                        .freeRender(new EngineerRenderer())
+                        .freeRender(new ZapperIllagerRenderer())
                 .build());
 
         event.registerEntityRenderer(REEntities.GOLEM_OF_LAST_RESORT.get(), FDEntityRendererBuilder.<GolemOfLastResort>builder()

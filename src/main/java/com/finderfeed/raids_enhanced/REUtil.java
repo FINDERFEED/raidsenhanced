@@ -9,6 +9,11 @@ public class REUtil {
 
     public static final int GOLEM_SMACK = 1;
     public static final int LIGHTNING_DEBRIS = 2;
+    public static final int DRILL_DEATH = 3;
+
+    public static void drillDeath(ServerLevel serverLevel, Vec3 pos, double radius){
+        posEvent(serverLevel, pos, DRILL_DEATH, 0, radius);
+    }
 
     public static void golemSmackParticles(ServerLevel serverLevel, Vec3 pos, double radius){
         posEvent(serverLevel, pos, GOLEM_SMACK, 0, radius);

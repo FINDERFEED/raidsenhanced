@@ -2,7 +2,7 @@ package com.finderfeed.raids_enhanced.init;
 
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
-import com.finderfeed.raids_enhanced.content.entities.engineer.EngineerEntity;
+import com.finderfeed.raids_enhanced.content.entities.engineer.ZapperIllager;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
 import com.finderfeed.raids_enhanced.content.entities.golem_of_last_resort.GolemOfLastResort;
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
@@ -12,7 +12,7 @@ import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBli
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
 import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
-import com.finderfeed.raids_enhanced.content.items.electromancer_staff.ElectromancerStaffCastEntity;
+import com.finderfeed.raids_enhanced.content.items.electromancer_staff.ZapperStaffCastEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -78,8 +78,8 @@ public class REEntities {
             .build("falling_block"));
 
 
-    public static final Supplier<EntityType<ElectromancerStaffCastEntity>> ENGINEER_STAFF_CAST_ENTTITY = ENTITIES.register("engineer_staff_cast_entity",()->EntityType.Builder.<ElectromancerStaffCastEntity>of(
-                    ElectromancerStaffCastEntity::new, MobCategory.MISC
+    public static final Supplier<EntityType<ZapperStaffCastEntity>> ENGINEER_STAFF_CAST_ENTTITY = ENTITIES.register("engineer_staff_cast_entity",()->EntityType.Builder.<ZapperStaffCastEntity>of(
+                    ZapperStaffCastEntity::new, MobCategory.MISC
             )
             .sized(0.25f,0.25f)
             .build("engineer_staff_cast_entity"));
@@ -92,8 +92,8 @@ public class REEntities {
             .build("ball_lightning"));
 
 
-    public static final Supplier<EntityType<EngineerEntity>> ENGINEER = ENTITIES.register("engineer",()->EntityType.Builder.<EngineerEntity>of(
-                    EngineerEntity::new, MobCategory.MONSTER
+    public static final Supplier<EntityType<ZapperIllager>> ZAPPER_ILLAGER = ENTITIES.register("zapper",()->EntityType.Builder.<ZapperIllager>of(
+                    ZapperIllager::new, MobCategory.MONSTER
             )
             .sized(0.6F, 1.95F)
             .build("engineer"));
@@ -134,7 +134,7 @@ public class REEntities {
                 .add(Attributes.ARMOR, 8.0)
                 .build());
 
-        event.put(ENGINEER.get(), Pillager.createAttributes()
+        event.put(ZAPPER_ILLAGER.get(), Pillager.createAttributes()
                         .add(Attributes.KNOCKBACK_RESISTANCE, 0.8f)
                         .add(Attributes.MAX_HEALTH, 100)
                         .add(Attributes.ARMOR, 8.0)

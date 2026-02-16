@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [],
+          "name": "raidsenhanced:zapper_staff"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "raidsenhanced:entities/zapper"
+}

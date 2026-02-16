@@ -17,20 +17,20 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
 
-public class ElectromancerStaffCastEntity extends Entity {
+public class ZapperStaffCastEntity extends Entity {
 
     public UUID owner;
     public float ownerRotation;
 
     public static void summon(LivingEntity owner, Vec3 pos){
-        ElectromancerStaffCastEntity staff = new ElectromancerStaffCastEntity(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), owner.level());
+        ZapperStaffCastEntity staff = new ZapperStaffCastEntity(REEntities.ENGINEER_STAFF_CAST_ENTTITY.get(), owner.level());
         staff.setPos(pos);
         staff.owner = owner.getUUID();
         staff.ownerRotation = (float) Math.toRadians(-owner.getYRot() + 180);
         owner.level().addFreshEntity(staff);
     }
 
-    public ElectromancerStaffCastEntity(EntityType<?> type, Level level) {
+    public ZapperStaffCastEntity(EntityType<?> type, Level level) {
         super(type, level);
     }
 

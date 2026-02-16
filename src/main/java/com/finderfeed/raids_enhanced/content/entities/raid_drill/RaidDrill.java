@@ -7,6 +7,7 @@ import com.finderfeed.fdlib.systems.bedrock.animations.TransitionAnimation;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.REClientUtil;
+import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.init.REAnimations;
@@ -241,6 +242,20 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     @Override
     public boolean isPersistenceRequired() {
         return true;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.WOOD_BREAK;
+    }
+
+    @Override
+    protected void tickDeath() {
+        this.deathTime++;
+        if (this.deathTime >= 1 && !this.level().isClientSide() && !this.isRemoved()) {
+            REUtil.drillDeath((ServerLevel) level(), this.position(), 60);
+            this.remove(Entity.RemovalReason.KILLED);
+        }
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.finderfeed.raids_enhanced.content.items;
 
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
 import com.finderfeed.raids_enhanced.init.REEntities;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,10 +21,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class PlayerBlimpItem extends Item {
+public class PlayerBlimpItem extends ItemWithDescription {
 
     public PlayerBlimpItem(Properties props) {
-        super(props);
+        super(props, Component.translatable("raidsenhanced.item_description.player_blimp").withStyle(ChatFormatting.GOLD));
     }
 
     @Override

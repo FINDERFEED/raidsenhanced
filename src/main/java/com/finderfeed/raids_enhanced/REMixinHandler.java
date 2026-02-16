@@ -28,7 +28,7 @@ public class REMixinHandler {
                     raid.joinRaid(currentGroup, golem, raidPos, false);
                 }
             }else if (raidLevel == 4){
-                var engineer = REEntities.ENGINEER.get().create(level);
+                var engineer = REEntities.ZAPPER_ILLAGER.get().create(level);
                 if (engineer != null) {
                     raid.joinRaid(currentGroup, engineer, raidPos, false);
                 }

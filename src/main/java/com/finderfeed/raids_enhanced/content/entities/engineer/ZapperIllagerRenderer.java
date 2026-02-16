@@ -18,17 +18,17 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-public class EngineerRenderer implements FDFreeEntityRenderer<EngineerEntity> {
+public class ZapperIllagerRenderer implements FDFreeEntityRenderer<ZapperIllager> {
 
     public static final ResourceLocation ELECTRIC_RAY = RaidsEnhanced.location("textures/entities/electromancer_ray.png");
     public static final ResourceLocation ELECTRIC_BARRIER = RaidsEnhanced.location("textures/entities/electromancer_barrier.png");
 
     @Override
-    public void render(EngineerEntity electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
+    public void render(ZapperIllager electromancerEntity, float v, float v1, PoseStack matrices, MultiBufferSource multiBufferSource, int i) {
         if (electromancerEntity.isLaserActive()) {
 
             Vec3 laserTarget = electromancerEntity.getLaserTarget(v);
-            Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, EngineerEntity.LIGHTNING_START, EngineerEntity.getModel(electromancerEntity.level()), v);
+            Matrix4f transformation = electromancerEntity.getModelPartTransformation(electromancerEntity, ZapperIllager.LIGHTNING_START, ZapperIllager.getModel(electromancerEntity.level()), v);
             Vec3 relativeLaserStart = new Vec3(transformation.transformPosition(new Vector3f()));
             Vec3 laserStart = relativeLaserStart.add(electromancerEntity.getPosition(v));;
 

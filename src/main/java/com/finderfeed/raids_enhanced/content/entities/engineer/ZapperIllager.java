@@ -47,7 +47,6 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -66,7 +65,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHead<EngineerEntity> {
+public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHead<ZapperIllager> {
 
 
     public static final String MAIN_LAYER = "IDLE";
@@ -74,9 +73,9 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
 
     public static final String LIGHTNING_START = "lightning_start";
 
-    public static final EntityDataAccessor<Byte> BYTE_PARTICLE_TRIGGER = SynchedEntityData.defineId(EngineerEntity.class, EntityDataSerializers.BYTE);
-    public static final EntityDataAccessor<Boolean> LASER_ACTIVE = SynchedEntityData.defineId(EngineerEntity.class, EntityDataSerializers.BOOLEAN);
-    public static final EntityDataAccessor<Vec3> LASER_TARGET = SynchedEntityData.defineId(EngineerEntity.class, FDEDataSerializers.VEC3.get());
+    public static final EntityDataAccessor<Byte> BYTE_PARTICLE_TRIGGER = SynchedEntityData.defineId(ZapperIllager.class, EntityDataSerializers.BYTE);
+    public static final EntityDataAccessor<Boolean> LASER_ACTIVE = SynchedEntityData.defineId(ZapperIllager.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Vec3> LASER_TARGET = SynchedEntityData.defineId(ZapperIllager.class, FDEDataSerializers.VEC3.get());
 
     private boolean rotatingFromBodyRot = true;
 
@@ -96,16 +95,16 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
     public boolean isUsingElectricRay = false;
     public boolean isUsingLightningsAttack = false;
 
-    private HeadControllerContainer<EngineerEntity> headControllerContainer;
+    private HeadControllerContainer<ZapperIllager> headControllerContainer;
 
-    public EngineerEntity(EntityType<? extends Raider> p_37839_, Level p_37840_) {
+    public ZapperIllager(EntityType<? extends Raider> p_37839_, Level p_37840_) {
         super(p_37839_, p_37840_);
         this.getNavigation().setCanFloat(true);
 
         this.lookControl = headControllerContainer = (new HeadControllerContainer<>(this) {
             @Override
             protected boolean resetXRotOnTick() {
-                return !EngineerEntity.this.isLaserActive();
+                return !ZapperIllager.this.isLaserActive();
             }
         }).addHeadController(getModel(level()), "head");
 
@@ -146,12 +145,12 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1){
             @Override
             public boolean canUse() {
-                return super.canUse() && EngineerEntity.this.getTarget() == null;
+                return super.canUse() && ZapperIllager.this.getTarget() == null;
             }
 
             @Override
             public boolean canContinueToUse() {
-                return super.canContinueToUse() && EngineerEntity.this.getTarget() == null;
+                return super.canContinueToUse() && ZapperIllager.this.getTarget() == null;
             }
         });
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
@@ -241,7 +240,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
 
             if (src.getEntity() instanceof LivingEntity livingEntity && livingEntity != this && livingEntity.distanceTo(this) < 5){
                 var damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                if (!(livingEntity instanceof EngineerEntity entity)) {
+                if (!(livingEntity instanceof ZapperIllager entity)) {
                     livingEntity.hurt(this.level().damageSources().mobAttack(this), (float) (damage * 0.5f));
                 }
                 Vec3 between = livingEntity.position().subtract(this.position());
@@ -353,14 +352,14 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
     }
 
     @Override
-    public HeadControllerContainer<EngineerEntity> getHeadControllerContainer() {
+    public HeadControllerContainer<ZapperIllager> getHeadControllerContainer() {
         return headControllerContainer;
     }
 
 
     public static class BallLightningRangedAttack extends Goal {
 
-        private EngineerEntity entity;
+        private ZapperIllager entity;
 
         private int attackTick = 0;
         private float attackRange;
@@ -370,7 +369,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
         private boolean strafingBackwards;
         private int strafingTime = -1;
 
-        public BallLightningRangedAttack(EngineerEntity electromancerEntity, float attackRange){
+        public BallLightningRangedAttack(ZapperIllager electromancerEntity, float attackRange){
             this.entity = electromancerEntity;
             this.attackRange = attackRange;
         }
@@ -592,11 +591,11 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
     public static class LightningsAttack extends Goal {
 
 
-        private EngineerEntity entity;
+        private ZapperIllager entity;
 
         private int useTick = 0;
 
-        public LightningsAttack(EngineerEntity electromancerEntity){
+        public LightningsAttack(ZapperIllager electromancerEntity){
             this.entity = electromancerEntity;
         }
 
@@ -748,11 +747,11 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
 
     public static class LaserAttackGoal extends Goal {
 
-        private EngineerEntity entity;
+        private ZapperIllager entity;
 
         private int useTick = 0;
 
-        public LaserAttackGoal(EngineerEntity electromancerEntity){
+        public LaserAttackGoal(ZapperIllager electromancerEntity){
             this.entity = electromancerEntity;
         }
 

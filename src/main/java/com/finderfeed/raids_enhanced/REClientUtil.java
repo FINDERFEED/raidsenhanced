@@ -32,9 +32,31 @@ public class REClientUtil {
             case REUtil.LIGHTNING_DEBRIS -> {
                 lightningDebris(pos, data);
             }
+            case REUtil.DRILL_DEATH -> {
+                drillDeath(pos, data);
+            }
         }
     }
 
+    private static void drillDeath(Vec3 pos, int data) {
+        var level = FDClientHelpers.getClientLevel();
+        ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
+
+        for (int i = 0; i < 80; i++){
+            float rndHeight = level.random.nextFloat() * 2;
+            float rndX = level.random.nextFloat() * 2 - 1;
+            float rndZ = level.random.nextFloat() * 2 - 1;
+            Vec3 ppos = pos.add(rndX, rndHeight, rndZ);
+            Vec3 pspeed = new Vec3(rndX,0,rndZ).normalize().scale(0.05 + level.random.nextFloat() * 0.1f).add(0,0.05 + level.random.nextFloat() * 0.1, 0);
+            var particle = particleEngine.createParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DARK_OAK_PLANKS.defaultBlockState()),
+                    ppos.x,ppos.y,ppos.z,
+                    pspeed.x,pspeed.y,pspeed.z);
+            if (particle != null) {
+                particle.setParticleSpeed(pspeed.x,pspeed.y,pspeed.z);
+            }
+        }
+
+    }
 
 
     public static void lightningDebris(Vec3 pos, int data){
