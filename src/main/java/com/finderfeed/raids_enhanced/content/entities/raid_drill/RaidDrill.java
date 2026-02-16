@@ -11,6 +11,7 @@ import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.RaidsEnhanced;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.init.REAnimations;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -215,7 +216,8 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.RAID_DRILL_DIG_OUT.get(), SoundSource.HOSTILE, 5f, 1f);
             } else if (this.reDigTicker >= unburrowTime + REAnimations.RAIDER_DRILL_UNBURROW.get().getAnimTime() + 10){
                 this.raidersSpawningTicker = 0;
-                this.raidersToSpawn = 2 + random.nextInt(2);
+
+                this.raidersToSpawn = REConfigs.CONFIG.get().raidDrill.minRaidersSpawn + random.nextInt(REConfigs.CONFIG.get().raidDrill.maxRaidersSpawn - REConfigs.CONFIG.get().raidDrill.minRaidersSpawn + 1);
                 this.reDigTicker = -1;
                 return;
             }

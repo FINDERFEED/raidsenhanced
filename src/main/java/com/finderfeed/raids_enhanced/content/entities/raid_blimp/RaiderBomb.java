@@ -4,6 +4,7 @@ import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.FDLibCalls;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.FDEntity;
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -104,7 +105,7 @@ public class RaiderBomb extends FDEntity {
                 if (!(entity instanceof Player player)) {
                     damage = (float) ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_DAMAGE);
                 }else{
-                    damage = 10;
+                    damage = REConfigs.CONFIG.get().handcannonBombDamage;
                 }
             }else{
                 damageSource = level().damageSources().generic();

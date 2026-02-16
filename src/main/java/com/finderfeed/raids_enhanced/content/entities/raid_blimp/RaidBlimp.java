@@ -53,6 +53,9 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
     public static final int HEIGHT_ABOVE_GROUND = 25;
 
+    @SerializableField
+    private boolean shouldDropLoot = false;
+
     private static FDModel clientModel;
     private static FDModel serverModel;
 
@@ -332,6 +335,11 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
         return result;
     }
 
+    @Override
+    protected boolean shouldDropLoot() {
+        return this.shouldDropLoot && super.shouldDropLoot();
+    }
+
     public boolean checkTargetClass(Entity target){
         return target instanceof AbstractVillager || (target instanceof Player player && !player.isSpectator() && !player.isCreative()) || target instanceof IronGolem;
     }
@@ -369,6 +377,13 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
             if (this.onGround() || this.deathTime > 300){
                 this.spawnDeathParts();
+
+                DamageSource damageSource = this.getLastDamageSource();
+                if (damageSource == null){
+                    damageSource = level().damageSources().generic();
+                }
+                this.shouldDropLoot = true;
+                this.dropAllDeathLoot((ServerLevel) level(), damageSource);
                 this.explode();
             }
 

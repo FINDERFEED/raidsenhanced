@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced.content.items.handcannon;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
 import com.finderfeed.raids_enhanced.content.items.ItemWithDescription;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REItems;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.ChatFormatting;
@@ -32,7 +33,7 @@ public class HandCannon extends ItemWithDescription {
         if (!level.isClientSide){
 
             if (!player.isCreative()) {
-                player.getCooldowns().addCooldown(REItems.HANDCANNON.get(), 30);
+                player.getCooldowns().addCooldown(REItems.HANDCANNON.get(), REConfigs.CONFIG.get().handcannonUseCooldown);
             }
 
             Vec3 particlePos = player.position().add(0, player.getEyeHeight(),0);

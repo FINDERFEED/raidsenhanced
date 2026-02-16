@@ -8,6 +8,7 @@ import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
@@ -77,7 +78,7 @@ public class VerticalLightningStrikeAttack extends Entity {
 
         ServerLevel level = (ServerLevel) this.level();
 
-        float damage = 10;
+        float damage = REConfigs.CONFIG.get().zapperStaffLightningDamage;
         Entity ownerEntity;
 
         if (this.owner != null) {

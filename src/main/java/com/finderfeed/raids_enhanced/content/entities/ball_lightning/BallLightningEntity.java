@@ -3,6 +3,7 @@ package com.finderfeed.raids_enhanced.content.entities.ball_lightning;
 import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
@@ -98,7 +99,7 @@ public class BallLightningEntity extends Entity {
             damage = (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
             source = damageSources.mobAttack(owner);
             if (owner instanceof Player player){
-                damage = 5;
+                damage = REConfigs.CONFIG.get().zapperStaffBallLightningDamage;
             }
         } else {
 

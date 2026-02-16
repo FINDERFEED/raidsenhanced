@@ -11,6 +11,7 @@ import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOpt
 import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
 import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
+import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.ChatFormatting;
@@ -43,7 +44,7 @@ public class ZapperStaff extends ItemWithDescription {
             Vec3 lookAngle = player.getLookAngle();
             if (!this.usesAsLightning(player)){
                 if (!player.isCreative()) {
-                    player.getCooldowns().addCooldown(this, 40);
+                    player.getCooldowns().addCooldown(this, REConfigs.CONFIG.get().zapperStaffLightningUseCooldown);
                 }
                 PositionedScreenShakePacket.send((ServerLevel)level, FDShakeData.builder()
                         .frequency(5f)
@@ -61,7 +62,7 @@ public class ZapperStaff extends ItemWithDescription {
                 serverLevel.sendParticles(new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), lookAngle, 3,0f,2,level.random.nextBoolean()), ppos.x, ppos.y, ppos.z, 1,0,0,0,0);
 
                 if (!player.isCreative()) {
-                    player.getCooldowns().addCooldown(this, 10);
+                    player.getCooldowns().addCooldown(this, REConfigs.CONFIG.get().zapperStaffBallLightningUseCooldown);
                 }
                 level.playSound(null, player.getX(), player.getY(), player.getZ(), RESounds.ENGINEER_BALL_LIGHTNING_LAUNCH.get(), SoundSource.HOSTILE, 2f, level.random.nextFloat() * 0.1f + 0.8f);
                 BallLightningEntity.summon(player, level, player.getEyePosition().add(lookAngle), lookAngle.scale(2));

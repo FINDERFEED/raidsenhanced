@@ -27,6 +27,7 @@ public class RaidsEnhanced {
         REParticles.PARTICLES.register(modEventBus);
         RECreativeTabs.TABS.register(modEventBus);
         REEntities.ENTITIES.register(modEventBus);
+        REConfigs.CONFIGS.register(modEventBus);
         REModels.MODELS.register(modEventBus);
         RESounds.SOUNDS.register(modEventBus);
         REItems.ITEMS.register(modEventBus);

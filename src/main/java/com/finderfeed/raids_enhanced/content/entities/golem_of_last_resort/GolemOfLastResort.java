@@ -180,8 +180,12 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
 
 
-        }else{
-            this.getHeadControllerContainer().clientTick();
+        }else {
+            if (!this.isDeadOrDying()) {
+                this.getHeadControllerContainer().clientTick();
+            }else{
+                this.getHeadControllerContainer().setControllersMode(HeadControllerContainer.Mode.ANIMATION);
+            }
         }
     }
 
