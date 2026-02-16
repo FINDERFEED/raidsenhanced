@@ -14,18 +14,25 @@ public class REMixinHandler {
 
         if (numGroups == currentGroup) {
             Level level = raid.getLevel();
-            int type = level.random.nextInt(3);
-            if (type == 0){
+
+
+            int raidLevel = raid.getRaidOmenLevel();
+            if (raidLevel == 2){
+                var drill = REEntities.RAID_DRILL.get().create(level);
+                if (drill != null) {
+                    raid.joinRaid(currentGroup, drill, raidPos, false);
+                }
+            } else if (raidLevel == 3){
                 var golem = REEntities.GOLEM_OF_LAST_RESORT.get().create(level);
                 if (golem != null) {
                     raid.joinRaid(currentGroup, golem, raidPos, false);
                 }
-            }else if (type == 1){
+            }else if (raidLevel == 4){
                 var engineer = REEntities.ENGINEER.get().create(level);
                 if (engineer != null) {
                     raid.joinRaid(currentGroup, engineer, raidPos, false);
                 }
-            }else if (type == 2) {
+            }else if (raidLevel >= 5) {
                 var blimp = REEntities.RAID_BLIMP.get().create(level);
                 if (blimp != null) {
                     int height = level.getHeight(Heightmap.Types.MOTION_BLOCKING, raidPos.getX(),raidPos.getZ());

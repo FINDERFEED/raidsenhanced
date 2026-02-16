@@ -72,7 +72,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     @SerializableField
     private int raidersToSpawn = 0;
 
-    public BlockPos testRaidPos;
+    private BlockPos noRaidPos;
 
 
     public RaidDrill(EntityType<? extends Raider> drill, Level level) {
@@ -95,17 +95,16 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
 
         if (!level().isClientSide){
 
-            if (testRaidPos == null){
-                this.remove(RemovalReason.DISCARDED);
-            }else{
-
-                if (this.getVehicle() != null){
-                    this.stopRiding();
-                }
-
-                this.tickReDig();
-                this.tickRaidersSpawning();
+            if (noRaidPos == null){
+                noRaidPos = this.getOnPos().offset(1,0,0);
             }
+
+            if (this.getVehicle() != null){
+                this.stopRiding();
+            }
+            this.tickReDig();
+            this.tickRaidersSpawning();
+
         }else {
             if (tickCount % 4 == 0) {
                 this.blocksToRender = REClientUtil.collectStates(level(), this.position().add(0,-0.5,0), 1);
@@ -184,7 +183,18 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
                 this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_BURROW)
                         .build());
             } else if (this.reDigTicker == burrowedTime + 5){
-                BlockPos blockPos = this.calculateDigOutPos(testRaidPos);
+
+                BlockPos relativePos;
+                if (this.raid != null){
+                    relativePos = this.raid.getCenter();
+                }else{
+                    if (noRaidPos == null){
+                        noRaidPos = this.getOnPos().offset(1,0,0);
+                    }
+                    relativePos = this.noRaidPos;
+                }
+
+                BlockPos blockPos = this.calculateDigOutPos(relativePos);
                 if (blockPos != null) {
                     this.teleportTo(blockPos.getX() + 0.5, blockPos.getY() + 1, blockPos.getZ() + 0.5);
 
@@ -385,12 +395,24 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         this.autoSave(tag);
+        if (this.noRaidPos != null) {
+            tag.putInt("noRaidPosX", this.noRaidPos.getX());
+            tag.putInt("noRaidPosY", this.noRaidPos.getY());
+            tag.putInt("noRaidPosZ", this.noRaidPos.getZ());
+        }
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.autoLoad(tag);
+        if (tag.contains("noRaidPosX")){
+            this.noRaidPos = new BlockPos(
+                    tag.getInt("noRaidPosX"),
+                    tag.getInt("noRaidPosY"),
+                    tag.getInt("noRaidPosZ")
+            );
+        }
     }
 
     @EventBusSubscriber

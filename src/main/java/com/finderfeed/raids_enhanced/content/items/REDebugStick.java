@@ -38,10 +38,10 @@ public class REDebugStick extends Item {
 
 //            VerticalLightningStrikeAttack.summon(player, player.position());
 
-            RaidDrill raidDrill = new RaidDrill(REEntities.RAID_DRILL.get(), level);
-            raidDrill.testRaidPos = player.getOnPos();
-            raidDrill.setPos(player.position().add(player.getLookAngle().scale(15)));
-            level.addFreshEntity(raidDrill);
+//            RaidDrill raidDrill = new RaidDrill(REEntities.RAID_DRILL.get(), level);
+//            raidDrill.testRaidPos = player.getOnPos();
+//            raidDrill.setPos(player.position().add(player.getLookAngle().scale(15)));
+//            level.addFreshEntity(raidDrill);
 
         }else{
 //            Vec3 ppos = player.position().add(0,1,0).add(player.getLookAngle());

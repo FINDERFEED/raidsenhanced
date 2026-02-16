@@ -143,7 +143,7 @@ public class REEntities {
 
         event.put(RAID_DRILL.get(), Pillager.createAttributes()
                         .add(Attributes.KNOCKBACK_RESISTANCE, 1f)
-                        .add(Attributes.MAX_HEALTH, 100)
+                        .add(Attributes.MAX_HEALTH, 5)
                         .add(Attributes.ARMOR, 8.0)
                 .build());
 

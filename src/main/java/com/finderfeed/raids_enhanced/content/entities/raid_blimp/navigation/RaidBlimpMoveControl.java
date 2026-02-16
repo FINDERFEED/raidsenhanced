@@ -45,7 +45,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
             float distance = (float) between.length();
 
 
-            if (distance > 6) {
+            if (distance > speed) {
                 if (this.mob instanceof RaidBlimp raidBlimp) {
                     raidBlimp.isMoving = true;
                 }
