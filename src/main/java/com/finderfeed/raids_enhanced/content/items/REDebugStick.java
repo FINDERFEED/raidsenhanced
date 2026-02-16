@@ -1,6 +1,7 @@
 package com.finderfeed.raids_enhanced.content.items;
 
 import com.finderfeed.fdlib.FDHelpers;
+import com.finderfeed.fdlib.util.FDTargetFinder;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
@@ -15,6 +16,7 @@ import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +35,12 @@ public class REDebugStick extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 
         if (!level.isClientSide){
+
+
+            var blimps = FDTargetFinder.getEntitiesInSphere(RaidBlimp.class, player.level(), player.position(), 200);
+            for (var bl : blimps){
+                bl.getNavigation().moveTo(player.getX(),player.getY(),player.getZ(), 1f);
+            }
 
 //            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
 

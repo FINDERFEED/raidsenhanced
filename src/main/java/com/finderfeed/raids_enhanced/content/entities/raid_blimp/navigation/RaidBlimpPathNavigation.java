@@ -20,14 +20,20 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
     private int currentNode = 0;
     private int nextMoveNode = 0;
     private Vec3 nextPos = null;
+    private RaidBlimp blimp;
 
+    private boolean finishedMovingToPos = false;
 
-    public RaidBlimpPathNavigation(Mob p_26424_, Level p_26425_) {
-        super(p_26424_, p_26425_);
+    public RaidBlimpPathNavigation(RaidBlimp raidBlimp, Level p_26425_) {
+        super(raidBlimp, p_26425_);
+        this.blimp = raidBlimp;
     }
 
     @Override
     public void tick() {
+
+        RaidBlimpMoveControl moveControl = (RaidBlimpMoveControl) this.blimp.getMoveControl();
+
         this.tick++;
 
         if (this.hasDelayedRecomputation) {
@@ -39,7 +45,7 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
             this.processPath();
 
             if (nextPos != null) {
-                this.mob.getMoveControl().setWantedPosition(nextPos.x, nextPos.y, nextPos.z, this.speedModifier);
+                moveControl.setWantedPosition(nextPos.x, nextPos.y, nextPos.z, this.speedModifier);
             }
 
         }else{
@@ -51,17 +57,26 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
 
     }
 
+    public void setFinishedMovingToPos(boolean finishedMovingToPos) {
+        this.finishedMovingToPos = finishedMovingToPos;
+    }
+
+    @Override
+    public boolean isDone() {
+        return super.isDone();
+    }
 
     private void processPath(){
         if (!this.isDone()){
             Vec3 ePos = this.mob.position();
 
             if (nextPos != null){
-                if (ePos.distanceTo(nextPos) < 5){
+                if (finishedMovingToPos){
                     if (nextMoveNode >= this.path.getNodeCount() - 1){
                         this.path.setNextNodeIndex(this.path.getNodeCount());
                         return;
                     }else {
+                        finishedMovingToPos = false;
                         currentNode = nextMoveNode;
                         recalculationCooldown = 0;
                     }
@@ -100,6 +115,7 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
     public boolean moveTo(@Nullable Path p_26537_, double p_26538_) {
         boolean res;
         if (res = super.moveTo(p_26537_, p_26538_)) {
+            finishedMovingToPos = false;
             this.currentNode = 0;
             this.nextPos = null;
             this.nextMoveNode = 0;

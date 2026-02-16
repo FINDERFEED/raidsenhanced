@@ -9,13 +9,21 @@ import net.minecraft.world.phys.Vec3;
 
 public class RaidBlimpMoveControl extends FlyingMoveControl {
 
-    public RaidBlimpMoveControl(Mob mob, int turnMax, boolean hoversInPlace) {
+    private RaidBlimp blimp;
+
+    public RaidBlimpMoveControl(RaidBlimp mob, int turnMax, boolean hoversInPlace) {
         super(mob, turnMax, hoversInPlace);
+        this.blimp = mob;
     }
 
     @Override
     public void tick() {
 
+        RaidBlimpPathNavigation navigation = (RaidBlimpPathNavigation) blimp.getNavigation();
+
+        if (navigation.isDone()){
+            this.operation = Operation.WAIT;
+        }
 
         if (this.operation == Operation.MOVE_TO) {
             float speed = (float) (this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
@@ -26,7 +34,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
 
-            if (d3 >= 25) {
+            if (d3 >= 15) {
 
                 float f = (float) (Mth.atan2(d2, d0) * 180.0F / (float) Math.PI) - 90.0F;
                 this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, speed * 10f));
@@ -45,7 +53,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
             float distance = (float) between.length();
 
 
-            if (distance > speed) {
+            if (distance > 6) {
                 if (this.mob instanceof RaidBlimp raidBlimp) {
                     raidBlimp.isMoving = true;
                 }
@@ -53,6 +61,7 @@ public class RaidBlimpMoveControl extends FlyingMoveControl {
                 Vec3 deltaMovement = this.mob.getLookAngle().normalize().scale(speed);
                 this.mob.setDeltaMovement(deltaMovement);
             } else {
+                navigation.setFinishedMovingToPos(true);
                 if (this.mob instanceof RaidBlimp raidBlimp) {
                     raidBlimp.isMoving = false;
                 }
