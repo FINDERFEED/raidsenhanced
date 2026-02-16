@@ -20,6 +20,7 @@ public class RaidBlimpPart extends Entity {
 
     public static final int WOODEN_STICK = 1;
     public static final int PROPELLER = 2;
+    public static final int GOLEM_PART = 3;
 
     public static EntityDataAccessor<Integer> PART_TYPE = SynchedEntityData.defineId(RaidBlimpPart.class, EntityDataSerializers.INT);
     public static EntityDataAccessor<Integer> LIFETIME = SynchedEntityData.defineId(RaidBlimpPart.class, EntityDataSerializers.INT);

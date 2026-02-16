@@ -15,7 +15,9 @@ import com.finderfeed.fdlib.util.math.FDMathUtil;
 import com.finderfeed.raids_enhanced.REUtil;
 import com.finderfeed.raids_enhanced.content.entities.FDRaider;
 import com.finderfeed.raids_enhanced.content.entities.falling_block.REFallingBlock;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaiderBomb;
+import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
 import com.finderfeed.raids_enhanced.content.particles.SimpleTexturedParticleOptions;
 import com.finderfeed.raids_enhanced.init.REAnimations;
 import com.finderfeed.raids_enhanced.init.REModels;
@@ -23,6 +25,7 @@ import com.finderfeed.raids_enhanced.init.REParticles;
 import com.finderfeed.raids_enhanced.init.RESounds;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -180,6 +183,61 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         }else{
             this.getHeadControllerContainer().clientTick();
         }
+    }
+
+    @Override
+    protected void tickDeath() {
+
+        if (!level().isClientSide){
+            if (deathTime == 0){
+                this.getAnimationSystem().stopAnimation(MAIN_LAYER);
+                this.getAnimationSystem().stopAnimation(WALKING_LAYER);
+                this.getAnimationSystem().stopAnimation(WHIRLWIND_LAYER);
+
+                this.getAnimationSystem().startAnimation(MAIN_LAYER, AnimationTicker.builder(REAnimations.ILLAGER_GOLEM_DEATH).build());
+            }else if (this.deathTime >= 20){
+                this.spawnDeathParts();
+                this.explode();
+            }
+        }
+
+        this.deathTime++;
+    }
+
+
+
+    private void explode(){
+        level().playSound(null, this.position().x,this.position().y,this.position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 5f, 1f);
+        Vec3 pos = this.position();
+        for (var serverPlayer : FDTargetFinder.getEntitiesInSphere(ServerPlayer.class, level(), pos, 160)) {
+            for (int i = 0; i < 2; i++){
+                Vec3 ppos = this.position().add(
+                        random.nextFloat() * 2 - 1,
+                        0.25 + random.nextFloat() * 1,
+                        random.nextFloat() * 2 - 1
+                );
+                ((ServerLevel) level()).sendParticles(serverPlayer, ParticleTypes.EXPLOSION_EMITTER, true, ppos.x, ppos.y, ppos.z, 1, 0, 0, 0, 0);
+            }
+        }
+        this.setRemoved(RemovalReason.DISCARDED);
+    }
+
+    private void spawnDeathParts(){
+
+        for (int i = 0; i < 10; i++){
+
+            Vec3 v = new Vec3(1,0,0).yRot(random.nextFloat() * FDMathUtil.FPI * 2);
+            Vec3 speed = v.scale(0.1f + random.nextFloat() * 1).add(0,0.15 + random.nextFloat() * 1.25f,0);
+            Vec3 startPos = this.position().add(0,1 + random.nextFloat(),0).add(v.scale(random.nextFloat() * 3f));
+            RaidBlimpPart.summon(level(), startPos, speed, RaidBlimpPart.GOLEM_PART, random.nextInt(100) + 100);
+
+        }
+
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return RESounds.ILLAGER_GOLEM_DEATH.get();
     }
 
     private void destroyBlocks() {

@@ -102,7 +102,18 @@ public class REClientEvents {
                                 .model(REModels.ELECTROMANCER)
                                 .renderType(RenderType.entityCutoutNoCull(RaidsEnhanced.location("textures/entities/electromancer.png")))
                                 .addBoneController("head", new HeadBoneTransformation<>())
+                                .transformation(((engineerEntity, poseStack, v) -> {
+                                    if (engineerEntity.deathTime > 0) {
+                                        float f = ((float) engineerEntity.deathTime + v - 1.0F) / 20.0F * 1.6F;
+                                        f = Mth.sqrt(f);
+                                        if (f > 1.0F) {
+                                            f = 1.0F;
+                                        }
+                                        poseStack.mulPose(Axis.ZP.rotationDegrees(f * 90));
+                                    }
+                                }))
                                 .build())
+
                         .shouldRender(((electromancerEntity, frustum, v, v1, v2) -> {
                             return true;
                         }))

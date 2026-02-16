@@ -73,6 +73,7 @@ public class RaidBlimpPartRenderer extends EntityRenderer<RaidBlimpPart> {
         PARTS = new HashMap<>();
         PARTS.put(1, new RaidBlimpPartDefinition(new FDModel(REModels.RAID_AIRSHIP_PART_1.get()), RaidsEnhanced.location("textures/entities/raid_airship_part_1.png")));
         PARTS.put(2, new RaidBlimpPartDefinition(new FDModel(REModels.RAID_AIRSHIP_PART_2.get()), RaidsEnhanced.location("textures/entities/raid_airship_part_2.png")));
+        PARTS.put(3, new RaidBlimpPartDefinition(new FDModel(REModels.RAID_AIRSHIP_PART_1.get()), RaidsEnhanced.location("textures/entities/golem_part.png")));
     }
 
     @Override

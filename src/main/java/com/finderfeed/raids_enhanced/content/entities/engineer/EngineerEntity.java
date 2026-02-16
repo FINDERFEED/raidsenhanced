@@ -105,7 +105,7 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
         this.lookControl = headControllerContainer = (new HeadControllerContainer<>(this) {
             @Override
             protected boolean resetXRotOnTick() {
-                return false;
+                return !EngineerEntity.this.isLaserActive();
             }
         }).addHeadController(getModel(level()), "head");
 
@@ -241,8 +241,9 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
 
             if (src.getEntity() instanceof LivingEntity livingEntity && livingEntity != this && livingEntity.distanceTo(this) < 5){
                 var damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-
-                livingEntity.hurt(this.level().damageSources().mobAttack(this), (float) (damage * 0.5f));
+                if (!(livingEntity instanceof EngineerEntity entity)) {
+                    livingEntity.hurt(this.level().damageSources().mobAttack(this), (float) (damage * 0.5f));
+                }
                 Vec3 between = livingEntity.position().subtract(this.position());
                 Vec3 pushVector = between.normalize().scale(2f);
 
@@ -579,6 +580,8 @@ public class EngineerEntity extends FDRaider implements AutoSerializable, IHasHe
             this.noActionTime = 0;
         }
     }
+
+
 
     @Override
     public boolean isPersistenceRequired() {

@@ -25,5 +25,6 @@ public class RESounds {
     public static final Supplier<SoundEvent> RAID_GOLEM_HIT = SOUNDS.register("raid_golem_hit", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_golem_hit")));
     public static final Supplier<SoundEvent> RAID_DRILL_IDLE = SOUNDS.register("raid_drill_idle", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_drill_idle")));
     public static final Supplier<SoundEvent> RAID_DRILL_DIG_OUT = SOUNDS.register("raid_drill_dig_out", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("raid_drill_dig_out")));
+    public static final Supplier<SoundEvent> ILLAGER_GOLEM_DEATH = SOUNDS.register("illager_golem_death", ()->SoundEvent.createVariableRangeEvent(RaidsEnhanced.location("illager_golem_death")));
 
 }

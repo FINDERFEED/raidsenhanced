@@ -68,5 +68,10 @@
     "sounds": [
       "raidsenhanced:raid_drill_idle"
     ]
+  },
+  "illager_golem_death": {
+    "sounds": [
+      "raidsenhanced:illager_golem_death"
+    ]
   }
 }
