@@ -79,7 +79,7 @@ public class RaidDrillRenderer implements FDFreeEntityRenderer<RaidDrill> {
                     Vec3 direction = FDMathUtil.interpolateVectors(new Vec3(directionTarget.x * 0.05,1,directionTarget.z * 0.05), directionTarget, p);
 
 
-                    this.renderBlockWithRotationOrOffset(matrices, multiBufferSource, state, pair.first, direction, LightTexture.FULL_BRIGHT);
+                    this.renderBlockWithRotationOrOffset(matrices, multiBufferSource, state, pair.first, direction, light);
                 }
                 matrices.popPose();
             }

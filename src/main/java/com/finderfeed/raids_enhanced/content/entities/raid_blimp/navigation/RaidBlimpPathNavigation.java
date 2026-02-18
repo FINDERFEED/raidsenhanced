@@ -114,7 +114,8 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
     @Override
     public boolean moveTo(@Nullable Path p_26537_, double p_26538_) {
         boolean res;
-        if (res = super.moveTo(p_26537_, p_26538_)) {
+        Path p = this.path;
+        if (res = super.moveTo(p_26537_, p_26538_) && p != p_26537_) {
             finishedMovingToPos = false;
             this.currentNode = 0;
             this.nextPos = null;
