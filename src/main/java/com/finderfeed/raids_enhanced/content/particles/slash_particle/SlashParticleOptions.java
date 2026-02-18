@@ -1,43 +1,52 @@
 package com.finderfeed.raids_enhanced.content.particles.slash_particle;
 
-import com.finderfeed.fdlib.util.FDByteBufCodecs;
+import com.finderfeed.fdlib.systems.stream_codecs.NetworkCodec;
 import com.finderfeed.fdlib.util.FDCodecs;
+import com.finderfeed.raids_enhanced.init.REParticles;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class SlashParticleOptions implements ParticleOptions {
 
-    public static StreamCodec<RegistryFriendlyByteBuf, SlashParticleOptions> streamCodec(ParticleType<?> type){
-        return StreamCodec.composite(
-                FDByteBufCodecs.VEC3, v->v.direction,
-                ByteBufCodecs.INT, v->v.lifetime,
-                ByteBufCodecs.FLOAT, v->v.pitch,
-                ByteBufCodecs.FLOAT, v->v.size,
-                ByteBufCodecs.BOOL, v->v.reversedSide,
-                ((vec3, lifetime, aFloat, aFloat2, aBoolean) -> {
-                    return new SlashParticleOptions(type, vec3, lifetime, aFloat, aFloat2, aBoolean);
-                })
-        );
-    }
+    public static final Deserializer<SlashParticleOptions> DESERIALIZER = new Deserializer<SlashParticleOptions>() {
+        @Override
+        public SlashParticleOptions fromCommand(ParticleType<SlashParticleOptions> p_123733_, StringReader p_123734_) throws CommandSyntaxException {
+            return new SlashParticleOptions(REParticles.ELECTRIC_SLASH.get(), new Vec3(0,1,0),1,1,1,true);
+        }
 
-    public static MapCodec<SlashParticleOptions> codec(ParticleType<?> type){
-        return RecordCodecBuilder.mapCodec(p->p.group(
-                FDCodecs.VEC3.fieldOf("direction").forGetter(v->v.direction),
-                Codec.INT.fieldOf("lifetime").forGetter(v->v.lifetime),
-                Codec.FLOAT.fieldOf("pitch").forGetter((v->v.pitch)),
-                Codec.FLOAT.fieldOf("size").forGetter((v->v.size)),
-                Codec.BOOL.fieldOf("reversedSide").forGetter((v->v.reversedSide))
-        ).apply(p, ((vec3, lifetime, aFloat, aFloat2, aBoolean) -> {
-            return new SlashParticleOptions(type, vec3, lifetime, aFloat, aFloat2, aBoolean);
-        })));
-    }
+        @Override
+        public SlashParticleOptions fromNetwork(ParticleType<SlashParticleOptions> p_123735_, FriendlyByteBuf p_123736_) {
+            return NETWORK_CODEC.fromNetwork(p_123736_);
+        }
+    };
+
+    public static NetworkCodec<SlashParticleOptions> NETWORK_CODEC = NetworkCodec.composite(
+            NetworkCodec.registry(()->ForgeRegistries.PARTICLE_TYPES), v->v.particleType,
+            NetworkCodec.VEC3, v->v.direction,
+            NetworkCodec.INT, v->v.lifetime,
+            NetworkCodec.FLOAT, v->v.pitch,
+            NetworkCodec.FLOAT, v->v.size,
+            NetworkCodec.BOOL, v->v.reversedSide,
+            SlashParticleOptions::new
+    );
+
+    public static Codec<SlashParticleOptions> CODEC = RecordCodecBuilder.create(p->p.group(
+            BuiltInRegistries.PARTICLE_TYPE.byNameCodec().fieldOf("particle_type").forGetter(v->v.particleType),
+            FDCodecs.VEC3.fieldOf("direction").forGetter(v->v.direction),
+            Codec.INT.fieldOf("lifetime").forGetter(v->v.lifetime),
+            Codec.FLOAT.fieldOf("pitch").forGetter((v->v.pitch)),
+            Codec.FLOAT.fieldOf("size").forGetter((v->v.size)),
+            Codec.BOOL.fieldOf("reversedSide").forGetter((v->v.reversedSide))
+    ).apply(p,SlashParticleOptions::new));
 
     public ParticleType<?> particleType;
     public Vec3 direction;
@@ -58,6 +67,16 @@ public class SlashParticleOptions implements ParticleOptions {
     @Override
     public ParticleType<?> getType() {
         return particleType;
+    }
+
+    @Override
+    public void writeToNetwork(FriendlyByteBuf buf) {
+        NETWORK_CODEC.toNetwork(buf, this);
+    }
+
+    @Override
+    public String writeToString() {
+        return "";
     }
 
 }

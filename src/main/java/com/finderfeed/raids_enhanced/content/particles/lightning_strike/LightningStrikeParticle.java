@@ -69,15 +69,14 @@ public class LightningStrikeParticle extends AnimatedSpriteParticle {
 
 
 
-        vertex.addVertex(mat, -size/2,0,0).setUv(u2,v2).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -size/2,size,0).setUv(u1,v2).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, size/2,size,0).setUv(u1,v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, size/2,0,0).setUv(u2,v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-
-        vertex.addVertex(mat, size/2,0,0).setUv(u2,v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, size/2,size,0).setUv(u1,v1).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -size/2,size,0).setUv(u1,v2).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -size/2,0,0).setUv(u2,v2).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(LightTexture.FULL_BRIGHT);
+        vertex.vertex(mat, -size/2,0,0).uv(u2,v2).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -size/2,size,0).uv(u1,v2).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, size/2,size,0).uv(u1,v1).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, size/2,0,0).uv(u2,v1).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, size/2,0,0).uv(u2,v1).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, size/2,size,0).uv(u1,v1).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -size/2,size,0).uv(u1,v2).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -size/2,0,0).uv(u2,v2).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(LightTexture.FULL_BRIGHT).endVertex();
     }
 
     @Override

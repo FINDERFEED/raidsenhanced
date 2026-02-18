@@ -66,15 +66,14 @@ public class SlashParticle extends TextureSheetParticle {
         }
 
         float w = options.size;
-        vertex.addVertex(mat, -w/2,-w/2,0).setUv(u1,v1).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -w/2,w/2,0).setUv(u1,v2).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, w/2,w/2, 0).setUv(u2,v2).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, w/2, -w/2, 0).setUv(u2,v1).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-
-        vertex.addVertex(mat, w/2, -w/2, 0).setUv(u2,v1).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, w/2,w/2, 0).setUv(u2,v2).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -w/2,w/2,0).setUv(u1,v2).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
-        vertex.addVertex(mat, -w/2,-w/2,0).setUv(u1,v1).setColor(1f, 1f, 1f, 1f).setLight(LightTexture.FULL_BRIGHT);
+        vertex.vertex(mat, -w/2,-w/2,0).uv(u1,v1).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -w/2,w/2,0).uv(u1,v2).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, w/2,w/2, 0).uv(u2,v2).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, w/2, -w/2, 0).uv(u2,v1).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, w/2, -w/2, 0).uv(u2,v1).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, w/2,w/2, 0).uv(u2,v2).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -w/2,w/2,0).uv(u1,v2).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
+        vertex.vertex(mat, -w/2,-w/2,0).uv(u1,v1).color(1f, 1f, 1f, 1f).uv2(LightTexture.FULL_BRIGHT).endVertex();
 
     }
 
