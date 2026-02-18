@@ -27,7 +27,7 @@ public class REDebugStick extends Item {
 
             var blimps = FDTargetFinder.getEntitiesInSphere(RaidBlimp.class, player.level(), player.position(), 200);
             for (var bl : blimps){
-                Vec3 lookPos = player.getLookAngle().multiply(1,0,1).normalize().scale(200);
+                Vec3 lookPos = player.getLookAngle().scale(200);
                 Vec3 pos = player.position().add(lookPos);
                 bl.getNavigation().moveTo(pos.x, pos.y, pos.z, 1f);
 
