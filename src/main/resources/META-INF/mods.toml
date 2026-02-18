@@ -32,11 +32,17 @@ config="${mod_id}.mixins.json"
 
 
 [[dependencies.${mod_id}]] #optional
-    modId="neoforge" #mandatory
+    modId="forge" #mandatory
+
     type="required" #mandatory
-    versionRange="[${neo_version},)"
+
+    versionRange="${forge_version_range}" #mandatory
+
     ordering="NONE"
+
     side="BOTH"
+
+    mandatory = true
 
 # Here's another dependency
 [[dependencies.${mod_id}]]
@@ -45,6 +51,7 @@ config="${mod_id}.mixins.json"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+    mandatory = true
 
 [[dependencies.${mod_id}]]
     modId="fdlib"
@@ -52,5 +59,6 @@ config="${mod_id}.mixins.json"
     versionRange="${fdlib_version_range}"
     ordering="NONE"
     side="BOTH"
+    mandatory = true
 
 

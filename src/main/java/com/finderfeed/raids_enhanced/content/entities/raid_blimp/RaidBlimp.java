@@ -275,9 +275,9 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
 
             Vec3 b = pos.subtract(this.position()).multiply(1,0,1).normalize();
-            Vec3 l = this.getLookAngle().multiply(1,0,1).normalize();
+            Vec3 l = this.getLookAngle().multiply(1,0,1).normalize().yRot(FDMathUtil.FPI / 2);
             double angle = FDMathUtil.angleBetweenVectors(b,l);
-            if (angle >= FDMathUtil.FPI / 2 - FDMathUtil.FPI / 16 && angle <= FDMathUtil.FPI / 2 + FDMathUtil.FPI / 16){
+            if (angle <= FDMathUtil.FPI / 8){
                 lastHurtBy = null;
             }
 

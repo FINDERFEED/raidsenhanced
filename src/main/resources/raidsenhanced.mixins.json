@@ -1,9 +1,10 @@
 {
   "required": true,
   "package": "com.finderfeed.raids_enhanced.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "raidsenhanced.refmap.json",
   "mixins": [
+    "EntityMixin",
     "PlayerMixin",
     "RaidMixin"
   ],

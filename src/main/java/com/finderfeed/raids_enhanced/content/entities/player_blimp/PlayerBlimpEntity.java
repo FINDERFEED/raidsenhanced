@@ -1,5 +1,6 @@
 package com.finderfeed.raids_enhanced.content.entities.player_blimp;
 
+import com.finderfeed.fdlib.network.FDPacketHandler;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.AnimationTicker;
 import com.finderfeed.fdlib.systems.bedrock.models.FDModel;
 import com.finderfeed.fdlib.util.math.FDMathUtil;
@@ -10,8 +11,9 @@ import com.google.common.collect.Lists;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -22,26 +24,31 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
-import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class PlayerBlimpEntity extends FDVehicle {
+
+
+    private static final EntityDataAccessor<Float> DAMAGE = SynchedEntityData.defineId(PlayerBlimpEntity.class, EntityDataSerializers.FLOAT);
 
     public static final String ROTATION_LAYER = "ROTATION";
     public static final String DANGLING_LIGHTS = "DANGLING_LIGHTS";
@@ -95,9 +102,6 @@ public class PlayerBlimpEntity extends FDVehicle {
             }
         }
 
-        if (this.getHurtTime() > 0) {
-            this.setHurtTime(this.getHurtTime() - 1);
-        }
 
         if (this.getDamage() > 0.0F) {
             this.setDamage(this.getDamage() - 1.0F);
@@ -107,9 +111,6 @@ public class PlayerBlimpEntity extends FDVehicle {
 
         super.tick();
         this.tickLerp();
-
-
-
 
 
         if (this.isControlledByLocalInstance()){
@@ -182,6 +183,41 @@ public class PlayerBlimpEntity extends FDVehicle {
 
     }
 
+    public boolean hurt(DamageSource p_38319_, float p_38320_) {
+        if (this.isInvulnerableTo(p_38319_)) {
+            return false;
+        } else if (!this.level().isClientSide && !this.isRemoved()) {
+            this.setDamage(this.getDamage() + p_38320_ * 20.0F);
+            this.markHurt();
+            this.gameEvent(GameEvent.ENTITY_DAMAGE, p_38319_.getEntity());
+            boolean flag = p_38319_.getEntity() instanceof Player && ((Player)p_38319_.getEntity()).getAbilities().instabuild;
+            if (flag || this.getDamage() > 40.0F) {
+                if (!flag && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    this.destroy(p_38319_);
+                }
+
+                this.discard();
+            }
+
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    public void setDamage(float p_38312_) {
+        this.entityData.set(DAMAGE, p_38312_);
+    }
+
+    public float getDamage() {
+        return this.entityData.get(DAMAGE);
+    }
+
+
+    protected void defineSynchedData() {;
+        this.entityData.define(DAMAGE, 0.0F);
+    }
+
     public void setRotatingState(int rotationDirection){
         this.rotationDirection = rotationDirection;
     }
@@ -193,7 +229,7 @@ public class PlayerBlimpEntity extends FDVehicle {
         }else if (inputRight){
             rotationDirection = -1;
         }
-        PacketDistributor.sendToServer(new PlayerBlimpRotatingPacket(this.getId(), rotationDirection));
+        FDPacketHandler.INSTANCE.sendToServer(new PlayerBlimpRotatingPacket(this.getId(), rotationDirection));
     }
 
     private void blimpMovement(){
@@ -208,29 +244,26 @@ public class PlayerBlimpEntity extends FDVehicle {
         }
     }
 
-    @Override
-    protected void positionRider(Entity entity, MoveFunction func) {
-        super.positionRider(entity, func);
+    protected void positionRider(Entity entity, Entity.MoveFunction moveFunc) {
+        if (this.hasPassenger(entity)) {
+            float f = 0;
+            float f1 = (float)((this.isRemoved() ? (double)0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
+            if (this.getPassengers().size() > 1) {
+                int i = this.getPassengers().indexOf(entity);
+                if (i == 0) {
+                    f = 0.2F;
+                } else {
+                    f = -0.6F;
+                }
 
-    }
-
-    @Override
-    protected Vec3 getPassengerAttachmentPoint(Entity p_294665_, EntityDimensions p_295933_, float p_295585_) {
-        float f = 0;
-        if (this.getPassengers().size() > 1) {
-            int i = this.getPassengers().indexOf(p_294665_);
-            if (i == 0) {
-                f = 0.2F;
-            } else {
-                f = -0.6F;
+                if (entity instanceof Animal) {
+                    f += 0.2F;
+                }
             }
 
-            if (p_294665_ instanceof Animal) {
-                f += 0.2F;
-            }
+            Vec3 vec3 = (new Vec3((double)f, 0.0D, 0.0D)).yRot(-this.getYRot() * ((float)Math.PI / 180F) - ((float)Math.PI / 2F));
+            moveFunc.accept(entity, this.getX() + vec3.x, this.getY() + (double)f1, this.getZ() + vec3.z);
         }
-
-        return new Vec3(0.0, (double)(p_295933_.height() / 3.0F), (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0));
     }
 
     private void tickLerp() {
@@ -240,49 +273,41 @@ public class PlayerBlimpEntity extends FDVehicle {
         }
 
         if (this.lerpSteps > 0) {
-            this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
-            this.lerpSteps--;
+            double d0 = this.getX() + (this.lerpX - this.getX()) / (double)this.lerpSteps;
+            double d1 = this.getY() + (this.lerpY - this.getY()) / (double)this.lerpSteps;
+            double d2 = this.getZ() + (this.lerpZ - this.getZ()) / (double)this.lerpSteps;
+            double d3 = Mth.wrapDegrees(this.lerpYRot - (double)this.getYRot());
+            this.setYRot(this.getYRot() + (float)d3 / (float)this.lerpSteps);
+            this.setXRot(this.getXRot() + (float)(this.lerpXRot - (double)this.getXRot()) / (float)this.lerpSteps);
+            --this.lerpSteps;
+            this.setPos(d0, d1, d2);
+            this.setRot(this.getYRot(), this.getXRot());
         }
     }
+
+    public Vec2 getRotationVector() {
+        return new Vec2(this.getXRot(), this.getYRot());
+    }
+
+    public Vec3 getForward() {
+        return Vec3.directionFromRotation(this.getRotationVector());
+    }
+
 
     @Override
     protected Entity.MovementEmission getMovementEmission() {
         return Entity.MovementEmission.EVENTS;
     }
 
+
     @Override
-    public void lerpTo(double p_38299_, double p_38300_, double p_38301_, float p_38302_, float p_38303_, int p_38304_) {
+    public void lerpTo(double p_38299_, double p_38300_, double p_38301_, float p_38302_, float p_38303_, int p_38304_, boolean p_38305_) {
         this.lerpX = p_38299_;
         this.lerpY = p_38300_;
         this.lerpZ = p_38301_;
         this.lerpYRot = (double)p_38302_;
         this.lerpXRot = (double)p_38303_;
         this.lerpSteps = 10;
-    }
-
-    @Override
-    public double lerpTargetX() {
-        return this.lerpSteps > 0 ? this.lerpX : this.getX();
-    }
-
-    @Override
-    public double lerpTargetY() {
-        return this.lerpSteps > 0 ? this.lerpY : this.getY();
-    }
-
-    @Override
-    public double lerpTargetZ() {
-        return this.lerpSteps > 0 ? this.lerpZ : this.getZ();
-    }
-
-    @Override
-    public float lerpTargetXRot() {
-        return this.lerpSteps > 0 ? (float)this.lerpXRot : this.getXRot();
-    }
-
-    @Override
-    public float lerpTargetYRot() {
-        return this.lerpSteps > 0 ? (float)this.lerpYRot : this.getYRot();
     }
 
     private void controlBlimp(){
@@ -396,6 +421,7 @@ public class PlayerBlimpEntity extends FDVehicle {
         return true;
     }
 
+
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         InteractionResult interactionresult = super.interact(player, hand);
@@ -459,8 +485,8 @@ public class PlayerBlimpEntity extends FDVehicle {
                 list.add(new Vec3(d0, (double)blockpos1.getY() + d3, d1));
             }
 
-            for (Pose pose : p_38357_.getDismountPoses()) {
-                for (Vec3 vec31 : list) {
+            for(Pose pose : p_38357_.getDismountPoses()) {
+                for(Vec3 vec31 : list) {
                     if (DismountHelper.canDismountTo(this.level(), vec31, p_38357_, pose)) {
                         p_38357_.setPose(pose);
                         return vec31;
@@ -472,17 +498,19 @@ public class PlayerBlimpEntity extends FDVehicle {
         return super.getDismountLocationForPassenger(p_38357_);
     }
 
-//    @Override
-//    protected Vec3 getRiddenInput(Player player, Vec3 travelVec) {
-//        return new Vec3(player.xxa,1,player.zza);
-//    }
-//
-//    @Override
-//    public void travel(Vec3 travelVector) {
-//        if (!travelVector.equals(Vec3.ZERO)) {
-//            super.travel(travelVector);
-//        }
-//    }
+    @Override
+    protected void addPassenger(Entity passenger) {
+        super.addPassenger(passenger);
+        if (this.isControlledByLocalInstance() && this.lerpSteps > 0) {
+            this.lerpSteps = 0;
+            this.absMoveTo(this.lerpX, this.lerpY, this.lerpZ, (float)this.lerpYRot, (float)this.lerpXRot);
+        }
+    }
+
+
+    public double getPassengersRidingOffset() {
+        return -0.1D;
+    }
 
     @Nullable
     @Override
@@ -534,27 +562,6 @@ public class PlayerBlimpEntity extends FDVehicle {
         return 2;
     }
 
-//    @Override
-//    public HumanoidArm getMainArm() {
-//        return HumanoidArm.RIGHT;
-//    }
-
-//    @Override
-//    public Iterable<ItemStack> getArmorSlots() {
-//        return new ArrayList<>();
-//    }
-//
-//    @Override
-//    public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
-//        return ItemStack.EMPTY;
-//    }
-//
-//    @Override
-//    public void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_) {
-//
-//    }
-
-
     @Override
     public boolean isPickable() {
         return !this.isRemoved();
@@ -564,8 +571,17 @@ public class PlayerBlimpEntity extends FDVehicle {
         return 0;
     }
 
+    protected void destroy(DamageSource p_219862_) {
+        this.spawnAtLocation(this.getDropItem());
+    }
+
     protected Item getDropItem() {
         return REItems.PLAYER_BLIMP.get();
+    }
+
+    @Override
+    public ItemStack getPickResult() {
+        return new ItemStack(this.getDropItem());
     }
 
     @Mod.EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
