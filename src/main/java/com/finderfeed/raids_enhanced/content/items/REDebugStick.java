@@ -1,22 +1,10 @@
 package com.finderfeed.raids_enhanced.content.items;
 
-import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.util.FDTargetFinder;
-import com.finderfeed.fdlib.util.math.FDMathUtil;
-import com.finderfeed.raids_enhanced.content.entities.ball_lightning.BallLightningEntity;
 import com.finderfeed.raids_enhanced.content.entities.raid_blimp.RaidBlimp;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.cannons.RaidBlimpCannonProjectile;
-import com.finderfeed.raids_enhanced.content.entities.raid_blimp.raid_airship_parts.RaidBlimpPart;
-import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
-import com.finderfeed.raids_enhanced.content.entities.vertical_lightning_strike.VerticalLightningStrikeAttack;
-import com.finderfeed.raids_enhanced.content.particles.lightning_strike.LightningStrikeParticleOptions;
-import com.finderfeed.raids_enhanced.content.particles.slash_particle.SlashParticleOptions;
-import com.finderfeed.raids_enhanced.init.REEntities;
-import com.finderfeed.raids_enhanced.init.REParticles;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +27,10 @@ public class REDebugStick extends Item {
 
             var blimps = FDTargetFinder.getEntitiesInSphere(RaidBlimp.class, player.level(), player.position(), 200);
             for (var bl : blimps){
-                bl.getNavigation().moveTo(player.getX(),player.getY(),player.getZ(), 1f);
+                Vec3 lookPos = player.getLookAngle().multiply(1,0,1).normalize().scale(200);
+                Vec3 pos = player.position().add(lookPos);
+                bl.getNavigation().moveTo(pos.x, pos.y, pos.z, 1f);
+
             }
 
 //            BallLightningEntity.summon(player, level, player.getEyePosition(), player.getLookAngle());
