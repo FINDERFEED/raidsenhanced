@@ -106,7 +106,7 @@ public class ZapperStaffCastEntity extends Entity {
 
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_326003_) {
+    protected void defineSynchedData() {
 
     }
 

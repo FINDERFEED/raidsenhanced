@@ -5,11 +5,11 @@ import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.model_sy
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.model_system.entity_model_system.EntityModelSystem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.level.Level;
 
-public abstract class FDVehicle extends VehicleEntity implements AnimatedObject {
+public abstract class FDVehicle extends Entity implements AnimatedObject {
 
     private EntityModelSystem<?> modelSystem = EntityModelSystem.create(this);
 

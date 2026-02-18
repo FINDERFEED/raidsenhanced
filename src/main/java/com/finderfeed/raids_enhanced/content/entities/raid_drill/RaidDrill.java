@@ -42,11 +42,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
-import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
                 this.raid.joinRaid(this.raid.getGroupsSpawned(), raider, this.getOnPos(), false);
             }else{
                 entity.setPos(this.position());
-                raider.finalizeSpawn((ServerLevel) this.level(), this.level().getCurrentDifficultyAt(this.getOnPos()), MobSpawnType.EVENT, null);
+                raider.finalizeSpawn((ServerLevel) this.level(), this.level().getCurrentDifficultyAt(this.getOnPos()), MobSpawnType.EVENT, null, null);
                 level().addFreshEntity(raider);
             }
             return true;
@@ -233,7 +233,6 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
 
     @Override
     public void checkDespawn() {
-        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
         if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
             this.discard();
         } else {
@@ -367,9 +366,9 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(IS_VISIBLE, false);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(IS_VISIBLE, false);
     }
 
     @Override
@@ -378,7 +377,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     }
 
     @Override
-    public void applyRaidBuffs(ServerLevel p_348605_, int p_37844_, boolean p_37845_) {
+    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
 
     }
 
@@ -394,8 +393,8 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     }
 
     @Override
-    protected double getDefaultGravity() {
-        return 0;
+    public boolean isNoGravity() {
+        return true;
     }
 
     @Override
@@ -432,19 +431,20 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
         }
     }
 
-    @EventBusSubscriber
+
+    @Mod.EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class Events {
 
         @SubscribeEvent
         public static void effectEvent(MobEffectEvent.Applicable event){
-            if (event.getEntity() instanceof RaidDrill raidDrill && event.getEffectInstance() != null && !event.getEffectInstance().is(MobEffects.GLOWING)){
-                event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+            if (event.getEntity() instanceof RaidDrill raidDrill && event.getEffectInstance() != null && event.getEffectInstance().getEffect() != MobEffects.GLOWING){
+                event.setResult(Event.Result.DENY);
             }
         }
 
         @SubscribeEvent
         public static void targetEvent(LivingChangeTargetEvent event){
-            if (event.getNewAboutToBeSetTarget() instanceof RaidDrill){
+            if (event.getNewTarget() instanceof RaidDrill){
                 event.setCanceled(true);
             }
         }

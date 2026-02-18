@@ -39,6 +39,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -112,6 +113,11 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+
+    }
+
+    @Override
+    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
 
     }
 
@@ -240,6 +246,11 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     }
 
     @Override
+    public float getEyeHeight(Pose p_20237_) {
+        return 2.05f;
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         return RESounds.ILLAGER_GOLEM_DEATH.get();
     }
@@ -247,7 +258,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
     private void destroyBlocks() {
         if (this.destroyBlocksTick > 0) {
             this.destroyBlocksTick--;
-            if (this.destroyBlocksTick == 0 && net.neoforged.neoforge.event.EventHooks.canEntityGrief(this.level(), this)) {
+            if (this.destroyBlocksTick == 0 && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
                 boolean flag = false;
                 int l = Mth.floor(this.getBbWidth() / 2.0F + 1.5F);
                 int i1 = Mth.floor(this.getBbHeight());
@@ -259,7 +270,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     Vec3 between = pos.subtract(center).multiply(1,0,1);
                     if (between.length() < 2.5) {
                         BlockState blockstate = this.level().getBlockState(blockpos);
-                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, blockpos, blockstate) && !blockstate.getCollisionShape(level(), blockpos).isEmpty()) {
+                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.minecraftforge.event.ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
                             flag = this.level().destroyBlock(blockpos, true, this) || flag;
                         }
                     }
@@ -275,7 +286,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
 
     @Override
     public void checkDespawn() {
-        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
         if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
             this.discard();
         } else {
@@ -305,10 +315,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         this.getAnimationSystem().setVariable("variable.hand_strength", strength);
     }
 
-    @Override
-    public void applyRaidBuffs(ServerLevel p_348605_, int p_37844_, boolean p_37845_) {
-
-    }
 
     @Override
     public boolean hurt(DamageSource src, float damage) {
@@ -609,7 +615,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     if (t != this.golem) {
                         this.golem.doHurtTarget(t);
                         if (t instanceof Player player && player.getUseItem().getItem() instanceof ShieldItem){
-                            player.disableShield();
+                            player.disableShield(true);
                         }
                     }
                 }
@@ -678,7 +684,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     if (t != this.golem) {
                         this.golem.doHurtTarget(t);
                         if (t instanceof Player player && player.getUseItem().getItem() instanceof ShieldItem){
-                            player.disableShield();
+                            player.disableShield(true);
                         }
                     }
                 }

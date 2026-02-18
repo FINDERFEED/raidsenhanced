@@ -45,7 +45,7 @@ public class PlayerBlimpItem extends ItemWithDescription {
                     if (!level.isClientSide) {
                         level.addFreshEntity(blimp);
                         level.gameEvent(player, GameEvent.ENTITY_PLACE, hitresult.getLocation());
-                        itemstack.consume(1, player);
+                        itemstack.shrink(1);
                     }
 
                     player.awardStat(Stats.ITEM_USED.get(this));

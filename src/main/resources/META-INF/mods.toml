@@ -24,9 +24,7 @@ displayName="${mod_name}" #mandatory
 authors="FINDERFEED"
 
 # The description text for the mod (multi line!) (#mandatory)
-description='''
-Example mod description.
-'''
+description='''${mod_description}'''
 
 
 [[mixins]]

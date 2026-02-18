@@ -2,10 +2,9 @@ package com.finderfeed.raids_enhanced.content.entities.player_blimp;
 
 import com.finderfeed.fdlib.network.FDPacket;
 import com.finderfeed.fdlib.network.RegisterFDPacket;
-import com.finderfeed.raids_enhanced.REClientUtil;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.NetworkEvent;
+import java.util.function.Supplier;
 
 @RegisterFDPacket("raidsenhanced:player_blimp_rotating")
 public class PlayerBlimpRotatingPacket extends FDPacket {
@@ -24,21 +23,22 @@ public class PlayerBlimpRotatingPacket extends FDPacket {
     }
 
     @Override
-    public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+    public void write(FriendlyByteBuf registryFriendlyByteBuf) {
         registryFriendlyByteBuf.writeInt(entityId);
         registryFriendlyByteBuf.writeByte(rotationDirection);
     }
 
+
     @Override
-    public void clientAction(IPayloadContext iPayloadContext) {
+    public void clientAction(Supplier<NetworkEvent.Context> supplier) {
+
     }
 
     @Override
-    public void serverAction(IPayloadContext iPayloadContext) {
-        var player = iPayloadContext.player();
+    public void serverAction(Supplier<NetworkEvent.Context> supplier) {
+        var player = supplier.get().getSender();
         if (player.level().getEntity(this.entityId) instanceof PlayerBlimpEntity playerBlimp) {
             playerBlimp.setRotatingState(rotationDirection);
         }
-
     }
 }

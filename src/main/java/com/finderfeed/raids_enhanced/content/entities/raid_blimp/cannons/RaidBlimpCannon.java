@@ -154,7 +154,7 @@ public class RaidBlimpCannon {
 
 
         if (dot >= dotRadius){
-            ClipContext clipContext = new ClipContext(cannonPos, epos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            ClipContext clipContext = new ClipContext(cannonPos, epos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
             var res = entity.level().clip(clipContext);
             if (res.getType() == HitResult.Type.MISS){
                 return true;

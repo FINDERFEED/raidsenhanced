@@ -75,7 +75,7 @@ public class RaidBlimpPart extends Entity {
         if (!this.getDeltaMovement().equals(Vec3.ZERO)){
             this.lastDeltaMovement = this.getDeltaMovement();
             if (tickCount > 5) {
-                ClipContext clipContext = new ClipContext(this.position(), this.position().add(this.getDeltaMovement()), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+                ClipContext clipContext = new ClipContext(this.position(), this.position().add(this.getDeltaMovement()), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
                 var res = level().clip(clipContext);
                 if (res.getType() != HitResult.Type.MISS) {
                     Vec3 location = res.getLocation();
@@ -96,7 +96,7 @@ public class RaidBlimpPart extends Entity {
             rotation++;
         }
 
-        this.applyGravity();
+        this.setDeltaMovement(this.getDeltaMovement().add(0, -this.getDefaultGravity(), 0));
         this.setPos(this.position().add(this.getDeltaMovement()));
     }
 
@@ -109,12 +109,11 @@ public class RaidBlimpPart extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(PART_TYPE, 1);
-        builder.define(LIFETIME, 800);
+    protected void defineSynchedData() {
+        this.entityData.define(PART_TYPE, 1);
+        this.entityData.define(LIFETIME, 800);
     }
 
-    @Override
     protected double getDefaultGravity() {
         return ServerPlayer.DEFAULT_BASE_GRAVITY;
     }

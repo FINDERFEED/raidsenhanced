@@ -16,7 +16,7 @@ public class REMixinHandler {
             Level level = raid.getLevel();
 
 
-            int raidLevel = raid.getRaidOmenLevel();
+            int raidLevel = raid.getBadOmenLevel();
             if (raidLevel == 2){
                 var drill = REEntities.RAID_DRILL.get().create(level);
                 if (drill != null) {

@@ -79,7 +79,7 @@ public class ZapperStaff extends ItemWithDescription {
         double dot = lookAngle.dot(new Vec3(0,1,0));
 
         if (player.onGround() && dot < -0.75){
-            ClipContext clipContext = new ClipContext(player.getEyePosition(), player.getEyePosition().add(lookAngle.scale(3)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            ClipContext clipContext = new ClipContext(player.getEyePosition(), player.getEyePosition().add(lookAngle.scale(3)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
             var res = player.level().clip(clipContext);
             if (res.getType() != HitResult.Type.MISS){
                 return false;

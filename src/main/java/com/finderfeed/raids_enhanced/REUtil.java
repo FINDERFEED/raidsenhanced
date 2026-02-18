@@ -1,9 +1,10 @@
 package com.finderfeed.raids_enhanced;
 
+import com.finderfeed.fdlib.network.FDPacketHandler;
 import com.finderfeed.raids_enhanced.content.packets.REPosEventPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 public class REUtil {
 
@@ -24,7 +25,7 @@ public class REUtil {
     }
 
     public static void posEvent(ServerLevel serverLevel, Vec3 pos, int event, int data, double radius){
-        PacketDistributor.sendToPlayersNear(serverLevel, null, pos.x, pos.y, pos.z, radius, new REPosEventPacket(pos, event, data));
+        FDPacketHandler.INSTANCE.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.x, pos.y, pos.z, radius, serverLevel.dimension())), new REPosEventPacket(pos, event, data));
     }
 
     public static Vec3 calculateMortarProjectileVelocity(Vec3 startPos, Vec3 endPos, double gravity, int tickTravelTime){

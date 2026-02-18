@@ -64,7 +64,7 @@ public class BallLightningEntity extends Entity {
         Vec3 end = start.add(this.getDeltaMovement());
 
 
-        ClipContext clipContext = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+        ClipContext clipContext = new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
         var result = level().clip(clipContext);
         var owner = this.getOwner();
 
@@ -76,7 +76,7 @@ public class BallLightningEntity extends Entity {
             });
             if (!entities.isEmpty()) {
                 var entity = entities.get(random.nextInt(entities.size()));
-                Vec3 bbCenter = entity.getBoundingBox().getBottomCenter();
+                Vec3 bbCenter = entity.getBoundingBox().getCenter();
                 Vec3 pos = new Vec3(
                         bbCenter.x,
                         Mth.clamp(this.position().y, bbCenter.y, bbCenter.y + entity.getBbHeight()),
@@ -120,7 +120,7 @@ public class BallLightningEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_326003_) {
+    protected void defineSynchedData() {
 
     }
 

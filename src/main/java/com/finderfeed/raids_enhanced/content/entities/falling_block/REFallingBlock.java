@@ -64,7 +64,7 @@ public class REFallingBlock extends FDProjectile implements AutoSerializable {
         }
 
 //        if (!level().isClientSide){
-            this.applyGravity();
+        this.setDeltaMovement(this.getDeltaMovement().add(0,-this.getDefaultGravity(),0));
 //        }
     }
 
@@ -100,10 +100,10 @@ public class REFallingBlock extends FDProjectile implements AutoSerializable {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder data) {
-        data
-                .define(GRAVITY, 0.025f)
-                .define(STATE, Blocks.STONE.defaultBlockState());
+    protected void defineSynchedData() {
+
+        this.entityData.define(GRAVITY, 0.025f);
+        this.entityData.define(STATE, Blocks.STONE.defaultBlockState());
     }
 
     @Override
@@ -124,7 +124,6 @@ public class REFallingBlock extends FDProjectile implements AutoSerializable {
     }
 
 
-    @Override
     protected double getDefaultGravity() {
         return this.getEntityData().get(GRAVITY);
     }

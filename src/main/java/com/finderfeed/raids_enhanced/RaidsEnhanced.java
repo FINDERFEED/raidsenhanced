@@ -2,13 +2,12 @@ package com.finderfeed.raids_enhanced;
 
 import com.finderfeed.raids_enhanced.init.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
-
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.ModContainer;
 
 
 @Mod(RaidsEnhanced.MOD_ID)
@@ -22,7 +21,9 @@ public class RaidsEnhanced {
         return ResourceLocation.tryBuild(MOD_ID,loc);
     }
 
-    public RaidsEnhanced(IEventBus modEventBus, ModContainer modContainer) {
+    public RaidsEnhanced() {
+
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         REAnimations.ANIMATIONS.register(modEventBus);
         REParticles.PARTICLES.register(modEventBus);
         RECreativeTabs.TABS.register(modEventBus);

@@ -66,7 +66,7 @@ public class RaiderBomb extends FDEntity {
                 );
             }
         }
-        this.applyGravity();
+        this.setDeltaMovement(this.getDeltaMovement().add(0, -this.getDefaultGravity(), 0));
         this.setPos(this.position().add(this.getDeltaMovement()));
     }
 
@@ -75,7 +75,7 @@ public class RaiderBomb extends FDEntity {
         Vec3 start = this.position().add(0,this.getBbHeight() / 2, 0);
         Vec3 end = start.add(deltaMovement);
 
-        ClipContext clipContext = new ClipContext(start,end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+        ClipContext clipContext = new ClipContext(start,end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
         var res = level().clip(clipContext);
 
         if (res.getType() != HitResult.Type.MISS){
@@ -147,11 +147,10 @@ public class RaiderBomb extends FDEntity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_326003_) {
+    protected void defineSynchedData() {
 
     }
 
-    @Override
     protected double getDefaultGravity() {
         return ServerPlayer.DEFAULT_BASE_GRAVITY;
     }

@@ -289,11 +289,11 @@ public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHea
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(LASER_TARGET, Vec3.ZERO);
-        builder.define(BYTE_PARTICLE_TRIGGER, (byte)0);
-        builder.define(LASER_ACTIVE, false);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(LASER_TARGET, Vec3.ZERO);
+        this.entityData.define(BYTE_PARTICLE_TRIGGER, (byte)0);
+        this.entityData.define(LASER_ACTIVE, false);
     }
 
     public void setLaserState(boolean state){
@@ -313,7 +313,7 @@ public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHea
     }
 
     @Override
-    public void applyRaidBuffs(ServerLevel p_348605_, int p_37844_, boolean p_37845_) {
+    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
 
     }
 
@@ -572,7 +572,6 @@ public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHea
 
     @Override
     public void checkDespawn() {
-        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
         if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
             this.discard();
         } else {
@@ -905,7 +904,7 @@ public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHea
             Vec3 laserDirection = new Vec3(mat.transformDirection(new Vector3f(0,0,-1)));
             Vec3 laserEnd = thisPos.add(laserDirection.scale(30));
 
-            ClipContext clipContext = new ClipContext(thisPos, laserEnd, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+            ClipContext clipContext = new ClipContext(thisPos, laserEnd, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
             var result = this.entity.level().clip(clipContext);
 
             this.entity.setLaserTarget(result.getLocation());

@@ -19,15 +19,15 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Pillager;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.Random;
 import java.util.function.Supplier;
 
-@EventBusSubscriber(modid = RaidsEnhanced.MOD_ID)
+@Mod.EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class REEntities {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, RaidsEnhanced.MOD_ID);
@@ -60,7 +60,6 @@ public class REEntities {
                     GolemOfLastResort::new, MobCategory.MONSTER
             )
             .sized(1.4f,2.6f)
-            .eyeHeight(2.05f)
             .build("golem_of_last_resort"));
 
 
@@ -110,7 +109,6 @@ public class REEntities {
                     PlayerBlimpEntity::new, MobCategory.MISC
             )
             .sized(1.375F, 0.5625F)
-            .eyeHeight(0.5625F)
             .clientTrackingRange(10)
             .build("electromancer_entity"));
 

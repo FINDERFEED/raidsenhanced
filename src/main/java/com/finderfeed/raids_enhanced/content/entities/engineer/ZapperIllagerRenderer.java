@@ -59,7 +59,7 @@ public class ZapperIllagerRenderer implements FDFreeEntityRenderer<ZapperIllager
 
 
             matrices.pushPose();
-            matrices.mulPose(mat);
+            matrices.mulPoseMatrix(mat);
 
             VertexConsumer vertex = multiBufferSource.getBuffer(RenderType.text(ELECTRIC_RAY));
             int laserFrame = electromancerEntity.tickCount % 4;
@@ -67,10 +67,10 @@ public class ZapperIllagerRenderer implements FDFreeEntityRenderer<ZapperIllager
             float width = 1f;
 
             Matrix4f matr = matrices.last().pose();
-            vertex.addVertex(matr, width/2,0,0).setColor(1f,1f,1f,1f).setUv(0,0.25f * (laserFrame + 1)).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
-            vertex.addVertex(matr, width/2,(float) len,0).setColor(1f,1f,1f,1f).setUv((float)len / 2f,0.25f * (laserFrame + 1)).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
-            vertex.addVertex(matr, -width/2,(float) len, 0).setColor(1f,1f,1f,1f).setUv((float)len / 2f,0.25f * laserFrame).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
-            vertex.addVertex(matr, -width/2,0,0).setColor(1f,1f,1f,1f).setUv(0,0.25f * laserFrame).setLight(LightTexture.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(matrices.last(),0,0,1);
+            vertex.vertex(matr, width/2,0,0).color(1f,1f,1f,1f).uv(0,0.25f * (laserFrame + 1)).uv2(LightTexture.FULL_BRIGHT).overlayCoords(OverlayTexture.NO_OVERLAY).normal(matrices.last().normal(),0,0,1).endVertex();
+            vertex.vertex(matr, width/2,(float) len,0).color(1f,1f,1f,1f).uv((float)len / 2f,0.25f * (laserFrame + 1)).uv2(LightTexture.FULL_BRIGHT).overlayCoords(OverlayTexture.NO_OVERLAY).normal(matrices.last().normal(),0,0,1).endVertex();
+            vertex.vertex(matr, -width/2,(float) len, 0).color(1f,1f,1f,1f).uv((float)len / 2f,0.25f * laserFrame).uv2(LightTexture.FULL_BRIGHT).overlayCoords(OverlayTexture.NO_OVERLAY).normal(matrices.last().normal(),0,0,1).endVertex();
+            vertex.vertex(matr, -width/2,0,0).color(1f,1f,1f,1f).uv(0,0.25f * laserFrame).uv2(LightTexture.FULL_BRIGHT).overlayCoords(OverlayTexture.NO_OVERLAY).normal(matrices.last().normal(),0,0,1).endVertex();
 
             matrices.popPose();
 

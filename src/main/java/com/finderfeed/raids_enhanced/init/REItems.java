@@ -7,15 +7,16 @@ import com.finderfeed.raids_enhanced.content.items.PlayerBlimpItem;
 import com.finderfeed.raids_enhanced.content.items.REDebugStick;
 import com.finderfeed.raids_enhanced.content.items.electromancer_staff.ZapperStaff;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
 
 public class REItems {
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.createItems(RaidsEnhanced.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, RaidsEnhanced.MOD_ID);
 
     public static final Supplier<Item> BLIMP_PARTS = ITEMS.register("blimp_parts", ()->new ItemWithDescription(new Item.Properties().stacksTo(1), Component.translatable("raidsenhanced.item_description.blimp_parts").withStyle(ChatFormatting.GOLD)));
     public static final Supplier<Item> PLAYER_BLIMP = ITEMS.register("player_blimp", ()->new PlayerBlimpItem(new Item.Properties().stacksTo(1)));

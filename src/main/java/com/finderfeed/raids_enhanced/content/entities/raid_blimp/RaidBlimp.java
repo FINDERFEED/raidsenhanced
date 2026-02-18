@@ -383,7 +383,7 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
                     damageSource = level().damageSources().generic();
                 }
                 this.shouldDropLoot = true;
-                this.dropAllDeathLoot((ServerLevel) level(), damageSource);
+                this.dropAllDeathLoot(damageSource);
                 this.explode();
             }
 
@@ -495,7 +495,7 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
                 var targets = FDTargetFinder.getEntitiesInCylinder(LivingEntity.class, level(), this.position().add(0, -downDistance, 0), downDistance, 5, entity -> {
                     if (!entity.isDeadOrDying() && entity != this){
                         if (this.checkTargetClass(entity)){
-                            ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+                            ClipContext clipContext = new ClipContext(this.position(), entity.position().add(0, entity.getBbHeight() / 2, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
                             var res = level().clip(clipContext);
                             return res.getType() == HitResult.Type.MISS;
                         }else{
@@ -557,10 +557,6 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
     }
 
 
-    @Override
-    protected double getDefaultGravity() {
-        return 0;
-    }
 
     @Override
     protected PathNavigation createNavigation(Level p_186262_) {
@@ -572,18 +568,18 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(targetRight1, -1);
-        builder.define(targetRight2, -1);
-        builder.define(targetRight3, -1);
-        builder.define(targetLeft1 , -1);
-        builder.define(targetLeft2 , -1);
-        builder.define(targetLeft3 , -1);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(targetRight1, -1);
+        this.entityData.define(targetRight2, -1);
+        this.entityData.define(targetRight3, -1);
+        this.entityData.define(targetLeft1 , -1);
+        this.entityData.define(targetLeft2 , -1);
+        this.entityData.define(targetLeft3 , -1);
     }
 
     @Override
-    public void applyRaidBuffs(ServerLevel level, int p_37844_, boolean p_37845_) {
+    public void applyRaidBuffs(int p_37844_, boolean p_37845_) {
 
     }
 
@@ -594,11 +590,6 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
     @Override
     public void push(double p_20286_, double p_20287_, double p_20288_) {
-
-    }
-
-    @Override
-    public void push(Vec3 p_347665_) {
 
     }
 
@@ -645,7 +636,6 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
     @Override
     public void checkDespawn() {
-        if (net.neoforged.neoforge.event.EventHooks.checkMobDespawn(this)) return;
         if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
             this.discard();
         } else {

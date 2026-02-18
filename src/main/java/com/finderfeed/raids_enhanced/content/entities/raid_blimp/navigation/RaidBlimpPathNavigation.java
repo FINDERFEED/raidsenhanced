@@ -88,7 +88,7 @@ public class RaidBlimpPathNavigation extends FlyingPathNavigation {
                 for (int i = currentNode + 1; i < this.path.getNodeCount(); i++) {
 
                     Vec3 v = this.path.getEntityPosAtNode(this.mob, i);
-                    ClipContext clipContext = new ClipContext(v, ePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty());
+                    ClipContext clipContext = new ClipContext(v, ePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null);
                     var result = level.clip(clipContext);
                     if (result.getType() == HitResult.Type.MISS) {
                         if (i >= this.path.getNodeCount() - 1) {

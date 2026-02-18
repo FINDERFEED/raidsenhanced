@@ -34,11 +34,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -76,7 +74,6 @@ public class PlayerBlimpEntity extends FDVehicle {
 
     public PlayerBlimpEntity(EntityType<? extends PlayerBlimpEntity> type, Level level) {
         super(type, level);
-        this.setNoGravity(true);
         this.getAnimationSystem().startAnimation("PERPELLER", AnimationTicker.builder(REAnimations.PLAYER_BLIMP_PERPELLER)
                 .build());
         this.getAnimationSystem().setAnimationsApplyListener(this::onAnimationsApplied);
@@ -563,21 +560,19 @@ public class PlayerBlimpEntity extends FDVehicle {
         return !this.isRemoved();
     }
 
-    @Override
     protected double getDefaultGravity() {
         return 0;
     }
 
-    @Override
     protected Item getDropItem() {
         return REItems.PLAYER_BLIMP.get();
     }
 
-    @EventBusSubscriber(modid = RaidsEnhanced.MOD_ID)
+    @Mod.EventBusSubscriber(modid = RaidsEnhanced.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class Events {
 
         @SubscribeEvent
-        public static void hurtEvent(LivingIncomingDamageEvent event){
+        public static void hurtEvent(LivingHurtEvent event){
             var source = event.getSource();
             if (source != null && source.is(DamageTypes.FALL) && event.getEntity().getVehicle() instanceof PlayerBlimpEntity){
                 event.setCanceled(true);
