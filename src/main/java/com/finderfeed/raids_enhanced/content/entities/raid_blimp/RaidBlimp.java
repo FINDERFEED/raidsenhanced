@@ -123,8 +123,9 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
 
     @Override
     public void tick() {
+        this.setOnGround(false);
         super.tick();
-
+        this.setOnGround(false);
         if (!level().isClientSide) {
             if (!this.isDeadOrDying()) {
                 this.detectEntitiesBeneathAndThrowBomb();
