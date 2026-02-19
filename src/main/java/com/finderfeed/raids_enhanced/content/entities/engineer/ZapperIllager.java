@@ -153,10 +153,28 @@ public class ZapperIllager extends FDRaider implements AutoSerializable, IHasHea
                 return super.canContinueToUse() && ZapperIllager.this.getTarget() == null;
             }
         });
-        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
-        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F){
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && ZapperIllager.this.getTarget() == null;
+            }
+
+            @Override
+            public boolean canUse() {
+                return super.canUse() && ZapperIllager.this.getTarget() == null;
+            }
+        });
+        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F){
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && ZapperIllager.this.getTarget() == null;
+            }
+
+            @Override
+            public boolean canUse() {
+                return super.canUse() && ZapperIllager.this.getTarget() == null;
+            }
+        });
     }
 
     @Override

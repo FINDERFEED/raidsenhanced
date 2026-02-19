@@ -118,7 +118,7 @@ public class REEntities {
         Random random = new Random();
         random.nextFloat(1, 2);
         event.put(RAID_BLIMP.get(), RaidBlimp.createMonsterAttributes()
-                        .add(Attributes.ATTACK_DAMAGE, 5.0)
+                        .add(Attributes.ATTACK_DAMAGE, 7.0)
                         .add(Attributes.MAX_HEALTH, 200)
                         .add(Attributes.FOLLOW_RANGE, 40.0)
                         .add(Attributes.FLYING_SPEED, 0.3f)
@@ -133,6 +133,7 @@ public class REEntities {
                 .build());
 
         event.put(ZAPPER_ILLAGER.get(), Pillager.createAttributes()
+                        .add(Attributes.ATTACK_DAMAGE, 7)
                         .add(Attributes.KNOCKBACK_RESISTANCE, 0.8f)
                         .add(Attributes.MAX_HEALTH, 100)
                         .add(Attributes.ARMOR, 8.0)
