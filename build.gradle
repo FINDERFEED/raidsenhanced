@@ -9,7 +9,7 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-version = mod_version
+version = mod_version + "-" + minecraft_version
 group = mod_group_id
 
 repositories {
@@ -29,7 +29,7 @@ repositories {
 }
 
 base {
-    archivesName = mod_id + "-" + minecraft_version
+    archivesName = mod_id
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
