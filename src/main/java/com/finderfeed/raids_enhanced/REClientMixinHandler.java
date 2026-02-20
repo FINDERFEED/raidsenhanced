@@ -18,7 +18,6 @@ public class REClientMixinHandler {
             var component = Component.translatable("raidsenhanced.mount").withStyle(ChatFormatting.RED);
             minecraft.gui.setOverlayMessage(component, false);
             minecraft.getNarrator().sayNow(component);
-            ci.cancel();
         }
     }
 }

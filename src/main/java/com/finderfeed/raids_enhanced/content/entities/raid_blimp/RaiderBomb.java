@@ -4,6 +4,7 @@ import com.finderfeed.fdlib.FDHelpers;
 import com.finderfeed.fdlib.FDLibCalls;
 import com.finderfeed.fdlib.systems.bedrock.animations.animation_system.entity.FDEntity;
 import com.finderfeed.fdlib.util.FDTargetFinder;
+import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
 import com.finderfeed.raids_enhanced.init.REConfigs;
 import com.finderfeed.raids_enhanced.init.REEntities;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -81,9 +83,12 @@ public class RaiderBomb extends FDEntity {
         if (res.getType() != HitResult.Type.MISS){
             this.explode(res.getLocation());
         }else {
-            var owner = ((ServerLevel) level()).getEntity(this.owner);
+            Entity owner = null;
+            if (this.owner != null){
+                owner = ((ServerLevel) level()).getEntity(this.owner);
+            }
             var result = ProjectileUtil.getEntityHitResult(level(), owner, start, end, new AABB(start,end),(entity)->{
-                return true;
+                return !(entity instanceof PlayerBlimpEntity);
             });
             if (result != null){
                 this.explode(result.getLocation());
@@ -92,7 +97,10 @@ public class RaiderBomb extends FDEntity {
     }
 
     public void explode(Vec3 pos){
-        var entity = ((ServerLevel)level()).getEntity(owner);
+        Entity entity = null;
+        if (this.owner != null){
+            entity = ((ServerLevel) level()).getEntity(this.owner);
+        }
         var entities = FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(), pos, 5);
         for (var e : entities){
             if (e == entity){
