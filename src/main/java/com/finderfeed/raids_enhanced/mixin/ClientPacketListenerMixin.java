@@ -19,7 +19,7 @@ public class ClientPacketListenerMixin {
 
     @Shadow private ClientLevel level;
 
-    @Inject(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setOverlayMessage(Lnet/minecraft/network/chat/Component;Z)V", shift = At.Shift.BEFORE), cancellable = true)
+    @Inject(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/GameNarrator;sayNow(Lnet/minecraft/network/chat/Component;)V", shift = At.Shift.AFTER), cancellable = true)
     public void handleSetEntityPassengers(ClientboundSetPassengersPacket packet, CallbackInfo ci){
         REClientMixinHandler.setPassengers(level, packet,ci);
     }

@@ -21,6 +21,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -181,6 +182,35 @@ public class PlayerBlimpEntity extends FDVehicle {
 
         oldPos = this.position();
 
+        this.collectEntitiesAround();
+
+    }
+
+    private void collectEntitiesAround(){
+        List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, -0.01F, 0.2F), EntitySelector.pushableBy(this));
+        if (!list.isEmpty()) {
+            boolean flag = !this.level().isClientSide && !(this.getControllingPassenger() instanceof Player);
+
+            for (Entity entity : list) {
+                if (!entity.hasPassenger(this)) {
+                    if (flag
+                            && this.getPassengers().size() < this.getMaxPassengers()
+                            && !entity.isPassenger()
+                            && this.hasEnoughSpaceFor(entity)
+                            && entity instanceof LivingEntity
+                            && !(entity instanceof WaterAnimal)
+                            && !(entity instanceof Player)) {
+                        entity.startRiding(this);
+                    } else {
+                        this.push(entity);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean hasEnoughSpaceFor(Entity entity) {
+        return entity.getBbWidth() < this.getBbWidth();
     }
 
     public boolean hurt(DamageSource p_38319_, float p_38320_) {
@@ -512,13 +542,9 @@ public class PlayerBlimpEntity extends FDVehicle {
         return -0.1D;
     }
 
-    @Nullable
     @Override
     public LivingEntity getControllingPassenger() {
-        if (!this.getPassengers().isEmpty() && this.getPassengers().get(0) instanceof Player player){
-            return player;
-        }
-        return super.getControllingPassenger();
+        return this.getFirstPassenger() instanceof LivingEntity livingentity ? livingentity : super.getControllingPassenger();
     }
 
     @Override
