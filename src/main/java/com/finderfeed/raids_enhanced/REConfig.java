@@ -7,7 +7,7 @@ import com.finderfeed.fdlib.systems.config.ReflectiveJsonConfig;
 public class REConfig extends ReflectiveJsonConfig {
 
     @ConfigValue
-    public float zapperStaffBallLightningDamage = 5f;
+    public float zapperStaffBallLightningDamage = 7f;
 
     @ConfigValue
     public float zapperStaffLightningDamage = 15f;

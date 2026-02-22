@@ -2,6 +2,7 @@ package com.finderfeed.raids_enhanced;
 
 import com.finderfeed.fdlib.FDClientHelpers;
 import com.finderfeed.raids_enhanced.content.entities.player_blimp.PlayerBlimpEntity;
+import com.finderfeed.raids_enhanced.content.entities.raid_drill.RaidDrill;
 import com.finderfeed.raids_enhanced.content.util.HorizontalCircleRandomDirections;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
@@ -42,11 +43,21 @@ public class REClientUtil {
         var level = FDClientHelpers.getClientLevel();
         ParticleEngine particleEngine = Minecraft.getInstance().particleEngine;
 
+        Vec3 offsetVec = Vec3.ZERO;
+        if (level.getEntity(data) instanceof RaidDrill raidDrill){
+            float yRot = raidDrill.getYRot();
+            offsetVec = new Vec3(0,0,0.5).yRot((float) Math.toRadians(-yRot + 180));
+        }
+
         for (int i = 0; i < 80; i++){
             float rndHeight = level.random.nextFloat() * 2;
             float rndX = level.random.nextFloat() * 2 - 1;
             float rndZ = level.random.nextFloat() * 2 - 1;
             Vec3 ppos = pos.add(rndX, rndHeight, rndZ);
+
+            float p = rndHeight / 2;
+            ppos = ppos.add(offsetVec.scale(p));
+
             Vec3 pspeed = new Vec3(rndX,0,rndZ).normalize().scale(0.05 + level.random.nextFloat() * 0.1f).add(0,0.05 + level.random.nextFloat() * 0.1, 0);
             var particle = particleEngine.createParticle(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DARK_OAK_PLANKS.defaultBlockState()),
                     ppos.x,ppos.y,ppos.z,
