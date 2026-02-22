@@ -25,6 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class BallLightningEntity extends Entity {
@@ -69,7 +70,7 @@ public class BallLightningEntity extends Entity {
         var owner = this.getOwner();
 
         if (result.getType() != HitResult.Type.MISS){
-            this.explode(owner, this.position());
+            this.explode(owner, this.position(), null);
         }else {
             var entities = FDHelpers.traceEntities(level(), start, end, 0.1f, (entity) -> {
                 return entity instanceof LivingEntity livingEntity && entity != owner;
@@ -82,12 +83,12 @@ public class BallLightningEntity extends Entity {
                         Mth.clamp(this.position().y, bbCenter.y, bbCenter.y + entity.getBbHeight()),
                         bbCenter.z
                 );
-                this.explode(owner, pos);
+                this.explode(owner, pos,(LivingEntity) entity);
             }
         }
     }
 
-    private void explode(LivingEntity owner, Vec3 explodePos){
+    private void explode(LivingEntity owner, Vec3 explodePos, LivingEntity guaranteedHit){
         if (level() instanceof ServerLevel serverLevel){
             serverLevel.sendParticles(new SimpleTexturedParticleOptions(REParticles.BALL_LIGHTNING_EXPLOSION.get(), 1f, 3), explodePos.x,explodePos.y,explodePos.z,1,0,0,0,0);
         }
@@ -106,7 +107,11 @@ public class BallLightningEntity extends Entity {
             damage = 5;
             source = damageSources.generic();
         }
-        for (var entity : FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(),explodePos, 2f, e -> e != owner)) {
+        var targets = new ArrayList<>(FDTargetFinder.getEntitiesInSphere(LivingEntity.class, level(),explodePos, 2f, e -> e != owner));
+        if (guaranteedHit != null){
+            targets.add(guaranteedHit);
+        }
+        for (var entity : targets) {
             entity.hurt(source, damage);
         }
         this.setRemoved(RemovalReason.DISCARDED);

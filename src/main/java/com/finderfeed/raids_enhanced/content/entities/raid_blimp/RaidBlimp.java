@@ -227,7 +227,8 @@ public class RaidBlimp extends FDRaider implements AutoSerializable {
                 double yDiff = this.getY() - entity.getY();
 
                 double hdist = b.length();
-                if (hdist > 30 || Math.abs(yDiff) > RaidBlimp.HEIGHT_ABOVE_GROUND) {
+                float absYDiff = (float) Math.abs(yDiff);
+                if (hdist > 30 || absYDiff > RaidBlimp.HEIGHT_ABOVE_GROUND || absYDiff < 5) {
                     Vec3 nb = b.normalize();
 
                     Vec3 movePos = pos.add(nb.reverse().scale(Math.min(hdist, 10)));

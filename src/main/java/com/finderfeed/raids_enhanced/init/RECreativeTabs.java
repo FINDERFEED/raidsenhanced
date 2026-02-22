@@ -21,6 +21,10 @@ public class RECreativeTabs {
                         output.accept(REItems.PLAYER_BLIMP.get());
                         output.accept(REItems.BLIMP_PARTS.get());
                         output.accept(REItems.HANDCANNON.get());
+                        output.accept(REItems.RAID_BLIMP_SPAWN_EGG.get());
+                        output.accept(REItems.GOLEM_OF_LAST_RESORT_SPAWN_EGG.get());
+                        output.accept(REItems.RAID_DRILL_SPAWN_EGG.get());
+                        output.accept(REItems.ZAPPER_SPAWN_EGG.get());
                     })
                     .build()
     );
