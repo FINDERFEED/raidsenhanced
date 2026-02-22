@@ -1,5 +1,6 @@
 package com.finderfeed.raids_enhanced;
 
+import com.finderfeed.fdlib.systems.config.Comment;
 import com.finderfeed.fdlib.systems.config.ConfigValue;
 import com.finderfeed.fdlib.systems.config.ReflectiveJsonConfig;
 
@@ -42,6 +43,14 @@ public class REConfig extends ReflectiveJsonConfig {
 
         @ConfigValue
         public int maxRaidersSpawn = 3;
+
+        @ConfigValue
+        @Comment("If raider drill is not touched after it spawns illagers it burrows again after this time (in ticks)")
+        public int burrowAgainAfter = 200;
+
+        @ConfigValue
+        @Comment("This is to prevent it infinitely burrowing and spawning illagers.")
+        public int automaticBurrowTimes = 5;
 
     }
 
