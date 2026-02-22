@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "raidsenhanced:item/raider_drill_spawn_egg"
+  }
+}

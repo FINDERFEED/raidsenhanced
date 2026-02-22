@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "raidsenhanced:item/golem_of_last_resort_spawn_egg"
+  }
+}
