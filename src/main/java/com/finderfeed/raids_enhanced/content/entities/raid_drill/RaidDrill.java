@@ -74,6 +74,12 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     @SerializableField
     private int raidersToSpawn = 0;
 
+    @SerializableField
+    private int idleTicker = 0;
+
+    @SerializableField
+    private int automaticReDigAmount = 0;
+
     private BlockPos noRaidPos;
 
 
@@ -140,6 +146,12 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
             if (this.raidersToSpawn > 0 && this.raidersSpawningTicker % 60 == 0){
                 if (this.spawnRaider()){
                     this.raidersToSpawn--;
+                }
+            }else{
+                idleTicker++;
+                if (this.automaticReDigAmount < REConfigs.CONFIG.get().raidDrill.automaticBurrowTimes && idleTicker >= REConfigs.CONFIG.get().raidDrill.burrowAgainAfter){
+                    this.automaticReDigAmount++;
+                    this.launchReDig();
                 }
             }
 
@@ -216,7 +228,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
                 this.level().playSound(null, this.getX(), this.getY(), this.getZ(), RESounds.RAID_DRILL_DIG_OUT.get(), SoundSource.HOSTILE, 5f, 1f);
             } else if (this.reDigTicker >= unburrowTime + REAnimations.RAIDER_DRILL_UNBURROW.get().getAnimTime() + 10){
                 this.raidersSpawningTicker = 0;
-
+                this.idleTicker = 0;
                 this.raidersToSpawn = REConfigs.CONFIG.get().raidDrill.minRaidersSpawn + random.nextInt(REConfigs.CONFIG.get().raidDrill.maxRaidersSpawn - REConfigs.CONFIG.get().raidDrill.minRaidersSpawn + 1);
                 this.reDigTicker = -1;
                 return;
@@ -265,6 +277,8 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
 
         if (src.getEntity() != null){
             if (reDigTicker == -1 && super.hurt(src, 0.1f)){
+                this.idleTicker = 0;
+                this.automaticReDigAmount = 0;
                 if (++hits >= 3){
                     int newHealth = (int) this.getHealth();
                     if (newHealth == 0){
@@ -294,6 +308,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
 
     private void launchReDig(){
         this.raidersToSpawn = 0;
+        this.idleTicker = 0;
         this.raidersSpawningTicker = -1;
         this.reDigTicker = 0;
         hits = 0;
@@ -348,6 +363,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
         FluidState bf = level().getFluidState(blockPos);
 
         if (bf.isEmpty() && !this.isBlockNotValidForSpawn(b)
+                && !level().getBlockState(blockPos).getCollisionShape(level(), blockPos).isEmpty()
                 && level().getBlockState(blockPos.above()).getCollisionShape(level(), blockPos.above()).isEmpty()
                 && level().getBlockState(blockPos.above(2)).getCollisionShape(level(), blockPos.above(2)).isEmpty()
         ){
