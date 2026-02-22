@@ -222,6 +222,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
                     this.lookAt(EntityAnchorArgument.Anchor.FEET, lookAtPos);
                 }
             } else if (this.reDigTicker == burrowedTime + 10){
+                REUtil.lightningDebris((ServerLevel) level(), this.position(), 60);
                 this.getAnimationSystem().startAnimation(BURROW_LAYER, AnimationTicker.builder(REAnimations.RAIDER_DRILL_UNBURROW)
                         .build());
             }else if (this.reDigTicker == burrowedTime + 12){
@@ -267,7 +268,6 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
     protected void tickDeath() {
         this.deathTime++;
         if (this.deathTime >= 1 && !this.level().isClientSide() && !this.isRemoved()) {
-            REUtil.drillDeath((ServerLevel) level(), this.position(), 60);
             this.remove(Entity.RemovalReason.KILLED);
         }
     }
@@ -279,6 +279,7 @@ public class RaidDrill extends FDRaider implements AutoSerializable {
             if (reDigTicker == -1 && super.hurt(src, 0.1f)){
                 this.idleTicker = 0;
                 this.automaticReDigAmount = 0;
+                REUtil.drillDeath((ServerLevel) level(), this.position(), 60, this.getId());
                 if (++hits >= 3){
                     int newHealth = (int) this.getHealth();
                     if (newHealth == 0){

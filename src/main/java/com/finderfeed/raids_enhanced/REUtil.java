@@ -11,8 +11,8 @@ public class REUtil {
     public static final int LIGHTNING_DEBRIS = 2;
     public static final int DRILL_DEATH = 3;
 
-    public static void drillDeath(ServerLevel serverLevel, Vec3 pos, double radius){
-        posEvent(serverLevel, pos, DRILL_DEATH, 0, radius);
+    public static void drillDeath(ServerLevel serverLevel, Vec3 pos, double radius, int drillId){
+        posEvent(serverLevel, pos, DRILL_DEATH, drillId, radius);
     }
 
     public static void golemSmackParticles(ServerLevel serverLevel, Vec3 pos, double radius){
