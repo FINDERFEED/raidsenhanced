@@ -50,7 +50,7 @@ public class REConfig extends ReflectiveJsonConfig {
 
         @ConfigValue
         @Comment("This is to prevent it infinitely burrowing and spawning illagers.")
-        public int automaticBurrowTimes = 5;
+        public int automaticBurrowTimes = 3;
 
     }
 

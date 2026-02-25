@@ -44,6 +44,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
@@ -110,9 +111,6 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
-
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
     }
 
@@ -270,7 +268,7 @@ public class GolemOfLastResort extends FDRaider implements IHasHead<GolemOfLastR
                     Vec3 between = pos.subtract(center).multiply(1,0,1);
                     if (between.length() < 2.5) {
                         BlockState blockstate = this.level().getBlockState(blockpos);
-                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && net.minecraftforge.event.ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
+                        if (blockstate.canEntityDestroy(this.level(), blockpos, this) && WitherBoss.canDestroy(blockstate) && net.minecraftforge.event.ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
                             flag = this.level().destroyBlock(blockpos, true, this) || flag;
                         }
                     }
